@@ -1,30 +1,32 @@
 ---
 update:
-  - slug: thoth-station/adviser
-    label: ['approved', 'bot']
-  - slug: thoth-station/analyzer
-    label: ['approved', 'bot']
-  - slug: thoth-station/cleanup-job
-    label: ['approved', 'bot']
-  - slug: thoth-station/common
-    label: ['approved', 'bot']
-  - slug: thoth-station/graph-refresh-job
-    label: ['approved', 'bot']
-  - slug: thoth-station/graph-sync-job
-    label: ['approved', 'bot']
-  - slug: thoth-station/lab
-    label: ['approved', 'bot']
-  - slug: thoth-station/package-extract
-    label: ['approved', 'bot']
-  - slug: thoth-station/package-releases-job
-    label: ['approved', 'bot']
-  - slug: thoth-station/result-api
-    label: ['approved', 'bot']
-  - slug: thoth-station/solver
-    label: ['approved', 'bot']
-  - slug: thoth-station/storages
-    label: ['approved', 'bot']
-  - slug: thoth-station/user-api
-    label: ['approved', 'bot']
-  - slug: thoth-station/kebechet
-    label: ['approved', 'bot']
+  - &update_config
+    slug: thoth-station/adviser
+    label:
+      - bot
+  - <<: *update_config
+    slug: thoth-station/analyzer
+  - <<: *update_config
+    slug: thoth-station/cleanup-job
+  - <<: *update_config
+    slug: thoth-station/common
+  - <<: *update_config
+    slug: thoth-station/graph-refresh-job
+  - <<: *update_config
+    slug: thoth-station/graph-sync-job
+  - <<: *update_config
+    slug: thoth-station/lab
+  - <<: *update_config
+    slug: thoth-station/package-extract
+  - <<: *update_config
+    slug: thoth-station/package-releases-job
+  - <<: *update_config
+    slug: thoth-station/result-api
+  - <<: *update_config
+    slug: thoth-station/solver
+  - <<: *update_config
+    slug: thoth-station/storages
+  - <<: *update_config
+    slug: thoth-station/user-api
+  - <<: *update_config
+    slug: thoth-station/kebechet
