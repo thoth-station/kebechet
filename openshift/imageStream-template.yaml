@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: kebechet-imagestream
+  thoth: 0.1.0
+metadata:
+  name: kebechet-imagestream
+  annotations:
+    description: This is Kebechet ImageStream BuildConfig, this template is meant to be used by Jenkins, but could also be used by humans...
+    openshift.io/display-name: Kebechet ImageStream
+    version: 0.2.0
+    tags: poc,thoth,ai-stacks,kebechet
+    template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: kebechet
+    name: kebechet-job
+  spec:
+    name: latest
+    lookupPolicy:
+      local: true
+
