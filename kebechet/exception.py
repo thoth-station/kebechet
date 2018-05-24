@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""Exceptions and errors that can be found in Kebechet."""
+
 
 class KebechetException(Exception):
     """A base class for Kebechet exception hierarchy."""
@@ -30,3 +32,7 @@ class PipenvError(KebechetException):
 
 class InternalError(KebechetException):
     """Raised for internal errors, should not occur for end-user."""
+
+
+class PullRequestError(KebechetException):
+    """Raised in case of failed pull request."""
