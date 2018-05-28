@@ -35,6 +35,9 @@ from .utils import cwd
 
 _LOGGER = logging.getLogger(__name__)
 
+# Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
+# as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
+# updated on subsequent calls.
 
 def _get_dependency_version(dependency: str, is_dev: bool) -> str:
     """Get version of the given dependency from Pipfile.lock."""
