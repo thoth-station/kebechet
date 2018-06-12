@@ -4,3 +4,4 @@ pipenv
 requests
 toml
 delegator.py
+gitpython
