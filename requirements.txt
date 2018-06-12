@@ -5,3 +5,4 @@ requests
 toml
 delegator.py
 gitpython
+pyyaml
