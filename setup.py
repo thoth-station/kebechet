@@ -22,6 +22,9 @@ def get_version():
 
 setup(
     name='kebechet',
+    entry_points={
+        'console_scripts': ['kebechet=kebechet.cli:cli']
+    },
     version=get_version(),
     description='Keep your dependencies in your projects fresh and up2date',
     long_description='Keep your dependencies in your projects fresh and up2date',
