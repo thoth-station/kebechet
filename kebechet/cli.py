@@ -39,11 +39,11 @@ def _print_version(ctx, _, value):
 
 @click.group()
 @click.pass_context
-@click.option('-v', '--verbose', is_flag=True,
+@click.option('-v', '--verbose', is_flag=True, envvar='KEBECHET_VERBOSE',
               help="Be verbose about what's going on.")
 @click.option('--version', is_flag=True, is_eager=True, callback=_print_version, expose_value=False,
               help="Print version and exit.")
-@click.option('--github-token', type=str, default=None, metavar='TOKEN',
+@click.option('--github-token', type=str, default=None, metavar='TOKEN', envvar='KEBECHET_TOKEN',
               help="A GitHub token to be used to open pull requests.")
 def cli(ctx=None, verbose=0, github_token=None):
     """"""
@@ -69,7 +69,7 @@ def cli_update(slug, label=None):
 
 
 @cli.command('run')
-@click.argument('configuration', metavar='config')
+@click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION')
 def cli_run(configuration):
     """Run Kebechet respecting YAML file configuration."""
     config.run(configuration)
