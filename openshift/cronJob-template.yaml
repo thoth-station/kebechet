@@ -6,7 +6,7 @@ labels:
 metadata:
   name: kebechet-cronjob
   annotations:
-    description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Jenkins, but could also be used by humans...
+    description: This is Kebechet CronJob Config, this template is meant to be used by Jenkins, but could also be used by humans...
     openshift.io/display-name: Kebechet CronJob
     version: 0.2.0
     tags: poc,thoth,ai-stacks,kebechet
@@ -22,8 +22,8 @@ objects:
     labels:
       app: kebechet
   spec:
-    schedule: "*/30 * * * *"
-    suspend: true
+    schedule: "*/20 * * * *"
+    suspend: false
     successfulJobsHistoryLimit: 10
     failedJobsHistoryLimit: 1
     concurrencyPolicy: Forbid
@@ -34,22 +34,38 @@ objects:
             containers:
             - image: kebechet-job
               name: kebechet
+              volumeMounts:
+              - name: ssh-config
+                mountPath: /home/user/.ssh
               env:
-              - name: GITHUB_OAUTH_TOKEN
-                valuefrom:
-                  configmapkeyref:
+              - name: KEBECHET_TOKEN
+                valueFrom:
+                  secretKeyRef:
                     key: github-oauth-token
-                    name: kebechet
-              - name: KEBECHET_CONFIG
-                valuefrom:
-                  configmapkeyref:
+                    name: kebechet-secret
+              - name: KEBECHET_CONFIGURATION
+                valueFrom:
+                  configMapKeyRef:
                     key: kebechet-config
-                    name: kebechet
+                    name: kebechet-configmap
+              - name: KEBECHET_VERBOSE
+                valueFrom:
+                  configMapKeyRef:
+                    key: kebechet-verbose
+                    name: kebechet-configmap
               resources:
                 requests:
-                  memory: "128Mi"
-                  cpu: "125m"
+                  memory: "2000Mi"
+                  cpu: "2000m"
                 limits:
-                  memory: "256Mi"
-                  cpu: "500m"
+                  memory: "2000Mi"
+                  cpu: "2000m"
+            volumes:
+            - name: ssh-config
+              secret:
+                secretName: kebechet-secret
+                items:
+                - key: ssh-privatekey
+                  path: id_rsa
+                  mode: 0600
             restartPolicy: Never
