@@ -65,7 +65,7 @@ def cli(ctx=None, verbose=0, github_token=None):
 @click.argument('slug')
 def cli_update(slug, label=None):
     """Update packages in the given repository (slug is org/repo) and open pull requests."""
-    update(slug, label.split(','))
+    update(slug, label.split(',') if label else None)
 
 
 @cli.command('run')

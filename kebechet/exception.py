@@ -36,3 +36,9 @@ class InternalError(KebechetException):
 
 class PullRequestError(KebechetException):
     """Raised in case of failed pull request."""
+
+
+class DependencyManagementError(KebechetException):
+    """An exception raised if there is an error in dependency management in the repo.
+
+    This errors are usually wrong or missing Pipfile, Pipfile.lock, requirments.in or requirments.txt."""
