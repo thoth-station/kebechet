@@ -22,27 +22,27 @@ objects:
       app: kebechet
     name: kebechet-job
   spec:
+    resources:
+      requests:
+        memory: "1000Mi"
+        cpu: "1000m"
+      limits:
+        memory: "1000Mi"
+        cpu: "1000m"
     output:
       to:
         kind: ImageStreamTag
         name: "kebechet-job:${IMAGE_STREAM_TAG}"
     runPolicy: Serial
     source:
+      type: Git
       git:
         uri: ${GITHUB_URL}
         ref: ${GITHUB_REF}
-      type: Git
     strategy:
-      type: Source
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: python-36-centos7:latest
-        env:
-        - name: ENABLE_PIPENV
-          value: '1'
-        - name: UPGRADE_PIP_TO_LATEST
-          value: ''
+      type: Docker
+      dockerStrategy:
+        dockerfilePath: Dockerfile
     triggers:
     - imageChange: {}
       type: ImageChange

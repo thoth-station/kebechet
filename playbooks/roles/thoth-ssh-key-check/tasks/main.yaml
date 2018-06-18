@@ -1,0 +1,18 @@
+---
+  - shell: |
+      ssh-keygen -q -t rsa -f ~/.ssh/kebechet_rsa -N ""
+      cat ~/.ssh/kebechet_rsa.pub
+    register: output
+
+  - name: check if KEBECHET_SSH_PRIVATE_KEY_PATH exists
+    debug:
+      msg:
+        - "KEBECHET_SSH_PRIVATE_KEY_PATH is not defined."
+        - "We Have set it for you, Please Copy the public key from the message and Set it onto GITHUB account"
+        - "{{ output.stdout }}"
+    when: KEBECHET_SSH_PRIVATE_KEY_PATH is not defined
+
+  - name: KEBECHET_SSH_PRIVATE_KEY is Set. As it was not defined
+    set_fact:
+      KEBECHET_SSH_PRIVATE_KEY_PATH : "$HOME/.ssh/kebechet_rsa"
+    when: KEBECHET_SSH_PRIVATE_KEY_PATH is not defined
