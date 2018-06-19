@@ -41,7 +41,7 @@
     when: buildconfig_exists is failed
 
   - name: start kebechet-job Build
-    command: oc start-build --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" kebechet-job"
+    command: oc start-build --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" kebechet-job
     when: buildconfig_exists is failed
 
   - name: "check if required Secret 'kebechet-secret' exists"
