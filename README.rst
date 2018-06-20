@@ -58,7 +58,7 @@ If there are any issues that have serious impact on Kebechet functionality, Kebe
 Notes
 =====
 
-To issue an update to Git repository, Kebechet creates branches in the provided repository. These branches are named based the on direct dependency that caused updates with its version. If the remote Git already has the given branch the push will fail. This means that there are not issued multiple pull requests for the same dependency update on multiple Kebechet runs. If you wish to issue update on top of the current master, just close the pull request and delete corresponding branch. Next Kebechet run will push changes into Git once again (the given branch does not exist) and opens a corresponding pull request as expected.
+To issue an update to Git repository, Kebechet creates branches in the provided repository. These branches are named based the on direct dependency that caused updates with its version. If the remote Git already has the given branch present, there will be performed a check for the base (master) against which the pull request is opened. If there were made changes in the master branch, Kebechet automatically updates commit so all updates issued with Kebechet are done on top of the current master. Note these updates are desctructive for older commits in the pull request - use ``git cherry-pick`` from Kebechet's update branch if you would like to do changes in the source code with dependency updates.
 
 Deploying Kebechet
 =================

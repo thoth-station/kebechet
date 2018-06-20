@@ -24,8 +24,9 @@ import typing
 from itertools import chain
 from tempfile import TemporaryDirectory
 
-import git
 import delegator
+import git
+import requests
 
 from .config import config
 from .exception import PipenvError
@@ -163,20 +164,53 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
     commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
     pr_body = f'Dependency {dependency} was used in version {old_version}, ' \
               f'but the current latest version is {new_version}.'
-    return _open_pull_request(repo, commit_msg, branch_name, pr_body, labels, files)
+
+    slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
+    owner, repo_name = slug.split('/', maxsplit=1)
+    response = requests.get(
+        f'https://api.github.com/repos/{owner}/{repo_name}/pulls',
+        params={'head': f'{owner}:{branch_name}'},
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+    response.raise_for_status()
+    response = response.json()
+
+    if len(response) == 0:
+        # We don't have update for this package yet, open a PR for it.
+        _git_push(repo, commit_msg, branch_name, files)
+        return _open_pull_request(repo, commit_msg, branch_name, pr_body, labels)
+    elif len(response) == 1:
+        # We have already an update for this package - check whether the opened pull request is pull request matching
+        # the current master. If not, rebase it to the current master. To avoid merge conflicts, we simple issue git
+        # push force to the update branch.
+        base_sha = response[0]['base']['sha']
+        pr_number = response[0]['number']
+        if repo.head.commit.hexsha != base_sha:
+            _LOGGER.info(f"Found already existing  pull request #{pr_number} for old master branch {base_sha[:7]!r} "
+                         f"updating pull request based on branch {branch_name!r} for the "
+                         f"current master branch {repo.head.commit.hexsha[:7]!r}")
+            _git_push(repo, commit_msg, branch_name, files, force_push=True)
+            # Return PR number directly
+            return response[0]['number']
+        else:
+            _LOGGER.info(f"Found already existing  pull request #{pr_number} for the current master "
+                         f"branch {repo.head.commit.hexsha[:7]!r}, "
+                         f"not updating pull request")
+    else:
+        InternalError("Multiple pull requests with same branch name opened.")
 
 
-def _open_pull_request(repo: git.Repo, commit_msg: str, branch_name: str,
-                       pr_body: str, labels: list, files: list) -> typing.Optional[int]:
+def _git_push(repo: git.Repo, commit_msg: str, branch_name: str, files: list, force_push: bool=False) -> None:
+    """Perform git push after adding files and giving a commit message."""
     repo.git.checkout('HEAD', b=branch_name)
     repo.index.add(files)
     repo.index.commit(commit_msg)
-    repo.remote().push(branch_name)
+    repo.remote().push(branch_name, force=force_push)
 
-    if not config.github_token:
-        _LOGGER.warning("No GitHub token provided - changes pushed to repo but no pull request will be opened")
-        return None
 
+def _open_pull_request(repo: git.Repo, commit_msg: str, branch_name: str, pr_body: str,
+                       labels: list) -> typing.Optional[int]:
+    """Open a pull request for the given branch."""
     slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
     try:
         pr_id = github_create_pr(slug, commit_msg, pr_body, branch_name)
