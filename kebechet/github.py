@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Common GitHub operations."""
+
 # TODO: replace this with a lib that also covers GitLab.
 
 import logging
@@ -55,6 +56,7 @@ def github_create_pr(slug: str, title: str, body: str, source_branch: str) -> in
 
 
 def github_add_labels(slug: str, issue_id: int, labels: list) -> None:
+    """All a list of labels to an Issue."""
     url = f'https://api.github.com/repos/{slug}/issues/{issue_id}/labels'
     response = requests.post(
         url,

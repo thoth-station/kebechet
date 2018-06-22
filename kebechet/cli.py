@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""The Command Line Interface."""
+
+
 import logging
 
 import click
@@ -46,7 +49,7 @@ def _print_version(ctx, _, value):
 @click.option('--github-token', type=str, default=None, metavar='TOKEN', envvar='KEBECHET_TOKEN',
               help="A GitHub token to be used to open pull requests.")
 def cli(ctx=None, verbose=0, github_token=None):
-    """"""
+    """The CLI."""
     if ctx:
         ctx.auto_envvar_prefix = 'KEBECHET'
 
