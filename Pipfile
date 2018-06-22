@@ -14,6 +14,15 @@ gitpython = "*"
 pyyaml = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-timeout = "*"
+pytest-cov = "*"
+pydocstyle = "*"
+pylint = "*"
+coala = "*"
+pycodestylebear = "*"
+yamllintbear = "*"
+pydocstylebear = "*"
 
 [requires]
 python_version = "3.6"

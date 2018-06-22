@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""Configuration Class."""
+
 import logging
 import os
 import typing
@@ -84,7 +86,7 @@ class _Config:
         for slug, label in config.iter_update():
             try:
                 update(slug, label)
-            except:
+            except Exception as exc:
                 _LOGGER.exception(f"An error occurred during update of {slug}")
 
 
