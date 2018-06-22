@@ -1,0 +1,17 @@
+- project:
+    check:
+      jobs:
+        - linters:
+            vars:
+              linters:
+                - coala
+    gate:
+      jobs:
+        - linters
+
+    sesheta-auto-gate:
+      jobs:
+        - linters:
+            vars:
+              linters:
+                - coala
