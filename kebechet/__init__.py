@@ -3,5 +3,5 @@
 from .update import update
 
 __name__ = 'kebechet'
-__version__ = '1.0.0-rc.2'
+__version__ = '1.0.0-rc.3'
 __author__ = 'Fridolin Pokorny <fridolin.pokorny@gmail.com>'
