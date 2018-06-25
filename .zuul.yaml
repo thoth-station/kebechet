@@ -11,11 +11,7 @@
 
     release:
       jobs:
-        - build-python-release
-        - python-upload-pypi:
-            secrets:
-              - name: pypi_info
-                secret: pypi_test_goern
+        - upload-test-pypi
 
     sesheta-auto-gate:
       jobs:
