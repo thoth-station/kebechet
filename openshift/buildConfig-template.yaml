@@ -46,6 +46,10 @@ objects:
     triggers:
     - imageChange: {}
       type: ImageChange
+    - type: Generic
+      generic:
+        secret: secret101
+        allowEnv: false
 
 parameters:
 - description: Git repository for Thoth's Kebechet
