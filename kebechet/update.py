@@ -379,6 +379,20 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
     return [(p, None, e['version'], pr_id) for p, e in packages.items()]
 
 
+def _pipenv_update_all():
+    """Update all dependencies to their latest version."""
+    _LOGGER.info("Updating all dependencies to their latest version")
+    result = delegator.run('pipenv update --dev --pre')
+    if result.return_code != 0:
+        _LOGGER.error(result.err)
+        raise PipenvError(f"Pipenv update failed: {result.out}")
+
+    result = delegator.run('pipenv lock')
+    if result.return_code != 0:
+        _LOGGER.error(result.err)
+        raise PipenvError(f"Pipenv lock failed: {result.out}")
+
+
 def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     """Update dependencies based on management used."""
     if not pipenv_used and not os.path.isfile('requirements.txt'):
@@ -389,6 +403,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     if pipenv_used:
         old_environment = _get_all_packages_versions()
         old_direct_dependencies_version = _get_direct_dependencies_version()
+        _pipenv_update_all()
     else:
         old_environment = _get_requirements_txt_dependencies()
         direct_dependencies = _get_direct_dependencies_requirements()
