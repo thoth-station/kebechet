@@ -440,20 +440,19 @@ def update(slug: str, labels: list) -> list:
     """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
     os.environ['PIPENV_VENV_IN_PROJECT'] = '1'
 
-    with TemporaryDirectory() as repo_path:
-        with cwd(repo_path):
-            repo_url = f'git@github.com:{slug}.git'
-            _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-            repo = git.Repo.clone_from(
-                repo_url, repo_path, branch='master', depth=1)
+    with TemporaryDirectory() as repo_path, cwd(repo_path):
+        repo_url = f'git@github.com:{slug}.git'
+        _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
+        repo = git.Repo.clone_from(
+            repo_url, repo_path, branch='master', depth=1)
 
-            if os.path.isfile('Pipfile'):
-                _LOGGER.info("Using Pipfile for dependency management")
-                return _do_update(repo, labels, pipenv_used=True)
-            elif os.path.isfile('requirements.in'):
-                _create_pipenv_environment()
-                _LOGGER.info("Using requirments.in for dependency management")
-                return _do_update(repo, labels, pipenv_used=False)
-            else:
-                raise DependencyManagementError("There was found an issue in your dependency "
-                                                "management - there was not found Pipfile nor requirements.in")
+        if os.path.isfile('Pipfile'):
+            _LOGGER.info("Using Pipfile for dependency management")
+            return _do_update(repo, labels, pipenv_used=True)
+        elif os.path.isfile('requirements.in'):
+            _create_pipenv_environment()
+            _LOGGER.info("Using requirments.in for dependency management")
+            return _do_update(repo, labels, pipenv_used=False)
+        else:
+            raise DependencyManagementError("There was found an issue in your dependency "
+                                            "management - there was not found Pipfile nor requirements.in")
