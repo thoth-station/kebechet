@@ -355,7 +355,7 @@ def _create_pipenv_environment():
             "No dependency management found in the repo (no Pipfile nor requirments.in)")
 
     _LOGGER.debug("Installing dependencies from requirements.in")
-    result = delegator.run('pipenv install -r requirements.in --pre')
+    result = delegator.run('pipenv install -r requirements.in')
     if result.return_code != 0:
         _LOGGER.error(result.err)
         raise PipenvError(
@@ -382,7 +382,7 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
 def _pipenv_update_all():
     """Update all dependencies to their latest version."""
     _LOGGER.info("Updating all dependencies to their latest version")
-    result = delegator.run('pipenv update --dev --pre')
+    result = delegator.run('pipenv update --dev')
     if result.return_code != 0:
         _LOGGER.error(result.err)
         raise PipenvError(f"Pipenv update failed: {result.out}")
