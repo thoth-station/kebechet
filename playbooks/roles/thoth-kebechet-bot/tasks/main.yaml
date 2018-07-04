@@ -64,7 +64,7 @@
 
   - name: create kebechet Configmap
     command: oc create configmap --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" kebechet-configmap \
-      --from-literal=kebechet-config="{{ KEBECHET_CONFIGURATION }}"
+      --from-literal=kebechet-config="{{ KEBECHET_CONFIGURATION_PATH }}"
       --from-literal=kebechet-verbose=1
     when: configmap_exists is failed
   

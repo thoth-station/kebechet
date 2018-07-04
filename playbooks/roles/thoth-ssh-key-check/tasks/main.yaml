@@ -3,6 +3,7 @@
       ssh-keygen -q -t rsa -f ~/.ssh/kebechet_rsa -N ""
       cat ~/.ssh/kebechet_rsa.pub
     register: output
+    when: KEBECHET_SSH_PRIVATE_KEY_PATH is not defined
 
   - name: check if KEBECHET_SSH_PRIVATE_KEY_PATH exists
     debug:
@@ -12,7 +13,7 @@
         - "{{ output.stdout }}"
     when: KEBECHET_SSH_PRIVATE_KEY_PATH is not defined
 
-  - name: KEBECHET_SSH_PRIVATE_KEY is Set. As it was not defined
+  - name: KEBECHET_SSH_PRIVATE_KEY set to "$HOME/.ssh/kebechet_rsa"
     set_fact:
       KEBECHET_SSH_PRIVATE_KEY_PATH : "$HOME/.ssh/kebechet_rsa"
     when: KEBECHET_SSH_PRIVATE_KEY_PATH is not defined
