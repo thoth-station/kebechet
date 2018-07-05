@@ -17,6 +17,8 @@
 
 """Exceptions and errors that can be found in Kebechet."""
 
+from delegator import Command
+
 
 class KebechetException(Exception):
     """A base class for Kebechet exception hierarchy."""
@@ -28,6 +30,10 @@ class ConfigurationError(KebechetException):
 
 class PipenvError(KebechetException):
     """Raised on missing/invalid Pipenv or Pipenv.lock file."""
+
+    def __init__(self, command: Command, *args, **kwargs):
+        self.command = command
+        super().__init__(*args, **kwargs)
 
 
 class InternalError(KebechetException):

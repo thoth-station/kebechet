@@ -28,7 +28,6 @@ from tempfile import TemporaryDirectory
 
 import delegator
 import git
-import requests
 
 from .config import config
 from .exception import PipenvError
@@ -49,14 +48,24 @@ _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 # updated on subsequent calls.
 
 
+def _run_pipenv(cmd: str):
+    """Run pipenv, raise :ref:kebechet.exception.PipenvError on any error holding all the ingormation."""
+    result = delegator.run(cmd)
+    if result.return_code != 0:
+        _LOGGER.error(result.err)
+        raise PipenvError(result)
+
+    return result.out
+
+
 def _get_dependency_version(dependency: str, is_dev: bool) -> str:
     """Get version of the given dependency from Pipfile.lock."""
     try:
         with open('Pipfile.lock') as pipfile_lock:
             pipfile_lock_content = json.load(pipfile_lock)
     except Exception as exc:
-        raise PipenvError(
-            f"Failed to load Pipfile.lock file: {str(exc)}") from exc
+        # TODO: open a PR to fix this
+        raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
 
     version = pipfile_lock_content['develop' if is_dev else 'default'].get(
         dependency, {}).get('version')
@@ -72,7 +81,8 @@ def _get_direct_dependencies() -> tuple:
     try:
         pipfile_content = toml.load('Pipfile')
     except Exception as exc:
-        raise PipenvError(f"Failed to load Pipfile: {str(exc)}") from exc
+        # TODO: open a PR to fix this
+        raise DependencyManagementError(f"Failed to load Pipfile: {str(exc)}") from exc
 
     default = list(package_name.lower()
                    for package_name in pipfile_content['packages'].keys())
@@ -105,8 +115,8 @@ def _get_all_packages_versions() -> dict:
         with open('Pipfile.lock') as pipfile_lock:
             pipfile_lock_content = json.load(pipfile_lock)
     except Exception as exc:
-        raise PipenvError(
-            f"Failed to load Pipfile.lock file: {str(exc)}") from exc
+        # TODO: open a PR to fix this
+        raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
 
     result = {}
     for package_name, package_info in pipfile_lock_content['default'].items():
@@ -252,11 +262,7 @@ def _open_pull_request(repo: git.Repo, commit_msg: str, branch_name: str, pr_bod
 def _get_all_outdated(old_direct_dependencies: dict) -> dict:
     """Get all outdated packages based on Pipfile.lock."""
     # We need to install environment first as this command is the first command run.
-    result = delegator.run('pipenv install --dev')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv install failed: {result.out}")
-
+    _run_pipenv('pipenv install --dev')
     new_direct_dependencies = _get_direct_dependencies_version()
 
     result = {}
@@ -280,13 +286,9 @@ def _get_all_outdated(old_direct_dependencies: dict) -> dict:
 
 def _pipenv_lock_requirements() -> None:
     """Perform pipenv lock into requirements.txt file."""
-    result = delegator.run('pipenv lock -r ')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv lock failed: {result.out}")
-
+    result = _run_pipenv('pipenv lock -r ')
     with open('requirements.txt', 'w') as requirements_file:
-        requirements_file.write(result.out)
+        requirements_file.write(result)
 
 
 def _create_update(repo: git.Repo, dependency: str, package_version: str, old_version: str,
@@ -298,21 +300,11 @@ def _create_update(repo: git.Repo, dependency: str, package_version: str, old_ve
     information of packages that were present in the old environment so we can selectively change versions in the
     already existing requirements.txt or add packages that were introduced as a transitive dependency.
     """
-    pipenv_opts = ['install',
-                   f"{dependency}=={package_version}", '--keep-outdated']
+    cmd = f'pipenv install {dependency}=={package_version} --keep-outdated'
     if is_dev:
-        pipenv_opts.append('--dev')
-
-    result = delegator.run('pipenv ' + ' '.join(pipenv_opts))
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv install failed: {result.out}")
-
-    pipenv_opts = ['lock', '--keep-outdated']
-    result = delegator.run('pipenv ' + ' '.join(pipenv_opts))
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv lock failed: {result.out}")
+        cmd += ' --dev'
+    _run_pipenv(cmd)
+    _run_pipenv('pipenv lock --keep-outdated')
 
     if not old_environment:
         pr_id = _open_pull_request_update(
@@ -330,24 +322,16 @@ def _create_update(repo: git.Repo, dependency: str, package_version: str, old_ve
 def _replicate_old_environment() -> None:
     """Replicate old environment based on its specification - packages in specific versions."""
     _LOGGER.info("Replicating old environment for incremental update")
-    result = delegator.run('pipenv sync --dev')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv sync failed: {result.out}")
+    _run_pipenv('pipenv sync --dev')
 
 
 def _create_pipenv_environment():
     """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in file."""
     if not os.path.isfile('requirements.in'):
-        raise DependencyManagementError(
-            "No dependency management found in the repo (no Pipfile nor requirments.in)")
+        raise DependencyManagementError("No dependency management found in the repo (no Pipfile nor requirments.in)")
 
     _LOGGER.debug("Installing dependencies from requirements.in")
-    result = delegator.run('pipenv install -r requirements.in')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(
-            f"Pipenv failed to install dependencies from requirements.in: {result.out}\n{result.err}")
+    _run_pipenv('pipenv install -r requirements.in')
 
 
 def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
@@ -372,15 +356,8 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
 def _pipenv_update_all():
     """Update all dependencies to their latest version."""
     _LOGGER.info("Updating all dependencies to their latest version")
-    result = delegator.run('pipenv update --dev')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv update failed: {result.out}")
-
-    result = delegator.run('pipenv lock')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv lock failed: {result.out}")
+    _run_pipenv('pipenv update --dev')
+    _run_pipenv('pipenv lock')
 
 
 def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
@@ -394,6 +371,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
         old_environment = _get_all_packages_versions()
         old_direct_dependencies_version = _get_direct_dependencies_version()
         _pipenv_update_all()
+        # TODO: open an issue
     else:
         old_environment = _get_requirements_txt_dependencies()
         direct_dependencies = _get_direct_dependencies_requirements()
@@ -419,7 +397,15 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
                          f"{new_version} as the given update already exists in PR #{pr_number}")
             continue
 
-        _replicate_old_environment()
+        try:
+            _replicate_old_environment()
+        except PipenvError:
+            # There has been an error in locking dependencies. This can be due to a missing dependency or simply
+            # currently locked dependencies are not correct. Try to issue a pull request that would fix that.
+            _LOGGER.warning("Failed to replicate old environment, trying re-lock dependencies")
+            os.remove('Pipfile.lock')
+            _run_pipenv('pipenv lock')
+            return []
 
         is_dev = outdated[package_name]['dev']
         try:
@@ -459,5 +445,6 @@ def update(slug: str, labels: list) -> list:
             _LOGGER.info("Using requirments.in for dependency management")
             return _do_update(repo, labels, pipenv_used=False)
         else:
+            # TODO: issue
             raise DependencyManagementError("There was found an issue in your dependency "
                                             "management - there was not found Pipfile nor requirements.in")
