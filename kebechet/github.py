@@ -67,3 +67,21 @@ def github_add_labels(slug: str, issue_id: int, labels: list) -> None:
         json=labels
     )
     response.raise_for_status()
+
+
+def github_list_pull_requests(slug: str, head: str=None) -> dict:
+    """List GitHub pull requests.
+
+    Optionally you can specify head to be used as a filter.
+    """
+    params = {}
+    if head:
+        params['head'] = head
+
+    response = requests.get(
+        f'https://api.github.com/repos/{slug}/pulls',
+        params=params,
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+    response.raise_for_status()
+    return response.json()

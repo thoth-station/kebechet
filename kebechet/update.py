@@ -36,6 +36,7 @@ from .exception import DependencyManagementError
 from .exception import InternalError
 from .github import github_create_pr
 from .github import github_add_labels
+from .github import github_list_pull_requests
 from .utils import cwd
 
 
@@ -162,55 +163,66 @@ def _get_requirements_txt_dependencies() -> dict:
     return result
 
 
+def _construct_branch_name(package_name: str, new_package_version: str) -> str:
+    """Construct branch name for the updated dependency."""
+    return f'kebechet-{package_name}-{new_package_version}'
+
+
 def _open_pull_request_update(repo: git.Repo, dependency: str,
                               old_version: str, new_version: str,
-                              labels: list, files: list) -> typing.Optional[int]:
+                              labels: list, files: list, pr_number: int) -> typing.Optional[int]:
     """Open a pull request for dependency update."""
     if not config.github_token:
         _LOGGER.info(
             "Skipping automated pull requests opening - no GitHub OAuth token provided")
         return None
 
-    _LOGGER.info(
-        f"Creating a pull request to update {dependency} from version {old_version} to {new_version}")
-    branch_name = f'kebechet-{dependency}-{new_version}'
+    branch_name = _construct_branch_name(dependency, new_version)
     commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
-    pr_body = f'Dependency {dependency} was used in version {old_version}, ' \
-              f'but the current latest version is {new_version}.'
 
+    # If we have already an update for this package we simple issue git
+    # push force always to keep branch up2date with the recent master and avoid merge conflicts.
+    _git_push(repo, commit_msg, branch_name, files, force_push=True)
+
+    if pr_number < 0:
+        _LOGGER.info(f"Creating a pull request to update {dependency} from version {old_version} to {new_version}")
+        pr_body = f'Dependency {dependency} was used in version {old_version}, ' \
+                  f'but the current latest version is {new_version}.'
+        pr_id = _open_pull_request(repo, commit_msg, branch_name, pr_body, labels)
+        _LOGGER.info(f"Newly created pull request #{pr_id} to update {dependency} from "
+                     f"version {old_version} to {new_version} updated")
+        return pr_id
+
+    _LOGGER.info(f"Pull request #{pr_exists} to update {dependency} from "
+                 f"version {old_version} to {new_version} updated")
+    return pr_number
+
+
+def _should_update(repo: git.Repo, package_name, new_package_version) -> tuple:
+    """Check whether the given update was already proposed as a pull request."""
     slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
     owner, repo_name = slug.split('/', maxsplit=1)
-    response = requests.get(
-        f'https://api.github.com/repos/{owner}/{repo_name}/pulls',
-        params={'head': f'{owner}:{branch_name}'},
-        headers={f'Authorization': f'token {config.github_token}'}
-    )
-    response.raise_for_status()
-    response = response.json()
+    branch_name = _construct_branch_name(package_name, new_package_version)
+    response = github_list_pull_requests(slug, head=f'{owner}:{branch_name}')
 
     if len(response) == 0:
-        # We don't have update for this package yet, open a PR for it.
-        _git_push(repo, commit_msg, branch_name, files)
-        return _open_pull_request(repo, commit_msg, branch_name, pr_body, labels)
+        _LOGGER.debug(f"No pull request was found for update of {package_name} to version {new_package_version}")
+        return -1, True
     elif len(response) == 1:
-        # We have already an update for this package - check whether the opened pull request is pull request matching
-        # the current master. If not, rebase it to the current master. To avoid merge conflicts, we simple issue git
-        # push force to the update branch.
         base_sha = response[0]['base']['sha']
         pr_number = response[0]['number']
         if repo.head.commit.hexsha != base_sha:
-            _LOGGER.info(f"Found already existing  pull request #{pr_number} for old master branch {base_sha[:7]!r} "
-                         f"updating pull request based on branch {branch_name!r} for the "
-                         f"current master branch {repo.head.commit.hexsha[:7]!r}")
-            _git_push(repo, commit_msg, branch_name, files, force_push=True)
-            # Return PR number directly
-            return response[0]['number']
+            _LOGGER.debug(f"Found already existing  pull request #{pr_number} for old master branch {base_sha[:7]!r} "
+                          f"updating pull request based on branch {branch_name!r} for the "
+                          f"current master branch {repo.head.commit.hexsha[:7]!r}")
+            return response[0]['number'], True
         else:
-            _LOGGER.info(f"Found already existing  pull request #{pr_number} for the current master "
-                         f"branch {repo.head.commit.hexsha[:7]!r}, "
-                         f"not updating pull request")
+            _LOGGER.debug(f"Found already existing  pull request #{pr_number} for the current master "
+                          f"branch {repo.head.commit.hexsha[:7]!r}, "
+                          f"not updating pull request")
+            return response[0]['number'], False
     else:
-        InternalError("Multiple pull requests with same branch name opened.")
+        raise InternalError(f"Multiple ({len(response)}) pull requests with same branch name {branch_name!r} opened.")
 
 
 def _git_push(repo: git.Repo, commit_msg: str, branch_name: str, files: list, force_push: bool = False) -> None:
@@ -249,9 +261,10 @@ def _get_all_outdated(old_direct_dependencies: dict) -> dict:
 
     result = {}
     for package_name in old_direct_dependencies.keys():
-        if old_direct_dependencies[package_name]['version'] != new_direct_dependencies[package_name]['version']:
+        if old_direct_dependencies[package_name]['version'] \
+                != new_direct_dependencies.get(package_name, {}).get('version'):
             old_version = old_direct_dependencies[package_name]['version']
-            new_version = new_direct_dependencies[package_name]['version']
+            new_version = new_direct_dependencies.get(package_name, {}).get('version')
             is_dev = old_direct_dependencies[package_name]['dev']
 
             _LOGGER.debug(
@@ -278,7 +291,7 @@ def _pipenv_lock_requirements() -> None:
 
 def _create_update(repo: git.Repo, dependency: str, package_version: str, old_version: str,
                    is_dev: bool = False, labels: list = None,
-                   old_environment: dict = None) -> typing.Union[tuple, None]:
+                   old_environment: dict = None, pr_number: int = False) -> typing.Union[tuple, None]:
     """Create an update for the given dependency when dependencies are managed by Pipenv.
 
     The old environment is set to a non None value only if we are operating on requirements.{in,txt}. It keeps
@@ -303,49 +316,24 @@ def _create_update(repo: git.Repo, dependency: str, package_version: str, old_ve
 
     if not old_environment:
         pr_id = _open_pull_request_update(
-            repo, dependency, old_version, package_version, labels, ['Pipfile.lock'])
+            repo, dependency, old_version, package_version, labels, ['Pipfile.lock'], pr_number)
         return old_version, package_version, pr_id
 
     # For requirements.txt scenario we need to propagate all changes (updates of transitive dependencies)
     # into requirements.txt file
     _pipenv_lock_requirements()
     pr_id = _open_pull_request_update(
-        repo, dependency, old_version, package_version, labels, ['requirements.txt'])
+        repo, dependency, old_version, package_version, labels, ['requirements.txt'], pr_number)
     return old_version, package_version, pr_id
 
 
-def _replicate_old_environment(repo: git.Repo, old_environment: dict) -> None:
+def _replicate_old_environment() -> None:
     """Replicate old environment based on its specification - packages in specific versions."""
-    # TODO: pipenv sync?
     _LOGGER.info("Replicating old environment for incremental update")
-
-    dev_packages = []
-    default_packages = []
-    for package_name in old_environment.keys():
-        if old_environment[package_name]['dev']:
-            dev_packages.append(
-                f"{package_name}=={old_environment[package_name]['version']}")
-        else:
-            default_packages.append(
-                f"{package_name}=={old_environment[package_name]['version']}")
-
-    result = delegator.run('pipenv install ' + ' '.join(default_packages))
+    result = delegator.run('pipenv sync --dev')
     if result.return_code != 0:
         _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv install failed: {result.out}")
-
-    result = delegator.run('pipenv install --dev ' + ' '.join(dev_packages))
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv install failed: {result.out}")
-
-    result = delegator.run('pipenv lock')
-    if result.return_code != 0:
-        _LOGGER.error(result.err)
-        raise PipenvError(f"Pipenv lock failed: {result.out}")
-
-    # Discard changes made to Pipenv by pipenv itself. We will open one pull request per update.
-    repo.head.reset(index=True, working_tree=True)
+        raise PipenvError(f"Pipenv sync failed: {result.out}")
 
 
 def _create_pipenv_environment():
@@ -359,18 +347,20 @@ def _create_pipenv_environment():
     if result.return_code != 0:
         _LOGGER.error(result.err)
         raise PipenvError(
-            f"Pipenv failed to install dependencies from requirements.in: {result.out}")
+            f"Pipenv failed to install dependencies from requirements.in: {result.out}\n{result.err}")
 
 
 def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
     """Perform initial requirements lock into requirements.txt file."""
     _pipenv_lock_requirements()
+    commit_msg = "Initial dependency lock"
+    branch_name = "kebechet-initial-lock"
+    _git_push(repo, commit_msg, branch_name, ['requirements.txt'], force_push=True)
     pr_id = _open_pull_request(
         repo,
-        "Initial dependency lock", 'kebechet-initial-lock',
-        "Initially lock all packages stated in requirements.in file in requirements.txt",
+        commit_msg,
+        "Initial lock for requirements.txt",
         labels,
-        ['requirements.txt']
     )
 
     packages = _get_all_packages_versions()
@@ -413,25 +403,40 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     outdated = _get_all_outdated(old_direct_dependencies_version)
     _LOGGER.info(f"Outdated: {outdated}")
 
+    # Undo changes made to Pipfile.lock by _pipenv_update_all.
+    repo.head.reset(index=True, working_tree=True)
+
     result = []
     slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
     for package_name in outdated.keys():
-        _replicate_old_environment(repo, old_environment)
+        # As an optimization, first check if the given PR is already present.
+        new_version = outdated[package_name]['new_version']
+        old_version = outdated[package_name]['old_version']
+
+        pr_number, should_update = _should_update(repo, package_name, new_version)
+        if not should_update:
+            _LOGGER.info(f"Skipping update creation for {package_name} from version {old_version} to "
+                         f"{new_version} as the given update already exists in PR #{pr_number}")
+            continue
+
+        _replicate_old_environment()
 
         is_dev = outdated[package_name]['dev']
         try:
-            _LOGGER.info(
-                f"Creating update of dependency {package_name} in repo {slug} (devel: {is_dev})")
+            _LOGGER.info(f"Creating update of dependency {package_name} in repo {slug} (devel: {is_dev})")
             versions = _create_update(
-                repo, package_name,
-                outdated[package_name]['new_version'], outdated[package_name]['old_version'],
-                is_dev=is_dev, labels=labels, old_environment=old_environment if not pipenv_used else None
+                repo, package_name, new_version, old_version,
+                is_dev=is_dev,
+                labels=labels,
+                old_environment=old_environment if not pipenv_used else None,
+                pr_number=pr_number
             )
             if versions:
                 result.append({package_name: versions})
         except Exception as exc:
-            _LOGGER.exception(
-                f"Failed to create update for dependency {package_name}: {str(exc)}")
+            _LOGGER.exception(f"Failed to create update for dependency {package_name}: {str(exc)}")
+        finally:
+            repo.head.reset(index=True, working_tree=True)
 
     return result
 
