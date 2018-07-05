@@ -6,14 +6,14 @@ ENV USER=kebechet \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
 
-# Add the ssh key from local dir to container dir.
-# ADD github /home/user/.ssh/id_rsa
-
 RUN \
     dnf install -y --setopt=tsflags=nodocs git python3-pip gcc redhat-rpm-config python3-devel which gcc-c++ &&\
     pip3 install kebechet &&\
-    mkdir /home/user /home/user/.ssh &&\
+    mkdir -p /home/user/.ssh &&\
     chmod a+wr /etc/passwd /home/user
+
+# Add the ssh key from local dir to container dir.
+# ADD github /home/user/.ssh/id_rsa
 
 COPY docker-entrypoint.sh /
 
