@@ -349,8 +349,6 @@ def _open_pull_request(repo: git.Repo, commit_msg: str, branch_name: str, pr_bod
 
 def _get_all_outdated(old_direct_dependencies: dict) -> dict:
     """Get all outdated packages based on Pipfile.lock."""
-    # We need to install environment first as this command is the first command run.
-    _run_pipenv('pipenv install --dev')
     new_direct_dependencies = _get_direct_dependencies_version()
 
     result = {}
