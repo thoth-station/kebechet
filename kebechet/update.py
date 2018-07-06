@@ -240,6 +240,11 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
 
     _LOGGER.info(f"Pull request #{pr_number} to update {dependency} from "
                  f"version {old_version} to {new_version} updated")
+    github_add_comment(
+        _get_slug(repo),
+        pr_number,
+        f"Pull request has been rebased on top of the current master with SHA {repo.head.commit.hexsha}"
+    )
     return pr_number
 
 
