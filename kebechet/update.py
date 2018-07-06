@@ -24,24 +24,37 @@ import re
 import json
 import typing
 from itertools import chain
+import platform
 from tempfile import TemporaryDirectory
+from functools import partial
 
 import delegator
 import git
+import kebechet
 
 from .config import config
 from .exception import PipenvError
 from .exception import DependencyManagementError
 from .exception import InternalError
 from .github import github_create_pr
+from .github import github_add_comment
 from .github import github_add_labels
 from .github import github_list_pull_requests
+from .github import github_list_issues
+from .github import github_list_issue_comments
+from .github import github_open_issue
+from .github import github_close_issue
+from .messages import ISSUE_PIPENV_UPDATE_ALL
+from .messages import ISSUE_COMMENT_UPDATE_ALL
+from .messages import ISSUE_CLOSE_UPDATE_ALL
 from .utils import cwd
 
 
 _LOGGER = logging.getLogger(__name__)
 # Ignore PycodestyleBear
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
+
+_ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 
 # Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
 # as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
@@ -50,12 +63,37 @@ _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 
 def _run_pipenv(cmd: str):
     """Run pipenv, raise :ref:kebechet.exception.PipenvError on any error holding all the ingormation."""
+    _LOGGER.debug(f"Running pipenv command {cmd!r}")
     result = delegator.run(cmd)
     if result.return_code != 0:
         _LOGGER.error(result.err)
         raise PipenvError(result)
 
     return result.out
+
+
+def _get_environment_details() -> str:
+    try:
+        pipenv_version = _run_pipenv('pipenv --version')
+    except PipenvError as exc:
+        pipenv_version = f"Failed to obtain pipenv version:\n{exc.stderr}"
+
+    return f"""
+Kebechet version: {kebechet.__version__}
+Python version: {platform.python_version()}
+Platform: {platform.platform()}
+pipenv version: {pipenv_version}
+"""
+
+
+def _get_dependency_graph(graceful: bool = False):
+    try:
+        _run_pipenv('pipenv install --dev --skip-lock')
+        return _run_pipenv('pipenv graph')
+    except PipenvError as exc:
+        if not graceful:
+            raise
+        return f"Unable to obtain dependency graph:\n\n{exc.stderr}"
 
 
 def _get_dependency_version(dependency: str, is_dev: bool) -> str:
@@ -183,8 +221,7 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
                               labels: list, files: list, pr_number: int) -> typing.Optional[int]:
     """Open a pull request for dependency update."""
     if not config.github_token:
-        _LOGGER.info(
-            "Skipping automated pull requests opening - no GitHub OAuth token provided")
+        _LOGGER.info("Skipping automated pull requests opening - no GitHub OAuth token provided")
         return None
 
     branch_name = _construct_branch_name(dependency, new_version)
@@ -199,18 +236,64 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
         pr_body = f'Dependency {dependency} was used in version {old_version}, ' \
                   f'but the current latest version is {new_version}.'
         pr_id = _open_pull_request(repo, commit_msg, branch_name, pr_body, labels)
-        _LOGGER.info(f"Newly created pull request #{pr_id} to update {dependency} from "
-                     f"version {old_version} to {new_version} updated")
         return pr_id
 
-    _LOGGER.info(f"Pull request #{pr_exists} to update {dependency} from "
+    _LOGGER.info(f"Pull request #{pr_number} to update {dependency} from "
                  f"version {old_version} to {new_version} updated")
     return pr_number
 
 
+def _get_issue(repo, title: str) -> typing.Optional[dict]:
+    slug = _get_slug(repo)
+    for issue in github_list_issues(slug):
+        if issue['title'] == title:
+            return issue
+
+    return None
+
+
+def _open_issue_if_not_exist(repo: git.Repo, title: str, body: typing.Callable, refresh_comment: typing.Callable,
+                             labels: list = None) -> typing.Optional[int]:
+    """Open the given issue if does not exist already (as opened)."""
+    slug = _get_slug(repo)
+
+    _LOGGER.debug(f"Reporting issue {title!r}")
+    issue = _get_issue(repo, title)
+    if issue:
+        _LOGGER.info(f"Issue already noted on upstream with id #{issue['number']}")
+        comment_body = refresh_comment(repo, issue)
+        if comment_body:
+            github_add_comment(slug, issue['number'], comment_body)
+            _LOGGER.info(f"Added refresh comment to issue #{issue['number']}")
+        else:
+            _LOGGER.debug(f"Refresh comment not added")
+    else:
+        issue_id = github_open_issue(slug, title, body(), labels)['number']
+        _LOGGER.info(f"Reported issue {title!r} with id #{issue_id}")
+        return issue_id
+
+    return None
+
+
+def _close_issue_if_exists(repo: git.Repo, title: str, comment: str = None):
+    issue = _get_issue(repo, title)
+    if not issue:
+        _LOGGER.debug(f"Issue {title!r} not found, not closing it")
+        return
+
+    slug = _get_slug(repo)
+    github_add_comment(slug, issue['number'], comment)
+    github_close_issue(slug, issue['number'])
+
+
+def _get_slug(repo: git.Repo) -> str:
+    """Get slug (org/repo) for a repo."""
+    return repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
+
+
 def _should_update(repo: git.Repo, package_name, new_package_version) -> tuple:
     """Check whether the given update was already proposed as a pull request."""
-    slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
+    slug = _get_slug(repo)
     owner, repo_name = slug.split('/', maxsplit=1)
     branch_name = _construct_branch_name(package_name, new_package_version)
     response = github_list_pull_requests(slug, head=f'{owner}:{branch_name}')
@@ -340,6 +423,7 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
     commit_msg = "Initial dependency lock"
     branch_name = "kebechet-initial-lock"
     _git_push(repo, commit_msg, branch_name, ['requirements.txt'], force_push=True)
+    # FIXME
     pr_id = _open_pull_request(
         repo,
         commit_msg,
@@ -360,6 +444,30 @@ def _pipenv_update_all():
     _run_pipenv('pipenv lock')
 
 
+def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -> typing.Optional[str]:
+    """Create a refresh comment to an issue if the given master has some changes."""
+    slug = _get_slug(repo)
+    sha = repo.head.commit.hexsha
+
+    if sha in issue['body']:
+        _LOGGER.debug(f"No need to update refresh comment, the issue is up to date")
+        return
+
+    for issue_comment in github_list_issue_comments(slug, issue['number']):
+        if sha in issue_comment['body']:
+            _LOGGER.debug(f"No need to update refresh comment, comment for the current "
+                          f"master {sha[:7]!r} found in a comment")
+            break
+    else:
+        return ISSUE_COMMENT_UPDATE_ALL.format(
+            sha=repo.head.commit.hexsha,
+            slug=_get_slug(repo),
+            environment_details=_get_environment_details(),
+            dependency_graph=_get_dependency_graph(graceful=True),
+            **exc.__dict__
+        )
+
+
 def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     """Update dependencies based on management used."""
     if not pipenv_used and not os.path.isfile('requirements.txt'):
@@ -370,8 +478,33 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     if pipenv_used:
         old_environment = _get_all_packages_versions()
         old_direct_dependencies_version = _get_direct_dependencies_version()
-        _pipenv_update_all()
-        # TODO: open an issue
+        try:
+            _pipenv_update_all()
+        except PipenvError as exc:
+            _LOGGER.warning("Failed to update dependencies to their latest version, reporting issue")
+            # TODO: comment if relevant for changed master
+            _open_issue_if_not_exist(
+                repo,
+                _ISSUE_UPDATE_ALL_NAME,
+                body=lambda: ISSUE_PIPENV_UPDATE_ALL.format(
+                    sha=repo.head.commit.hexsha,
+                    slug=_get_slug(repo),
+                    environment_details=_get_environment_details(),
+                    dependency_graph=_get_dependency_graph(graceful=True),
+                    **exc.__dict__
+                ),
+                refresh_comment=partial(_update_all_refresh_comment, exc),
+                labels=labels
+            )
+            return []
+
+        # We were able to update all, close reported issue if any.
+        _close_issue_if_exists(
+            repo,
+            _ISSUE_UPDATE_ALL_NAME,
+            comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+        )
+
     else:
         old_environment = _get_requirements_txt_dependencies()
         direct_dependencies = _get_direct_dependencies_requirements()
@@ -405,6 +538,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
             _LOGGER.warning("Failed to replicate old environment, trying re-lock dependencies")
             os.remove('Pipfile.lock')
             _run_pipenv('pipenv lock')
+            # TODO: submit a PR, maybe move up
             return []
 
         is_dev = outdated[package_name]['dev']

@@ -32,7 +32,11 @@ class PipenvError(KebechetException):
     """Raised on missing/invalid Pipenv or Pipenv.lock file."""
 
     def __init__(self, command: Command, *args, **kwargs):
-        self.command = command
+        """Asssign values for exception so that they can be used in issue reports automatically."""
+        self.command = command.cmd
+        self.stdout = command.out
+        self.stderr = command.err
+        self.raw_command = command
         super().__init__(*args, **kwargs)
 
 

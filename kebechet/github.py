@@ -69,7 +69,7 @@ def github_add_labels(slug: str, issue_id: int, labels: list) -> None:
     response.raise_for_status()
 
 
-def github_list_pull_requests(slug: str, head: str=None) -> dict:
+def github_list_pull_requests(slug: str, head: str = None) -> list:
     """List GitHub pull requests.
 
     Optionally you can specify head to be used as a filter.
@@ -83,5 +83,71 @@ def github_list_pull_requests(slug: str, head: str=None) -> dict:
         params=params,
         headers={f'Authorization': f'token {config.github_token}'}
     )
+    response.raise_for_status()
+    # TODO: pagination?
+    return response.json()
+
+
+def github_list_issues(slug: str) -> list:
+    """List GitHub issues."""
+    # This will list open pull requests (see state parameter in docs)- that is what we want.
+    response = requests.get(
+        f'https://api.github.com/repos/{slug}/issues',
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    # TODO: pagination?
+    return response.json()
+
+
+def github_open_issue(slug: str, title: str, body: str, labels: list = None) -> dict:
+    """Open an issue on GitHub."""
+    response = requests.post(
+        f'https://api.github.com/repos/{slug}/issues',
+        json={
+            'title': title,
+            'body': body,
+            'labels': labels
+        },
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    return response.json()
+
+
+def github_add_comment(slug: str, issue_id: int, comment_body: str) -> dict:
+    """Add a comment to GitHub issue."""
+    response = requests.post(
+        f'https://api.github.com/repos/{slug}/issues/{issue_id}/comments',
+        json={'body': comment_body},
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    return response.json()
+
+
+def github_list_issue_comments(slug: str, issue_id: int) -> list:
+    """List comments for the given GitHub issue."""
+    response = requests.get(
+        f'https://api.github.com/repos/{slug}/issues/{issue_id}/comments',
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    # TODO: pagination
+    return response.json()
+
+
+def github_close_issue(slug: str, issue_id: int) -> dict:
+    """Close the given GitHub issue."""
+    response = requests.patch(
+        f'https://api.github.com/repos/{slug}/issues/{issue_id}',
+        json={'state': 'closed'},
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
     response.raise_for_status()
     return response.json()
