@@ -44,6 +44,8 @@ from .github import github_list_issues
 from .github import github_list_issue_comments
 from .github import github_open_issue
 from .github import github_close_issue
+from .github import github_delete_branch
+from .github import github_get_branches
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_CLOSE_UPDATE_ALL
@@ -414,13 +416,13 @@ def _replicate_old_environment() -> None:
 def _create_pipenv_environment():
     """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in file."""
     if not os.path.isfile('requirements.in'):
-        raise DependencyManagementError("No dependency management found in the repo (no Pipfile nor requirments.in)")
+        raise DependencyManagementError("No dependency management found in the repo (no Pipfile nor requirements.in)")
 
     _LOGGER.debug("Installing dependencies from requirements.in")
     _run_pipenv('pipenv install -r requirements.in')
 
 
-def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
+def _create_initial_lock_requirements(repo: git.Repo, labels) -> dict:
     """Perform initial requirements lock into requirements.txt file."""
     _pipenv_lock_requirements()
     commit_msg = "Initial dependency lock"
@@ -437,7 +439,7 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> list:
     packages = _get_all_packages_versions()
 
     # Be compatible with return value of update().
-    return [(p, None, e['version'], pr_id) for p, e in packages.items()]
+    return {p: (None, e['version'], pr_id) for p, e in packages.items()}
 
 
 def _pipenv_update_all():
@@ -471,7 +473,23 @@ def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -
         )
 
 
-def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
+def _delete_old_branches(slug: str, update_result: dict) -> None:
+    """Delete old kebechet branches from the remote repository."""
+    branches = {entry['name'] for entry in github_get_branches(slug) if entry['name'].starswith('kebechet-')}
+    for package_name, versions in update_result.items():
+        branch_name = _construct_branch_name(package_name, versions[1])
+        # Remove active branches.
+        branches.remove(branch_name)
+
+    for branch_name in branches:
+        _LOGGER.debug(f"Deleting old branch {branch_name}")
+        try:
+            github_delete_branch(slug, branch_name)
+        except Exception as exc:
+            _LOGGER.exception(f"Failed to delete inactive branch {branch_name}")
+
+
+def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
     """Update dependencies based on management used."""
     if not pipenv_used and not os.path.isfile('requirements.txt'):
         # First time lock, open a PR
@@ -499,7 +517,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
                 refresh_comment=partial(_update_all_refresh_comment, exc),
                 labels=labels
             )
-            return []
+            return {}
 
         # We were able to update all, close reported issue if any.
         _close_issue_if_exists(
@@ -520,7 +538,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
     # Undo changes made to Pipfile.lock by _pipenv_update_all.
     repo.head.reset(index=True, working_tree=True)
 
-    result = []
+    result = {}
     slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
     for package_name in outdated.keys():
         # As an optimization, first check if the given PR is already present.
@@ -542,7 +560,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
             os.remove('Pipfile.lock')
             _run_pipenv('pipenv lock')
             # TODO: submit a PR, maybe move up
-            return []
+            return {}
 
         is_dev = outdated[package_name]['dev']
         try:
@@ -555,12 +573,13 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> list:
                 pr_number=pr_number
             )
             if versions:
-                result.append({package_name: versions})
+                result[package_name] = versions
         except Exception as exc:
             _LOGGER.exception(f"Failed to create update for dependency {package_name}: {str(exc)}")
         finally:
             repo.head.reset(index=True, working_tree=True)
 
+    _delete_old_branches(slug, result)
     return result
 
 

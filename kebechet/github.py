@@ -175,3 +175,26 @@ def github_close_issue(slug: str, issue_id: int) -> dict:
 
     response.raise_for_status()
     return response.json()
+
+
+def github_delete_branch(slug: str, branch: str) -> None:
+    """Delete the given branch from remote repository."""
+    response = requests.delete(
+        f'https://api.github.com/repos/{slug}/git/refs/heads/{branch}',
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    # GitHub returns an empty string, noting to return.
+
+
+def github_get_branches(slug: str) -> list:
+    """Get listing of all branches available on remote repository."""
+    response = requests.get(
+        f'https://api.github.com/repos/{slug}/branches',
+        headers={f'Authorization': f'token {config.github_token}'}
+    )
+
+    response.raise_for_status()
+    # TODO: pagination
+    return response.json()
