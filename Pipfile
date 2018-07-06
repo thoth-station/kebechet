@@ -17,12 +17,8 @@ pyyaml = "*"
 pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
-pydocstyle = "*"
 pylint = "*"
-coala = "*"
-pycodestylebear = "*"
-yamllintbear = "*"
-pydocstylebear = "*"
+coala-bears = "*"
 
 [requires]
 python_version = "3.6"
