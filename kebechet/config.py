@@ -77,7 +77,7 @@ class _Config:
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
-        """Run Kebechet respecting configuration provided in Kebechet YAML configuration."""
+        """Run Kebechet using provided YAML configuration file."""
         global config
         from .update import update
 
