@@ -55,6 +55,13 @@ Issues created by Kebechet
 
 If there are any issues that have serious impact on Kebechet functionality, Kebechet will automatically open an issue in the given repository. These issues can be configuration issues of Kebechet itself, issues in your dependency management such as errors in dependency management files or issues with package retrieval (such as misconfiguration in Python indexes, resolving issues or package version removal).
 
+Suppressing bot verbosity
+=========================
+
+Bot updates pull requests and issues and notifies about updates via comments (to issues or pull requests). You can suppress this behaviour by setting lable 'silent-bot' to issue or to a pull request. The bot will still perform updates but update comments will not be added.
+
+This is especially helpful if you have failing updates of your dependency and you would like to keep the pull request opened and check for fix later. Setting 'silent-bot' to the PR will suppress Kebechet to post updates and you will not retrieve spam messages anymore.
+
 Notes
 =====
 
