@@ -1,5 +1,6 @@
 ---
 - name: Playbook to provision Thoth's Kebechet Bot deployment
+  tags:
     - openshift
     - thoth
     - kebechet

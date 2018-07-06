@@ -6,11 +6,11 @@ labels:
 metadata:
   name: kebechet-cronjob
   annotations:
-    description: This is Kebechet CronJob Config, this template is meant to be used by Jenkins, but could also be used by humans...
+    description: This is Kebechet CronJob Config, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet CronJob
-    version: 0.2.0
+    version: 1.0.0
     tags: poc,thoth,ai-stacks,kebechet
-    template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
@@ -43,7 +43,7 @@ objects:
                   secretKeyRef:
                     key: github-oauth-token
                     name: kebechet-secret
-              - name: KEBECHET_CONFIGURATION
+              - name: KEBECHET_CONFIGURATION_PATH
                 valueFrom:
                   configMapKeyRef:
                     key: kebechet-config
@@ -55,11 +55,11 @@ objects:
                     name: kebechet-configmap
               resources:
                 requests:
-                  memory: "2000Mi"
-                  cpu: "2000m"
+                  memory: "2Gi"
+                  cpu: "2"
                 limits:
-                  memory: "2000Mi"
-                  cpu: "2000m"
+                  memory: "2Gi"
+                  cpu: "2"
             volumes:
             - name: ssh-config
               secret:

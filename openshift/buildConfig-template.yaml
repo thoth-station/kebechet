@@ -6,11 +6,11 @@ labels:
 metadata:
   name: kebechet-buildconfig
   annotations:
-    description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Jenkins, but could also be used by humans...
+    description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet BuildConfig
-    version: 0.2.0
+    version: 1.0.0
     tags: poc,thoth,ai-stacks,kebechet
-    template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
@@ -24,11 +24,11 @@ objects:
   spec:
     resources:
       requests:
-        memory: "1000Mi"
-        cpu: "1000m"
+        memory: "1Gi"
+        cpu: "1"
       limits:
-        memory: "1000Mi"
-        cpu: "1000m"
+        memory: "1Gi"
+        cpu: "1"
     output:
       to:
         kind: ImageStreamTag
