@@ -72,7 +72,7 @@ def cli_update(slug, label=None):
 
 
 @cli.command('run')
-@click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION')
+@click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION_PATH')
 def cli_run(configuration):
     """Run Kebechet respecting YAML file configuration."""
     config.run(configuration)

@@ -1,26 +1,35 @@
 apiVersion: v1
-kind: ConfigMap
+kind: Template
+labels:
+  template: kebechet-configmap
+  thoth: 0.1.0
 metadata:
   name: kebechet-configmap
-  labels:
-    app: kebechet
-annotations:
-  description: This is Kebechet ConfigMap, this template is meant to be used by Jenkins, but could also be used by humans...
-  openshift.io/display-name: Kebechet ConfigMap
-  version: 0.2.0
-  tags: poc,thoth,ai-stacks,kebechet
-  template.openshift.io/documentation-url: https://github.com/AICoE/Thoth/
-  template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
-  template.openshift.io/provider-display-name: Red Hat, Inc.
-data:
-  kebechet-config: ${KEBECHET_CONFIGURATION}
-  kebechet-verbose: ${KEBECHET_VERBOSE}
+  annotations:
+    description: This is Kebechet CronJob ConfigMap, this template is meant to be used by Bots, but could also be used by humans...
+    openshift.io/display-name: Kebechet ConfigMap
+    version: 1.0.0
+    tags: poc,thoth,ai-stacks,kebechet
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: kebechet-configmap
+    labels:
+      app: kebechet
+  data:
+    kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
+    kebechet-verbose: ${KEBECHET_VERBOSE}
 
 parameters:
-  - description: Kebechet configuration file.
+  - description: Path of Kebechet configuration file.
     displayName: Kebechet configuration
     required: true
-    name: KEBECHET_CONFIGURATION
+    name: KEBECHET_CONFIGURATION_PATH
     
   - description: Kebechet verbose mode.
     displayName: Kebechet Verbose

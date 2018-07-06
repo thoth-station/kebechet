@@ -68,13 +68,13 @@ To deploy kebechet on OpenShift cluster. Use the following Ansible command with 
 .. code-block:: console
 
   ansible-playbook \
-    --extra-vars=OCP_URL= <openshift_cluster_url> \
-    --extra-vars=OCP_TOKEN= <openshift_cluster_token> \
-    --extra-vars=KEBECHET_INFRA_NAMESPACE= <openshift_cluster_namespace> \
-    --extra-vars=KEBECHET_APPLICATION_NAMESPACE= <openshift_cluster_namespace> \
-    --extra-vars=KEBECHET_CONFIGURATION_PATH= <github_repo_config.yaml> \
-    --extra-vars=KEBECHET_TOKEN= <github_oauth_token> \
-    --extra-vars=KEBECHET_SSH_PRIVATE_KEY_PATH= <github_ssh_private_key_path> \
+    --extra-vars=OCP_URL=<openshift_cluster_url> \
+    --extra-vars=OCP_TOKEN=<openshift_cluster_token> \
+    --extra-vars=KEBECHET_INFRA_NAMESPACE=<openshift_cluster_namespace> \
+    --extra-vars=KEBECHET_APPLICATION_NAMESPACE=<openshift_cluster_namespace> \
+    --extra-vars=KEBECHET_CONFIGURATION_PATH=<github_repo_config.yaml> \
+    --extra-vars=KEBECHET_TOKEN=<github_oauth_token> \
+    --extra-vars=KEBECHET_SSH_PRIVATE_KEY_PATH=<github_ssh_private_key_path> \
     playbooks/provision.yaml
 
 
@@ -82,10 +82,10 @@ To deploy kebechet on OpenShift cluster. Use the following Ansible command with 
 
 * ``KEBECHET_TOKEN``: To raise a pull request bot requires user rights and premissions. The GitHub OAuth tokens are to be set for raising pull request whenever updates are encounter by the Kebechet.
 
-* ``KEBECHET_CONFIGURATION``: A YAML configuration file to be used for Kebechet to check for dependency updates.
+* ``KEBECHET_CONFIGURATION_PATH``: Path to the YAML configuration file to be used for Kebechet to check for dependency updates.
 
 * ``KEBECHET_INFRA_NAMESPACE``: The OpenShift namespace can be used for the infrastructural purposes, all the images stream are stored in the ``KEBECHET_INFRA_NAMESPACE``.
 
 * ``KEBECHET_APPLICATION_NAMESPACE``: The OpenShift namespace can be used for the application purposes, all the templates, builds, secrets, configmap and jobs are stored in the ``KEBECHET_APPLICATION_NAMESPACE``.
 
-* ``OCP_URL`` and ``OCP_TOKEN``: The OpenShift credentials are to be setup with the access token and url.
+* ``OCP_URL`` and ``OCP_TOKEN``: The OpenShift credentials used to login to.
