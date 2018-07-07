@@ -49,6 +49,7 @@ from .github import github_get_branches
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_CLOSE_UPDATE_ALL
+from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_REPLICATE_ENV
 from .utils import cwd
 
@@ -59,6 +60,7 @@ _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 
 _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
+_ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 
 # Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
 # as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
@@ -253,6 +255,7 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
 
 
 def _get_issue(repo, title: str) -> typing.Optional[dict]:
+    """Retrieve issue with the given title."""
     slug = _get_slug(repo)
     for issue in github_list_issues(slug):
         if issue['title'] == title:
@@ -261,8 +264,8 @@ def _get_issue(repo, title: str) -> typing.Optional[dict]:
     return None
 
 
-def _open_issue_if_not_exist(repo: git.Repo, title: str, body: typing.Callable, refresh_comment: typing.Callable,
-                             labels: list = None) -> typing.Optional[int]:
+def _open_issue_if_not_exist(repo: git.Repo, title: str, body: typing.Callable,
+                             refresh_comment: typing.Callable = None, labels: list = None) -> typing.Optional[int]:
     """Open the given issue if does not exist already (as opened)."""
     slug = _get_slug(repo)
 
@@ -270,6 +273,9 @@ def _open_issue_if_not_exist(repo: git.Repo, title: str, body: typing.Callable, 
     issue = _get_issue(repo, title)
     if issue:
         _LOGGER.info(f"Issue already noted on upstream with id #{issue['number']}")
+        if not refresh_comment:
+            return None
+
         comment_body = refresh_comment(repo, issue)
         if comment_body:
             github_add_comment(slug, issue['number'], comment_body)
@@ -291,7 +297,7 @@ def _close_issue_if_exists(repo: git.Repo, title: str, comment: str = None):
         return
 
     slug = _get_slug(repo)
-    github_add_comment(slug, issue['number'], comment)
+    github_add_comment(slug, issue['number'], comment, force_add=True)
     github_close_issue(slug, issue['number'])
 
 
@@ -626,7 +632,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
     return result
 
 
-def update(slug: str, labels: list) -> list:
+def update(slug: str, labels: list) -> dict:
     """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
     os.environ['PIPENV_VENV_IN_PROJECT'] = '1'
 
@@ -638,12 +644,24 @@ def update(slug: str, labels: list) -> list:
 
         if os.path.isfile('Pipfile'):
             _LOGGER.info("Using Pipfile for dependency management")
-            return _do_update(repo, labels, pipenv_used=True)
+            result = _do_update(repo, labels, pipenv_used=True)
         elif os.path.isfile('requirements.in'):
             _create_pipenv_environment()
             _LOGGER.info("Using requirments.in for dependency management")
-            return _do_update(repo, labels, pipenv_used=False)
+            result = _do_update(repo, labels, pipenv_used=False)
         else:
-            # TODO: issue
-            raise DependencyManagementError("There was found an issue in your dependency "
-                                            "management - there was not found Pipfile nor requirements.in")
+            _LOGGER.warning("No dependency management found")
+            _open_issue_if_not_exist(
+                repo,
+                _ISSUE_NO_DEPENDENCY_NAME,
+                lambda: ISSUE_NO_DEPENDENCY_MANAGEMENT,
+                labels=labels
+            )
+            return {}
+
+        _close_issue_if_exists(
+            repo,
+            _ISSUE_UPDATE_ALL_NAME,
+            comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+        )
+        return result

@@ -137,3 +137,15 @@ Most likely the deployment build will fail.
 
 For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
 """
+
+ISSUE_NO_DEPENDENCY_MANAGEMENT = \
+    """No dependency management found for this repository. If you want to keep your dependencies managed, \
+please submit `Pipfile` or `requirements.in` file.
+
+To generate a `Pipfile`, use:"
+```
+$ pipenv install --skip-lock --code ./
+$ git add Pipfile
+$ git commit -m 'Add Pipfile for dependency management'
+```
+"""
