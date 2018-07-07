@@ -18,7 +18,7 @@
 """Body of issues and pull requests automatically opened."""
 
 # A base information for update that failed with all the relevant information.
-_ISSUE_PIPENV_UPDATE_ALL_BASE = \
+_PIPENV_REPORT = \
     """
 ##### Command
 
@@ -71,7 +71,7 @@ Automatic dependency update failed for the current master with SHA {sha}.
 
 The automatic dependency management cannot continue. Please fix errors reported bellow.
 
-""" + _ISSUE_PIPENV_UPDATE_ALL_BASE + """
+""" + _PIPENV_REPORT + """
 
 ##### Notes
 
@@ -85,11 +85,55 @@ Once this issue is resolved, the issue will be automatically closed by bot.
 ISSUE_COMMENT_UPDATE_ALL = \
     """
 Automatic dependency update still failing for the current master with SHA {sha}.
-""" + _ISSUE_PIPENV_UPDATE_ALL_BASE
+""" + _PIPENV_REPORT
 
 
 # A close comment when update all works again.
 ISSUE_CLOSE_UPDATE_ALL = \
     """
 Closing this issue as it is no longer relevant for the current master with SHA {sha}.
+"""
+
+
+# Issue created when the environment cannot be replicated.
+ISSUE_REPLICATE_ENV = \
+    """
+Unable to replicate environment provided in [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
+
+Most likely the deployment build will fail.
+
+##### Command
+
+```
+  $ {command}
+```
+
+<details>
+  <summary>Standard output</summary>
+
+```
+{stdout}
+```
+
+</details>
+
+<details>
+  <summary>Standard error</summary>
+
+```
+{stderr}
+```
+
+</details>
+
+<details>
+  <summary>Environment details</summary>
+
+```
+{environment_details}
+```
+
+</details>
+
+For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
 """

@@ -49,6 +49,7 @@ from .github import github_get_branches
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_CLOSE_UPDATE_ALL
+from .messages import ISSUE_REPLICATE_ENV
 from .utils import cwd
 
 
@@ -57,6 +58,7 @@ _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 
 _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
+_ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 
 # Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
 # as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
@@ -432,6 +434,7 @@ def _create_initial_lock_requirements(repo: git.Repo, labels) -> dict:
     pr_id = _open_pull_request(
         repo,
         commit_msg,
+        branch_name,
         "Initial lock for requirements.txt",
         labels,
     )
@@ -473,19 +476,52 @@ def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -
         )
 
 
-def _delete_old_branches(slug: str, update_result: dict) -> None:
+def _relock_all(repo: git.Repo, exc: PipenvError, labels: list) -> None:
+    """Relock all dependencies given the Pipfile."""
+    issue_id = _open_issue_if_not_exist(
+        repo,
+        _ISSUE_REPLICATE_ENV_NAME,
+        lambda: ISSUE_REPLICATE_ENV.format(
+            **exc.__dict__, sha=repo.head.commit.hexsha,
+            slug=_get_slug(repo),
+            environment_details=_get_environment_details()
+        ),
+        refresh_comment=partial(_update_all_refresh_comment, exc),
+        labels=labels
+    )
+
+    _pipenv_update_all()
+    commit_msg = "Automatic dependency re-locking"
+    branch_name = "kebechet-dependency-relock"
+    _git_push(repo, commit_msg, branch_name, ['Pipfile.lock'])
+    pr_id = _open_pull_request(
+        repo,
+        commit_msg,
+        branch_name,
+        f"Fixes: #{issue_id}",
+        labels,
+    )
+
+    _LOGGER.info(f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue_id}")
+
+
+def _delete_old_branches(slug: str, outdated: dict) -> None:
     """Delete old kebechet branches from the remote repository."""
-    branches = {entry['name'] for entry in github_get_branches(slug) if entry['name'].starswith('kebechet-')}
-    for package_name, versions in update_result.items():
-        branch_name = _construct_branch_name(package_name, versions[1])
-        # Remove active branches.
-        branches.remove(branch_name)
+    branches = {entry['name'] for entry in github_get_branches(slug) if entry['name'].startswith('kebechet-')}
+    for package_name, info in outdated.items():
+        # Do not remove active branches - branches we issued PRs in.
+        branch_name = _construct_branch_name(package_name, info['new_version'])
+        try:
+            branches.remove(branch_name)
+        except KeyError:
+            # If there was an issue with PR opening.
+            pass
 
     for branch_name in branches:
         _LOGGER.debug(f"Deleting old branch {branch_name}")
         try:
             github_delete_branch(slug, branch_name)
-        except Exception as exc:
+        except Exception:
             _LOGGER.exception(f"Failed to delete inactive branch {branch_name}")
 
 
@@ -553,13 +589,12 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
 
         try:
             _replicate_old_environment()
-        except PipenvError:
+        except PipenvError as exc:
             # There has been an error in locking dependencies. This can be due to a missing dependency or simply
-            # currently locked dependencies are not correct. Try to issue a pull request that would fix that.
-            _LOGGER.warning("Failed to replicate old environment, trying re-lock dependencies")
-            os.remove('Pipfile.lock')
-            _run_pipenv('pipenv lock')
-            # TODO: submit a PR, maybe move up
+            # currently locked dependencies are not correct. Try to issue a pull request that would fix that. We know
+            # that update all works, use update.
+            _LOGGER.warning("Failed to replicate old environment, re-locking all dependencies")
+            _relock_all(repo, exc, labels)
             return {}
 
         is_dev = outdated[package_name]['dev']
@@ -579,7 +614,15 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
         finally:
             repo.head.reset(index=True, working_tree=True)
 
-    _delete_old_branches(slug, result)
+    # We know that locking was done correctly - if the issue is still open, close it. The issue
+    # should be automatically closed by merging the generated PR.
+    _close_issue_if_exists(
+        repo,
+        _ISSUE_REPLICATE_ENV_NAME,
+        comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+    )
+
+    _delete_old_branches(slug, outdated)
     return result
 
 
