@@ -16,7 +16,7 @@
       jobs:
         - upload-pypi-sesheta
 
-    sesheta-auto-gate:
+    kebechet-auto-gate:
       jobs:
         - linters:
             vars:
