@@ -148,4 +148,6 @@ $ pipenv install --skip-lock --code ./
 $ git add Pipfile
 $ git commit -m 'Add Pipfile for dependency management'
 ```
+
+Make sure your `Pipfile` or `requirements.in` is placed in the root of your Git repository.
 """

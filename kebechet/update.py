@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""The real stuff."""
+"""Dependency update management logic."""
 
 import os
 import logging
@@ -55,7 +55,6 @@ from .utils import cwd
 
 
 _LOGGER = logging.getLogger(__name__)
-# Ignore PycodestyleBear
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 
 _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
@@ -421,7 +420,7 @@ def _replicate_old_environment() -> None:
     _run_pipenv('pipenv sync --dev')
 
 
-def _create_pipenv_environment():
+def _create_pipenv_environment() -> None:
     """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in file."""
     if not os.path.isfile('requirements.in'):
         raise DependencyManagementError("No dependency management found in the repo (no Pipfile nor requirements.in)")
@@ -430,25 +429,48 @@ def _create_pipenv_environment():
     _run_pipenv('pipenv install -r requirements.in')
 
 
-def _create_initial_lock_requirements(repo: git.Repo, labels) -> dict:
+def _create_initial_lock(repo: git.Repo, labels: list, pipenv_used: bool) -> bool:
     """Perform initial requirements lock into requirements.txt file."""
-    _pipenv_lock_requirements()
-    commit_msg = "Initial dependency lock"
+    # We use lock_func to optimize run - it will be called only if actual locking needs to be performed.
+    if not pipenv_used and not os.path.isfile('requirements.txt'):
+        _LOGGER.info("Initial lock based on requirements.in will be done")
+        lock_func = _pipenv_lock_requirements
+    elif pipenv_used and not os.path.isfile('Pipfile.lock'):
+        _LOGGER.info("Initial lock based on Pipfile will be done")
+        lock_func = partial(_run_pipenv, 'pipenv lock')
+    else:
+        return False
+
     branch_name = "kebechet-initial-lock"
-    _git_push(repo, commit_msg, branch_name, ['requirements.txt'], force_push=True)
-    # FIXME
-    pr_id = _open_pull_request(
-        repo,
-        commit_msg,
-        branch_name,
-        "Initial lock for requirements.txt",
-        labels,
-    )
+    slug = _get_slug(repo)
+    owner, repo_name = slug.split('/', maxsplit=1)
+    response = github_list_pull_requests(slug, head=f'{owner}:{branch_name}')
+    files = ['requirements.txt' if not pipenv_used else 'Pipfile.lock']
 
-    packages = _get_all_packages_versions()
+    commit_msg = "Initial dependency lock"
+    if len(response) == 0:
+        lock_func()
+        _git_push(repo, commit_msg, branch_name, files)
+        pr_id = _open_pull_request(repo, commit_msg, branch_name, pr_body='', labels=labels)
+        _LOGGER.info(f"Initial dependency lock present in PR #{pr_id}")
+    elif len(response) == 1:
+        base_sha = response[0]['base']['sha']
+        pr_number = response[0]['number']
+        if repo.head.commit.hexsha != base_sha:
+            lock_func()
+            _git_push(repo, commit_msg, branch_name, files, force_push=True)
+            github_add_comment(
+                _get_slug(repo),
+                pr_number,
+                f"Pull request has been rebased on top of the current master with SHA {repo.head.commit.hexsha}"
+            )
+        else:
+            _LOGGER.info(f"Pull request #{pr_number} is up to date for the current master branch")
+    else:
+        raise DependencyManagementError(f"Found two pull requests for initial "
+                                        f"requirements lock for branch {branch_name}")
 
-    # Be compatible with return value of update().
-    return {p: (None, e['version'], pr_id) for p, e in packages.items()}
+    return True
 
 
 def _pipenv_update_all():
@@ -464,7 +486,7 @@ def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -
     sha = repo.head.commit.hexsha
 
     if sha in issue['body']:
-        _LOGGER.debug(f"No need to update refresh comment, the issue is up to date")
+        _LOGGER.debug("No need to update refresh comment, the issue is up to date")
         return
 
     for issue_comment in github_list_issue_comments(slug, issue['number']):
@@ -483,7 +505,7 @@ def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -
 
 
 def _relock_all(repo: git.Repo, exc: PipenvError, labels: list) -> None:
-    """Relock all dependencies given the Pipfile."""
+    """Re-lock all dependencies given the Pipfile."""
     issue_id = _open_issue_if_not_exist(
         repo,
         _ISSUE_REPLICATE_ENV_NAME,
@@ -520,7 +542,7 @@ def _delete_old_branches(slug: str, outdated: dict) -> None:
         try:
             branches.remove(branch_name)
         except KeyError:
-            # If there was an issue with PR opening.
+            # e.g. if there was an issue with PR opening.
             pass
 
     for branch_name in branches:
@@ -533,10 +555,17 @@ def _delete_old_branches(slug: str, outdated: dict) -> None:
 
 def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
     """Update dependencies based on management used."""
-    if not pipenv_used and not os.path.isfile('requirements.txt'):
-        # First time lock, open a PR
-        _LOGGER.info("Initial requirements.lock will be done")
-        return _create_initial_lock_requirements(repo, labels)
+    # Check for first time (initial) locks first.
+    try:
+        if _create_initial_lock(repo, labels, pipenv_used):
+            return {}
+    except PipenvError as exc:
+        _LOGGER.exception("Failed to perform initial dependency lock")
+        # TODO: open issue
+        raise
+    else:
+        # TODO: close issue
+        pass
 
     if pipenv_used:
         old_environment = _get_all_packages_versions()
@@ -545,7 +574,6 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
             _pipenv_update_all()
         except PipenvError as exc:
             _LOGGER.warning("Failed to update dependencies to their latest version, reporting issue")
-            # TODO: comment if relevant for changed master
             _open_issue_if_not_exist(
                 repo,
                 _ISSUE_UPDATE_ALL_NAME,
@@ -560,19 +588,17 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
                 labels=labels
             )
             return {}
-
-        # We were able to update all, close reported issue if any.
-        _close_issue_if_exists(
-            repo,
-            _ISSUE_UPDATE_ALL_NAME,
-            comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
-        )
-
-    else:
+        else:
+            # We were able to update all, close reported issue if any.
+            _close_issue_if_exists(
+                repo,
+                _ISSUE_UPDATE_ALL_NAME,
+                comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+            )
+    else:  # requirements.txt
         old_environment = _get_requirements_txt_dependencies()
         direct_dependencies = _get_direct_dependencies_requirements()
-        old_direct_dependencies_version = {
-            k: v for k, v in old_environment.items() if k in direct_dependencies}
+        old_direct_dependencies_version = {k: v for k, v in old_environment.items() if k in direct_dependencies}
 
     outdated = _get_all_outdated(old_direct_dependencies_version)
     _LOGGER.info(f"Outdated: {outdated}")
@@ -581,7 +607,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
     repo.head.reset(index=True, working_tree=True)
 
     result = {}
-    slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
+    slug = _get_slug(repo)
     for package_name in outdated.keys():
         # As an optimization, first check if the given PR is already present.
         new_version = outdated[package_name]['new_version']
@@ -661,7 +687,7 @@ def update(slug: str, labels: list) -> dict:
 
         _close_issue_if_exists(
             repo,
-            _ISSUE_UPDATE_ALL_NAME,
+            _ISSUE_NO_DEPENDENCY_NAME,
             comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
         )
         return result
