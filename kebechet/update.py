@@ -345,7 +345,7 @@ class UpdateManager(Manager):
             lock_func = partial(self._pipenv_lock_requirements, self)
         elif pipenv_used and not os.path.isfile('Pipfile.lock'):
             _LOGGER.info("Initial lock based on Pipfile will be done")
-            lock_func = partial(self.run_pipenv, self, 'pipenv lock')
+            lock_func = partial(self.run_pipenv, 'pipenv lock')
         else:
             return False
 
@@ -455,9 +455,17 @@ class UpdateManager(Manager):
 
     def _do_update(self, labels: list, pipenv_used: bool = False) -> dict:
         """Update dependencies based on management used."""
+        close_initial_lock_issue = partial(
+            close_issue_if_exists,
+            self.slug,
+            _ISSUE_INITIAL_LOCK_NAME,
+            comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
+        )
+
         # Check for first time (initial) locks first.
         try:
             if self._create_initial_lock(labels, pipenv_used):
+                close_initial_lock_issue()
                 return {}
         except PipenvError as exc:
             _LOGGER.exception("Failed to perform initial dependency lock")
@@ -475,12 +483,8 @@ class UpdateManager(Manager):
                 labels=labels
             )
             raise
-        else:
-            close_issue_if_exists(
-                self.slug,
-                _ISSUE_INITIAL_LOCK_NAME,
-                comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
-            )
+
+        close_initial_lock_issue()
 
         if pipenv_used:
             old_environment = self._get_all_packages_versions()
