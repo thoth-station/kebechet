@@ -48,7 +48,8 @@ from .github import github_delete_branch
 from .github import github_get_branches
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_COMMENT_UPDATE_ALL
-from .messages import ISSUE_CLOSE_UPDATE_ALL
+from .messages import ISSUE_INITIAL_LOCK
+from .messages import ISSUE_CLOSE_COMMENT
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_REPLICATE_ENV
 from .utils import cwd
@@ -58,6 +59,7 @@ _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
 
 _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
+_ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 
@@ -225,10 +227,6 @@ def _open_pull_request_update(repo: git.Repo, dependency: str,
                               old_version: str, new_version: str,
                               labels: list, files: list, pr_number: int) -> typing.Optional[int]:
     """Open a pull request for dependency update."""
-    if not config.github_token:
-        _LOGGER.info("Skipping automated pull requests opening - no GitHub OAuth token provided")
-        return None
-
     branch_name = _construct_branch_name(dependency, new_version)
     commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
 
@@ -480,7 +478,7 @@ def _pipenv_update_all():
     _run_pipenv('pipenv lock')
 
 
-def _update_all_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -> typing.Optional[str]:
+def _add_refresh_comment(exc: PipenvError, repo: git.Repo, issue: dict) -> typing.Optional[str]:
     """Create a refresh comment to an issue if the given master has some changes."""
     slug = _get_slug(repo)
     sha = repo.head.commit.hexsha
@@ -514,7 +512,7 @@ def _relock_all(repo: git.Repo, exc: PipenvError, labels: list) -> None:
             slug=_get_slug(repo),
             environment_details=_get_environment_details()
         ),
-        refresh_comment=partial(_update_all_refresh_comment, exc),
+        refresh_comment=partial(_add_refresh_comment, exc),
         labels=labels
     )
 
@@ -561,11 +559,26 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
             return {}
     except PipenvError as exc:
         _LOGGER.exception("Failed to perform initial dependency lock")
-        # TODO: open issue
+        _open_issue_if_not_exist(
+            repo,
+            _ISSUE_INITIAL_LOCK_NAME,
+            body=lambda: ISSUE_INITIAL_LOCK.format(
+                sha=repo.head.commit.hexsha,
+                slug=_get_slug(repo),
+                file='requirements.in' if not pipenv_used else 'Pipfile',
+                environment_details=_get_environment_details(),
+                **exc.__dict__
+            ),
+            refresh_comment=partial(_add_refresh_comment, exc),
+            labels=labels
+        )
         raise
     else:
-        # TODO: close issue
-        pass
+        _close_issue_if_exists(
+            repo,
+            _ISSUE_INITIAL_LOCK_NAME,
+            comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
+        )
 
     if pipenv_used:
         old_environment = _get_all_packages_versions()
@@ -584,7 +597,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
                     dependency_graph=_get_dependency_graph(graceful=True),
                     **exc.__dict__
                 ),
-                refresh_comment=partial(_update_all_refresh_comment, exc),
+                refresh_comment=partial(_add_refresh_comment, exc),
                 labels=labels
             )
             return {}
@@ -593,7 +606,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
             _close_issue_if_exists(
                 repo,
                 _ISSUE_UPDATE_ALL_NAME,
-                comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+                comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
             )
     else:  # requirements.txt
         old_environment = _get_requirements_txt_dependencies()
@@ -651,7 +664,7 @@ def _do_update(repo: git.Repo, labels: list, pipenv_used: bool = False) -> dict:
     _close_issue_if_exists(
         repo,
         _ISSUE_REPLICATE_ENV_NAME,
-        comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+        comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
     )
 
     _delete_old_branches(slug, outdated)
@@ -688,6 +701,6 @@ def update(slug: str, labels: list) -> dict:
         _close_issue_if_exists(
             repo,
             _ISSUE_NO_DEPENDENCY_NAME,
-            comment=ISSUE_CLOSE_UPDATE_ALL.format(sha=repo.head.commit.hexsha)
+            comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
         )
         return result

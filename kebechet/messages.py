@@ -89,7 +89,7 @@ Automatic dependency update still failing for the current master with SHA {sha}.
 
 
 # A close comment when update all works again.
-ISSUE_CLOSE_UPDATE_ALL = \
+ISSUE_CLOSE_COMMENT = \
     """
 Closing this issue as it is no longer relevant for the current master with SHA {sha}.
 """
@@ -150,4 +150,42 @@ $ git commit -m 'Add Pipfile for dependency management'
 ```
 
 Make sure your `Pipfile` or `requirements.in` is placed in the root of your Git repository.
+"""
+
+
+ISSUE_INITIAL_LOCK = \
+    """Failed to perform initial lock of your dependencies based on your [{file}](/{slug}/blob/{sha}/{file}).
+
+See attached report below to inspect this issue.
+
+##### Command
+
+```
+  $ {command}
+```
+
+<details>
+  <summary>Standard output</summary>
+
+```
+{stdout}
+```
+
+</details>
+
+<details>
+  <summary>Standard error</summary>
+
+```
+{stderr}
+```
+
+</details>
+
+<details>
+  <summary>Environment details</summary>
+
+```
+{environment_details}
+```
 """
