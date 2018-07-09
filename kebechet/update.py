@@ -416,7 +416,7 @@ class UpdateManager(Manager):
                 slug=self.slug,
                 environment_details=self.get_environment_details()
             ),
-            refresh_comment=partial(self._add_refresh_comment, self, exc),
+            refresh_comment=partial(self._add_refresh_comment, exc),
             labels=labels
         )
 
@@ -479,7 +479,7 @@ class UpdateManager(Manager):
                     environment_details=self.get_environment_details(),
                     **exc.__dict__
                 ),
-                refresh_comment=partial(self._add_refresh_comment, self, exc),
+                refresh_comment=partial(self._add_refresh_comment, exc),
                 labels=labels
             )
             raise
@@ -503,7 +503,7 @@ class UpdateManager(Manager):
                         dependency_graph=self.get_dependency_graph(graceful=True),
                         **exc.__dict__
                     ),
-                    refresh_comment=partial(self._add_refresh_comment, self, exc),
+                    refresh_comment=partial(self._add_refresh_comment, exc),
                     labels=labels
                 )
                 return {}
