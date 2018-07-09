@@ -17,8 +17,6 @@
 
 """Common GitHub operations."""
 
-# TODO: replace this with a lib that also covers GitLab.
-
 import logging
 import typing
 
@@ -188,7 +186,7 @@ def github_delete_branch(slug: str, branch: str) -> None:
     # GitHub returns an empty string, noting to return.
 
 
-def github_get_branches(slug: str) -> list:
+def github_list_branches(slug: str) -> list:
     """Get listing of all branches available on remote repository."""
     response = requests.get(
         f'https://api.github.com/repos/{slug}/branches',

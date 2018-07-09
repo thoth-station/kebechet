@@ -19,7 +19,11 @@
 
 
 import os
+import logging
 from contextlib import contextmanager
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @contextmanager
