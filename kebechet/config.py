@@ -79,13 +79,13 @@ class _Config:
     def run(cls, configuration_file: str) -> None:
         """Run Kebechet using provided YAML configuration file."""
         global config
-        from .update import update
+        from .update import UpdateManager
 
         config.from_file(configuration_file)
 
         for slug, label in config.iter_update():
             try:
-                update(slug, label)
+                UpdateManager().update(slug, label)
             except Exception as exc:
                 _LOGGER.exception(f"An error occurred during update of {slug}")
 
