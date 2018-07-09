@@ -32,7 +32,6 @@ import delegator
 import git
 import kebechet
 
-from .config import config
 from .exception import PipenvError
 from .exception import DependencyManagementError
 from .exception import InternalError
@@ -681,8 +680,16 @@ def update(slug: str, labels: list) -> dict:
         repo = git.Repo.clone_from(
             repo_url, repo_path, branch='master', depth=1)
 
+        close_no_management_issue = partial(
+            _close_issue_if_exists,
+            repo,
+            _ISSUE_NO_DEPENDENCY_NAME,
+            comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
+        )
+
         if os.path.isfile('Pipfile'):
             _LOGGER.info("Using Pipfile for dependency management")
+            close_no_management_issue()
             result = _do_update(repo, labels, pipenv_used=True)
         elif os.path.isfile('requirements.in'):
             _create_pipenv_environment()
@@ -698,9 +705,4 @@ def update(slug: str, labels: list) -> dict:
             )
             return {}
 
-        _close_issue_if_exists(
-            repo,
-            _ISSUE_NO_DEPENDENCY_NAME,
-            comment=ISSUE_CLOSE_COMMENT.format(sha=repo.head.commit.hexsha)
-        )
         return result
