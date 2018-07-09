@@ -55,7 +55,7 @@ from .utils import cwd
 
 
 _LOGGER = logging.getLogger(__name__)
-_RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\[)')
+_RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\\[)')
 
 _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
