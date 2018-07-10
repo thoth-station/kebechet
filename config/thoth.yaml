@@ -6,6 +6,7 @@ repositories:
       - bot
     managers:
       - update
+      - info
   - <<: *update_config
     slug: thoth-station/analyzer
   - <<: *update_config
