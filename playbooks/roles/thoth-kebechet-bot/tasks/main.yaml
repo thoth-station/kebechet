@@ -1,81 +1,84 @@
 ---
-  - name: "make sure to use project {{ KEBECHET_APPLICATION_NAMESPACE }}"
-    command: "oc project {{ KEBECHET_APPLICATION_NAMESPACE }}"
-    register: project_exists
-    ignore_errors: true
-    changed_when: False
+- name: "make sure to use project {{ KEBECHET_APPLICATION_NAMESPACE }}"
+  command: "oc project {{ KEBECHET_APPLICATION_NAMESPACE }}"
+  register: project_exists
+  ignore_errors: true
+  changed_when: false
 
-  - name: create/update Thoth Kebechet ImageStream templates
-    command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}"
-    with_items:
-      - ../openshift/imageStream-template.yaml
-  
-  - name: create/update Thoth Kebechet BuildConfig templates
-    command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}" 
-    with_items:
-      - ../openshift/buildConfig-template.yaml
+- name: create/update Thoth Kebechet ImageStream templates
+  command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}"
+  with_items:
+    - ../openshift/imageStream-template.yaml
 
-  - name: create/update Thoth Kebechet CronJob templates
-    command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}"
-    with_items:
-      - ../openshift/cronJob-template.yaml
+- name: create/update Thoth Kebechet BuildConfig templates
+  command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}"
+  with_items:
+    - ../openshift/buildConfig-template.yaml
 
-  - name: "check if ImageStream exists"
-    command: "oc get imagestream --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-job"
-    register: imagestream_exists
-    ignore_errors: true
-    changed_when: False
+- name: create/update Thoth Kebechet CronJob templates
+  command: oc apply --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --filename "{{ item }}"
+  with_items:
+    - ../openshift/cronJob-template.yaml
 
-  - name: create Kebechet ImageStream
-    command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" --template="{{ KEBECHET_INFRA_NAMESPACE }}/kebechet-imagestream"
-    when: imagestream_exists is failed
-    
-  - name: "check if BuildConfig exists"
-    command: "oc get buildconfig --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-job"
-    register: buildconfig_exists
-    ignore_errors: true
-    changed_when: False
+- name: "check if ImageStream exists"
+  command: "oc get imagestream --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-job"
+  register: imagestream_exists
+  ignore_errors: true
+  changed_when: false
 
-  - name: create Kebechet BuildConfig
-    command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" --template="{{ KEBECHET_INFRA_NAMESPACE }}/kebechet-buildconfig"
-    when: buildconfig_exists is failed
+- name: create Kebechet ImageStream
+  command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" \
+    --template="{{ KEBECHET_INFRA_NAMESPACE }}/kebechet-imagestream"
+  when: imagestream_exists is failed
 
-  - name: start kebechet-job Build
-    command: oc start-build --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" kebechet-job
-    when: buildconfig_exists is failed
+- name: "check if BuildConfig exists"
+  command: "oc get buildconfig --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-job"
+  register: buildconfig_exists
+  ignore_errors: true
+  changed_when: false
 
-  - name: "check if required Secret 'kebechet-secret' exists"
-    command: "oc get secret --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-secret"
-    register: secret_exists
-    ignore_errors: true
+- name: create Kebechet BuildConfig
+  command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" \
+    --template="{{ KEBECHET_INFRA_NAMESPACE }}/kebechet-buildconfig"
+  when: buildconfig_exists is failed
 
-  - name: create Secret with SSH Key and Access Token for GitHub
-    command: oc create secret --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" generic kebechet-secret \
-      --from-file=ssh-privatekey="{{ KEBECHET_SSH_PRIVATE_KEY_PATH }}" \
-      --from-literal=github-oauth-token="{{ KEBECHET_TOKEN }}" \
-      --type=kubernetes.io/ssh-auth \
-      --from-literal=github-webhook-secret="{{ KEBECHET_GITHUB_WEBHOOK_SECRET }}" \
-      --from-literal=mattermost-endpoint-url="{{ KEBESCHET_MATTERMOST_ENDPOINT_URL }}"
-    when: secret_exists is failed
+- name: start kebechet-job Build
+  command: oc start-build --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" kebechet-job
+  when: buildconfig_exists is failed
 
-  - name: "check if required ConfigMap 'kebechet-configmap' exists"
-    command: "oc get configmap --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-configmap"
-    register: configmap_exists
-    ignore_errors: true
-    changed_when: False
+- name: "check if required Secret 'kebechet-secret' exists"
+  command: "oc get secret --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-secret"
+  register: secret_exists
+  ignore_errors: true
 
-  - name: create kebechet Configmap
-    command: oc create configmap --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" kebechet-configmap \
-      --from-literal=kebechet-config="{{ KEBECHET_CONFIGURATION_PATH }}"
-      --from-literal=kebechet-verbose=1
-    when: configmap_exists is failed
-  
-  - name: "check if CronJob exists"
-    command: "oc get cronjob --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet"
-    register: cronjob_exists
-    ignore_errors: true
-    changed_when: False
-  
-  - name: create Kebechet CronJob
-    command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" --template="{{ KEBECHET_INFRA_NAMESPACE  }}/kebechet-cronjob"
-    when: cronjob_exists is failed
+- name: create Secret with SSH Key and Access Token for GitHub
+  command: oc create secret --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" generic kebechet-secret \
+    --from-file=ssh-privatekey="{{ KEBECHET_SSH_PRIVATE_KEY_PATH }}" \
+    --from-literal=github-oauth-token="{{ KEBECHET_TOKEN }}" \
+    --type=kubernetes.io/ssh-auth \
+    --from-literal=github-webhook-secret="{{ KEBECHET_GITHUB_WEBHOOK_SECRET }}" \
+    --from-literal=mattermost-endpoint-url="{{ KEBESCHET_MATTERMOST_ENDPOINT_URL }}"
+  when: secret_exists is failed
+
+- name: "check if required ConfigMap 'kebechet-configmap' exists"
+  command: "oc get configmap --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet-configmap"
+  register: configmap_exists
+  ignore_errors: true
+  changed_when: false
+
+- name: create kebechet Configmap
+  command: oc create configmap --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" kebechet-configmap \
+    --from-literal=kebechet-config="{{ KEBECHET_CONFIGURATION_PATH }}"
+    --from-literal=kebechet-verbose=1
+  when: configmap_exists is failed
+
+- name: "check if CronJob exists"
+  command: "oc get cronjob --namespace {{ KEBECHET_APPLICATION_NAMESPACE }} kebechet"
+  register: cronjob_exists
+  ignore_errors: true
+  changed_when: false
+
+- name: create Kebechet CronJob
+  command: oc new-app --namespace "{{ KEBECHET_APPLICATION_NAMESPACE  }}" \
+    --template="{{ KEBECHET_INFRA_NAMESPACE  }}/kebechet-cronjob"
+  when: cronjob_exists is failed

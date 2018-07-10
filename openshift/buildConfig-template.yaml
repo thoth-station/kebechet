@@ -6,7 +6,9 @@ labels:
 metadata:
   name: kebechet-buildconfig
   annotations:
-    description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots, but could also be used by humans...
+    description: >
+      This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots,
+      but could also be used by humans...
     openshift.io/display-name: Kebechet BuildConfig
     version: 1.1.0-dev
     tags: poc,thoth,ai-stacks,kebechet
@@ -44,12 +46,12 @@ objects:
         dockerStrategy:
           dockerfilePath: Dockerfile
       triggers:
-      - imageChange: {}
-        type: ImageChange
-      - type: Generic
-        generic:
-          secret: secret101
-          allowEnv: false
+        - imageChange: {}
+          type: ImageChange
+        - type: Generic
+          generic:
+            secret: secret101
+            allowEnv: false
 
   - apiVersion: v1
     kind: BuildConfig
@@ -79,32 +81,32 @@ objects:
         type: Source
         sourceStrategy:
           env:
-          - name: ENABLE_PIPENV
-            value: "1"
+            - name: ENABLE_PIPENV
+              value: "1"
           from:
             kind: ImageStreamTag
             name: python-36-centos7:latest
       successfulBuildsHistoryLimit: 2
       triggers:
-      - type: ImageChange
-        imageChange: {}
-      - type: ConfigChange
+        - type: ImageChange
+          imageChange: {}
+        - type: ConfigChange
 
 parameters:
-- description: Git repository for Thoth's Kebechet
-  displayName: Thoth Kebechet git repository
-  required: true
-  name: GITHUB_URL
-  value: 'https://github.com/thoth-station/kebechet'
+  - description: Git repository for Thoth's Kebechet
+    displayName: Thoth Kebechet git repository
+    required: true
+    name: GITHUB_URL
+    value: 'https://github.com/thoth-station/kebechet'
 
-- description: Git repository for Thoth's Graph Sync Job
-  displayName: Thoth Kebechet git reference
-  required: true
-  name: GITHUB_REF
-  value: 'master'
+  - description: Git repository for Thoth's Graph Sync Job
+    displayName: Thoth Kebechet git reference
+    required: true
+    name: GITHUB_REF
+    value: 'master'
 
-- description: Tag of the output ImageStream the resulting container image should go to
-  displayName: ImageStream Tag
-  required: true
-  name: IMAGE_STREAM_TAG
-  value: 'latest'
+  - description: Tag of the output ImageStream the resulting container image should go to
+    displayName: ImageStream Tag
+    required: true
+    name: IMAGE_STREAM_TAG
+    value: 'latest'

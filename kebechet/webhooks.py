@@ -54,6 +54,12 @@ def handle_github_open_issue(issue):
                    f"opened an issue: [{issue['title']}]({issue['html_url']})...")
 
 
+def handle_github_open_pullrequest(pullrequest):
+    """Will handle with care."""
+    notify_channel(f"[{pullrequest['user']['login']}]({pullrequest['user']['url']}) just "
+                   f"opened a pull request: [{pullrequest['title']}]({pullrequest['html_url']})...")
+
+
 @webhook.route('/github', methods=['POST'])
 def handle_github_webhook():
     """Entry point for github webhook."""

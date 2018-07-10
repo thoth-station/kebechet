@@ -7,7 +7,7 @@ metadata:
   name: kebechet-deployment
   annotations:
     description: >
-      This is Kebechet Webhooks Deployment, this template is meant to be used by Bots, 
+      This is Kebechet Webhooks Deployment, this template is meant to be used by Bots,
       but could also be used by humans...
     openshift.io/display-name: Kebechet BuildConfig
     version: 1.1.0-dev
@@ -38,10 +38,10 @@ objects:
       name: kebechet-webhooks
     spec:
       ports:
-      - name: 8080-tcp
-        port: 8080
-        protocol: TCP
-        targetPort: 8080
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
       selector:
         app: kebechet
         component: webhooks
@@ -69,37 +69,37 @@ objects:
             deploymentconfig: kebechet-webhooks
         spec:
           containers:
-          - name: kebechet-webhooks
-            image: kebechet-webhooks:latest
-            env:
-            - name: KEBECHET_GITHUB_WEBHOOK_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: kebechet-secret
-                  key: github-webhook-secret
-            - name: KEBESCHET_MATTERMOST_ENDPOINT_URL
-              valueFrom:
-                secretKeyRef:
-                  name: kebechet-secret
-                  key: mattermost-endpoint-url
-            ports:
-            - containerPort: 8080
-              protocol: TCP
-            resources:
-              requests:
-                memory: "128Mi"
-                cpu: "125m"
-              limits:
-                memory: "256Mi"
-                cpu: "500m"
+            - name: kebechet-webhooks
+              image: kebechet-webhooks:latest
+              env:
+                - name: KEBECHET_GITHUB_WEBHOOK_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: kebechet-secret
+                      key: github-webhook-secret
+                - name: KEBESCHET_MATTERMOST_ENDPOINT_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: kebechet-secret
+                      key: mattermost-endpoint-url
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "125m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "500m"
       test: false
       triggers:
-      - type: ConfigChange
-      - type: ImageChange
-        imageChangeParams:
-          automatic: true
-          containerNames:
-          - kebechet-webhooks
-          from:
-            kind: ImageStreamTag
-            name: kebechet-webhooks:latest
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - kebechet-webhooks
+            from:
+              kind: ImageStreamTag
+              name: kebechet-webhooks:latest

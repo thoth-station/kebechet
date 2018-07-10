@@ -16,22 +16,22 @@ metadata:
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
 objects:
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: kebechet-configmap
-    labels:
-      app: kebechet
-  data:
-    kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
-    kebechet-verbose: ${KEBECHET_VERBOSE}
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: kebechet-configmap
+      labels:
+        app: kebechet
+    data:
+      kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
+      kebechet-verbose: ${KEBECHET_VERBOSE}
 
 parameters:
   - description: Path of Kebechet configuration file.
     displayName: Kebechet configuration
     required: true
     name: KEBECHET_CONFIGURATION_PATH
-    
+
   - description: Kebechet verbose mode.
     displayName: Kebechet Verbose
     required: true

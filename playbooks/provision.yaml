@@ -10,7 +10,7 @@
   vars:
     OCP_URL: "{{ lookup('env','OCP_URL') }}"
     OCP_TOKEN: "{{ lookup('env','OCP_TOKEN') }}"
-    
+
     KEBECHET_APPLICATION_NAMESPACE: "{{ lookup('env','KEBECHET_APPLICATION_NAMESPACE') }}"
     KEBECHET_INFRA_NAMESPACE: "{{ lookup('env','KEBECHET_INFRA_NAMESPACE') }}"
     KEBECHET_GITHUB_WEBHOOK_SECRET: "{{ lookup('env',KEBECHET_GITHUB_WEBHOOK_SECRET }}"
@@ -19,6 +19,6 @@
   gather_facts: false
   connection: local
   roles:
-  - role: thoth-ssh-key-check
-  - role: thoth-kebechet-imagestreams
-  - role: thoth-kebechet-bot
+    - role: thoth-ssh-key-check
+    - role: thoth-kebechet-imagestreams
+    - role: thoth-kebechet-bot

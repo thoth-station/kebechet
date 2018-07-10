@@ -6,7 +6,8 @@ labels:
 metadata:
   name: kebechet-imagestream
   annotations:
-    description: This is Kebechet ImageStream, this template is meant to be used by Bots, but could also be used by humans...
+    description: >
+      This is Kebechet ImageStream, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet ImageStream
     version: 1.1.0-dev
     tags: poc,thoth,ai-stacks,kebechet
@@ -36,7 +37,7 @@ objects:
       lookupPolicy:
         local: true
       tags:
-      - name: latest
-        importPolicy: {}
-        referencePolicy:
-          type: ""
+        - name: latest
+          importPolicy: {}
+          referencePolicy:
+            type: ""
