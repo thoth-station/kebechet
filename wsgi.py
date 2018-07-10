@@ -15,28 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""This is the Flask webhook receiver..."""
 
-"""This will handle al the GitHub webhooks."""
+import logging
 
-import os
-from flask import Flask
-
-from .enums import ServiceType
-from .managers import UpdateManager, InfoManager
-from .webhooks import webhook
+from kebechet import create_webhook_receiver
 
 
-__name__ = 'kebechet'
-__version__ = '1.1.0-dev'
-__author__ = 'Fridolin Pokorny <fridolin.pokorny@gmail.com>'
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
-
-def create_webhook_receiver():
-    """ Create, configure and return the Flask application."""
-
-    app = Flask(__name__)
-    app.config['KEBECHET_GITHUB_WEBHOOK_SECRET'] = os.environ.get(
-        'KEBECHET_GITHUB_WEBHOOK_SECRET')
-    app.register_blueprint(webhook)
-
-    return(app)
+application = create_webhook_receiver()

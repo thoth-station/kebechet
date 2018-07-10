@@ -12,6 +12,8 @@ toml = "*"
 "delegator.py" = "*"
 gitpython = "*"
 pyyaml = "*"
+flask = "*"
+gunicorn = "*"
 igitt = "*"
 
 [dev-packages]
