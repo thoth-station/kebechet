@@ -17,12 +17,24 @@ metadata:
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
 objects:
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: kebechet-webhooks
+      labels:
+        app: kebechet
+        component: webhooks
+    spec:
+      to:
+        kind: Service
+        name: kebechet-webhooks
+
   - kind: Service
     apiVersion: v1
     metadata:
       labels:
         app: kebechet
-        component: kebechet-webhooks
+        component: webhooks
       name: kebechet-webhooks
     spec:
       ports:
