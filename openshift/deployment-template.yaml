@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: kebechet-buildconfig
+  thoth: 0.1.0
+metadata:
+  name: kebechet-deployment
+  annotations:
+    description: >
+      This is Kebechet Webhooks Deployment, this template is meant to be used by Bots, 
+      but could also be used by humans...
+    openshift.io/display-name: Kebechet BuildConfig
+    version: 1.1.0-dev
+    tags: poc,thoth,ai-stacks,kebechet
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+
+objects:
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      labels:
+        app: kebechet
+        component: kebechet-webhooks
+      name: kebechet-webhooks
+    spec:
+      ports:
+      - name: 8080-tcp
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        app: kebechet
+        component: webhooks
+        deploymentconfig: kebechet-webhooks
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      labels:
+        app: kebechet
+        component: webhooks
+      name: kebechet-webhooks
+    spec:
+      replicas: 1
+      revisionHistoryLimit: 5
+      selector:
+        app: kebechet
+        component: webhooks
+        deploymentconfig: kebechet-webhooks
+      template:
+        metadata:
+          labels:
+            app: kebechet
+            component: webhooks
+            deploymentconfig: kebechet-webhooks
+        spec:
+          containers:
+          - name: kebechet-webhooks
+            env:
+            - name: KEBECHET_GITHUB_WEBHOOK_SECRET
+              value: secret123
+            image: kebechet-webhooks:latest
+            ports:
+            - containerPort: 8080
+              protocol: TCP
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "125m"
+              limits:
+                memory: "256Mi"
+                cpu: "500m"
+      test: false
+      triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - kebechet-webhooks
+          from:
+            kind: ImageStreamTag
+            name: kebechet-webhooks:latest
