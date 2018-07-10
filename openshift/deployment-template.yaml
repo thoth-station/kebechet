@@ -70,10 +70,18 @@ objects:
         spec:
           containers:
           - name: kebechet-webhooks
+            image: kebechet-webhooks:latest
             env:
             - name: KEBECHET_GITHUB_WEBHOOK_SECRET
-              value: secret123
-            image: kebechet-webhooks:latest
+              valueFrom:
+                secretKeyRef:
+                  name: kebechet-secret
+                  key: github-webhook-secret
+            - name: KEBESCHET_MATTERMOST_ENDPOINT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kebechet-secret
+                  key: mattermost-endpoint-url
             ports:
             - containerPort: 8080
               protocol: TCP

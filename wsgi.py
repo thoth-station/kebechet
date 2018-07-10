@@ -17,6 +17,7 @@
 
 """This is the Flask webhook receiver..."""
 
+
 import logging
 
 from kebechet import create_webhook_receiver
@@ -24,5 +25,6 @@ from kebechet import create_webhook_receiver
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
+
 
 application = create_webhook_receiver()

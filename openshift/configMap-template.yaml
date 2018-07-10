@@ -6,9 +6,10 @@ labels:
 metadata:
   name: kebechet-configmap
   annotations:
-    description: This is Kebechet CronJob ConfigMap, this template is meant to be used by Bots, but could also be used by humans...
+    description: >
+      This is Kebechet ConfigMap, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet ConfigMap
-    version: 1.0.0
+    version: 1.1.0-dev
     tags: poc,thoth,ai-stacks,kebechet
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.

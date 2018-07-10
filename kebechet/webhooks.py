@@ -18,12 +18,18 @@
 """This is the webhook receiver..."""
 
 
+import os
 import logging
 import hmac
 import json
 
+import requests
+
 from flask import request, Blueprint, jsonify, current_app
 from git import Repo
+
+
+ENDPOINT_URL = os.getenv('KEBESCHET_MATTERMOST_ENDPOINT_URL', None)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,9 +38,29 @@ _LOGGER.setLevel(logging.DEBUG)
 webhook = Blueprint('webhook', __name__, url_prefix='')
 
 
+def notify_channel(message):
+    """Send message to Mattermost Channel."""
+    payload = {'text': message,
+               'icon_url': 'https://avatars1.githubusercontent.com/u/33906690'}
+
+    r = requests.post(ENDPOINT_URL, json=payload)
+    if r.status_code != 200:
+        _LOGGER.error(f"cant POST to {ENDPOINT_URL}")
+
+
+def handle_github_open_issue(issue):
+    """Will handle with care."""
+    notify_channel(f"[{issue['user']['login']}]({issue['user']['url']}) just "
+                   f"opened an issue: [{issue['title']}]({issue['html_url']})...")
+
+
 @webhook.route('/github', methods=['POST'])
 def handle_github_webhook():
     """Entry point for github webhook."""
+    if ENDPOINT_URL is None:
+        _LOGGER.error('No Mattermost incoming webhook URL supplied!')
+        exit(-2)
+
     signature = request.headers.get('X-Hub-Signature')
     sha, signature = signature.split('=')
 
@@ -48,11 +74,13 @@ def handle_github_webhook():
 
         if 'issue' in payload.keys():
             if payload['action'] == 'opened':
-                _LOGGER.info(f"An Issue has been opened: {payload['issue']['url']}")
+                _LOGGER.info(
+                    f"An Issue has been opened: {payload['issue']['url']}")
 
-                print(payload)
+                handle_github_open_issue(payload['issue'])
         else:
-            _LOGGER.debug(f"Received a github webhook {json.dumps(request.json)}")
+            _LOGGER.debug(
+                f"Received a github webhook {json.dumps(request.json)}")
     else:
         _LOGGER.error(
             f"Webhook secret mismatch: me: {hashhex} != them: {signature}")
