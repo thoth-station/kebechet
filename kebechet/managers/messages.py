@@ -18,7 +18,7 @@
 """Body of issues and pull requests automatically opened."""
 
 # A base information for update that failed with all the relevant information.
-_PIPENV_REPORT = \
+PIPENV_REPORT = \
     """
 ##### Command
 
@@ -71,7 +71,7 @@ Automatic dependency update failed for the current master with SHA {sha}.
 
 The automatic dependency management cannot continue. Please fix errors reported bellow.
 
-""" + _PIPENV_REPORT + """
+""" + PIPENV_REPORT + """
 
 ##### Notes
 
@@ -85,7 +85,7 @@ Once this issue is resolved, the issue will be automatically closed by bot.
 ISSUE_COMMENT_UPDATE_ALL = \
     """
 Automatic dependency update still failing for the current master with SHA {sha}.
-""" + _PIPENV_REPORT
+""" + PIPENV_REPORT
 
 
 # A close comment when update all works again.
@@ -188,4 +188,28 @@ See attached report below to inspect this issue.
 ```
 {environment_details}
 ```
+"""
+
+INFO_REPORT = \
+    """
+Information about dependency management for the current master branch with SHA {sha}.
+
+<details>
+  <summary>Dependency graph</summary>
+
+```
+{dependency_graph}
+```
+
+</details>
+
+<details>
+  <summary>Environment details</summary>
+
+```
+{environment_details}
+```
+
+</details>
+
 """
