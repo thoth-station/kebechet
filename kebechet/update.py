@@ -563,6 +563,7 @@ class UpdateManager(Manager):
                 _LOGGER.exception(f"Failed to create update for dependency {package_name}: {str(exc)}")
             finally:
                 self.repo.head.reset(index=True, working_tree=True)
+                self.repo.checkout('master')
 
         # We know that locking was done correctly - if the issue is still open, close it. The issue
         # should be automatically closed by merging the generated PR.
