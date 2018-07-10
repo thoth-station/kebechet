@@ -19,11 +19,12 @@
 
 import logging
 import platform
+import typing
 
 import delegator
 import kebechet
 
-from .exception import PipenvError
+from kebechet.exception import PipenvError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,3 +73,7 @@ class Manager:
             if not graceful:
                 raise
             return f"Unable to obtain dependency graph:\n\n{exc.stderr}"
+
+    def run(self, slug: str, labels: list) -> typing.Optional[dict]:
+        """Run the given manager implementation."""
+        raise NotImplementedError

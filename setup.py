@@ -33,6 +33,7 @@ setup(
     license='GPLv3+',
     packages=[
         'kebechet',
+        'kebechet.managers',
     ],
     install_requires=get_install_requires()
 )

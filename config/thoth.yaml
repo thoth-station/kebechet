@@ -1,9 +1,11 @@
 ---
-update:
+repositories:
   - &update_config
     slug: thoth-station/adviser
-    label:
+    labels:
       - bot
+    managers:
+      - update
   - <<: *update_config
     slug: thoth-station/analyzer
   - <<: *update_config

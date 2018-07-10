@@ -24,7 +24,7 @@ import click
 import daiquiri
 
 from kebechet import __version__ as kebechet_version
-from kebechet import update
+from kebechet.managers import UpdateManager
 from kebechet.config import config
 
 daiquiri.setup(level=logging.INFO)
@@ -68,7 +68,7 @@ def cli(ctx=None, verbose=0, github_token=None):
 @click.argument('slug')
 def cli_update(slug, label=None):
     """Update packages in the given repository (slug is org/repo) and open pull requests."""
-    update(slug, label.split(',') if label else None)
+    UpdateManager().run(slug, label.split(',') if label else None)
 
 
 @cli.command('run')

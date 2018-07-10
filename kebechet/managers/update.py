@@ -28,26 +28,26 @@ from tempfile import TemporaryDirectory
 from functools import partial
 import git
 
-from .exception import PipenvError
-from .exception import DependencyManagementError
-from .exception import InternalError
-from .messages import ISSUE_PIPENV_UPDATE_ALL
+from kebechet.exception import PipenvError
+from kebechet.exception import DependencyManagementError
+from kebechet.exception import InternalError
+from kebechet.utils import cwd
+from kebechet.source_management import open_issue_if_not_exist
+from kebechet.source_management import open_pull_request
+from kebechet.source_management import close_issue_if_exists
+from kebechet.source_management import add_comment
+from kebechet.source_management import list_pull_requests
+from kebechet.source_management import list_issue_comments
+from kebechet.source_management import list_branches
+from kebechet.source_management import delete_branch
+
+from .manager import Manager
+from .messages import ISSUE_CLOSE_COMMENT
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_INITIAL_LOCK
-from .messages import ISSUE_CLOSE_COMMENT
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
+from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
-from .utils import cwd
-from .manager import Manager
-from .source_management import open_issue_if_not_exist
-from .source_management import open_pull_request
-from .source_management import close_issue_if_exists
-from .source_management import add_comment
-from .source_management import list_pull_requests
-from .source_management import list_issue_comments
-from .source_management import list_branches
-from .source_management import delete_branch
-
 
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\\[)')
@@ -576,7 +576,7 @@ class UpdateManager(Manager):
         self._delete_old_branches(outdated)
         return result
 
-    def update(self, slug: str, labels: list) -> dict:
+    def run(self, slug: str, labels: list) -> typing.Optional[dict]:
         """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ['PIPENV_VENV_IN_PROJECT'] = '1'

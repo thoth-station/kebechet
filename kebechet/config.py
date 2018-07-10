@@ -33,8 +33,8 @@ class _Config:
     """Library-wide configuration."""
 
     def __init__(self):
-        self._update = None
         self._github_token = None
+        self._repositories = None
 
     def from_file(self, config_path: str):
         if config_path.startswith(('https://', 'https://')):
@@ -46,15 +46,12 @@ class _Config:
                 content = config_file.read()
 
         try:
-            content = yaml.load(content)
+            self._repositories = yaml.load(content).pop('repositories') or []
         except Exception as exc:
             raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
 
-        self._update = content.pop('update', None) or []
-        self.github_token = content.pop('github_token', None)
-
-        if content:
-            _LOGGER.warning(f"Ingoring unknown configuration found in the YAML configuration file: {content}")
+        # TODO: make possible to pass GitLab/GitHub API for each entry
+        # TODO: make possible to use different GitLab/GitHub tokens for each entry
 
     @property
     def github_token(self) -> typing.Union[str, None]:
@@ -67,27 +64,37 @@ class _Config:
         if token:
             self._github_token = token
 
-    def iter_update(self):
+    def iter_entries(self):
         """Iterate over repositories listed for updates."""
-        for update_entry in self._update or []:
+        for entry in self._repositories or []:
             try:
-                yield update_entry['slug'], update_entry.get('label')
+                # TODO: once we support different github/gitlab APIs and tokens per each, assign changes here
+                yield entry['slug'], entry.get('labels'), entry['managers']
             except KeyError:
-                _LOGGER.exception("An error in your configuration - slug was not provided, ignoring...")
+                _LOGGER.exception("An error in your configuration - ignoring the given configuration entry...")
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
         """Run Kebechet using provided YAML configuration file."""
         global config
-        from .update import UpdateManager
+        from kebechet.managers import REGISTERED_MANAGERS
 
         config.from_file(configuration_file)
 
-        for slug, label in config.iter_update():
-            try:
-                UpdateManager().update(slug, label)
-            except Exception as exc:
-                _LOGGER.exception(f"An error occurred during update of {slug}")
+        for slug, labels, managers in config.iter_entries():
+            for manager in managers:
+                kebechet_manager = REGISTERED_MANAGERS.get(manager)
+
+                if not kebechet_manager:
+                    _LOGGER.error("Unable to find requested manager {manager!r}, skipping")
+
+                _LOGGER.info(f"Running manager {manager!r} for {slug!r}")
+                try:
+                    kebechet_manager().run(slug, labels)
+                except Exception as exc:
+                    _LOGGER.exception(
+                        f"An error occurred during run of manager {manager!r} {kebechet_manager} for {slug}, skipping"
+                    )
 
 
 config = _Config()
