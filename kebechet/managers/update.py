@@ -300,7 +300,7 @@ class UpdateManager(Manager):
         information of packages that were present in the old environment so we can selectively change versions in the
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
-        cmd = f'pipenv install {dependency}=={package_version} --keep-outdated'
+        cmd = f'pipenv update {dependency} --keep-outdated'
         if is_dev:
             cmd += ' --dev'
         self.run_pipenv(cmd)
