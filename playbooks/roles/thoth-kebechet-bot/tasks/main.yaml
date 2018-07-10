@@ -52,8 +52,10 @@
   - name: create Secret with SSH Key and Access Token for GitHub
     command: oc create secret --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" generic kebechet-secret \
       --from-file=ssh-privatekey="{{ KEBECHET_SSH_PRIVATE_KEY_PATH }}" \
-      --from-literal=github-oauth-token="{{ KEBECHET_TOKEN }}"
+      --from-literal=github-oauth-token="{{ KEBECHET_TOKEN }}" \
       --type=kubernetes.io/ssh-auth \
+      --from-literal=github-webhook-secret="{{ KEBECHET_GITHUB_WEBHOOK_SECRET }}" \
+      --from-literal=mattermost-endpoint-url="{{ KEBESCHET_MATTERMOST_ENDPOINT_URL }}"
     when: secret_exists is failed
 
   - name: "check if required ConfigMap 'kebechet-configmap' exists"
