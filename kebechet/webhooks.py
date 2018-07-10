@@ -35,7 +35,6 @@ webhook = Blueprint('webhook', __name__, url_prefix='')
 @webhook.route('/github', methods=['POST'])
 def handle_github_webhook():
     """Entry point for github webhook."""
-
     signature = request.headers.get('X-Hub-Signature')
     sha, signature = signature.split('=')
 

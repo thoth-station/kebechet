@@ -32,8 +32,7 @@ __author__ = 'Fridolin Pokorny <fridolin.pokorny@gmail.com>'
 
 
 def create_webhook_receiver():
-    """ Create, configure and return the Flask application."""
-
+    """Create, configure and return the Flask application."""
     app = Flask(__name__)
     app.config['KEBECHET_GITHUB_WEBHOOK_SECRET'] = os.environ.get(
         'KEBECHET_GITHUB_WEBHOOK_SECRET')
