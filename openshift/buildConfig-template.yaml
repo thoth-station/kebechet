@@ -15,41 +15,80 @@ metadata:
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
 objects:
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    labels:
-      app: kebechet
-    name: kebechet-job
-  spec:
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "1"
-      limits:
-        memory: "1Gi"
-        cpu: "1"
-    output:
-      to:
-        kind: ImageStreamTag
-        name: "kebechet-job:${IMAGE_STREAM_TAG}"
-    runPolicy: Serial
-    source:
-      type: Git
-      git:
-        uri: ${GITHUB_URL}
-        ref: ${GITHUB_REF}
-    strategy:
-      type: Docker
-      dockerStrategy:
-        dockerfilePath: Dockerfile
-    triggers:
-    - imageChange: {}
-      type: ImageChange
-    - type: Generic
-      generic:
-        secret: secret101
-        allowEnv: false
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: kebechet
+      name: kebechet-job
+    spec:
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "1"
+        limits:
+          memory: "1Gi"
+          cpu: "1"
+      output:
+        to:
+          kind: ImageStreamTag
+          name: "kebechet-job:${IMAGE_STREAM_TAG}"
+      runPolicy: Serial
+      source:
+        type: Git
+        git:
+          uri: ${GITHUB_URL}
+          ref: ${GITHUB_REF}
+      strategy:
+        type: Docker
+        dockerStrategy:
+          dockerfilePath: Dockerfile
+      triggers:
+      - imageChange: {}
+        type: ImageChange
+      - type: Generic
+        generic:
+          secret: secret101
+          allowEnv: false
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: kebechet
+      name: kebechet-webhooks
+    spec:
+      failedBuildsHistoryLimit: 5
+      output:
+        to:
+          kind: ImageStreamTag
+          name: kebechet-webhooks:latest
+      resources:
+        limits:
+          cpu: "2"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 768Mi
+      source:
+        type: Git
+        git:
+          ref: feature/webhooks
+          uri: https://github.com/goern/thoth-kebechet.git
+      strategy:
+        type: Source
+        sourceStrategy:
+          env:
+          - name: ENABLE_PIPENV
+            value: "1"
+          from:
+            kind: ImageStreamTag
+            name: python-36-centos7:latest
+      successfulBuildsHistoryLimit: 2
+      triggers:
+      - type: ImageChange
+        imageChange: {}
+      - type: ConfigChange
 
 parameters:
 - description: Git repository for Thoth's Kebechet
