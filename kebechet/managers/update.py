@@ -300,10 +300,13 @@ class UpdateManager(Manager):
         information of packages that were present in the old environment so we can selectively change versions in the
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
-        cmd = f'pipenv update {dependency} --keep-outdated'
+        cmd = f'pipenv install {dependency}=={package_version} --keep-outdated'
         if is_dev:
             cmd += ' --dev'
         self.run_pipenv(cmd)
+        # Discard changes by pipenv made in Pipfile (dependency lock) as it affects hashes computed for Pipfile.lock.
+        # We don't do `pipenv update` as in some cases pipenv does not update dependencies at all.
+        self.repo.git.checkout('--', 'Pipfile')
         self.run_pipenv('pipenv lock --keep-outdated')
 
         if not old_environment:
@@ -563,7 +566,7 @@ class UpdateManager(Manager):
                 _LOGGER.exception(f"Failed to create update for dependency {package_name}: {str(exc)}")
             finally:
                 self.repo.head.reset(index=True, working_tree=True)
-                self.repo.checkout('master')
+                self.repo.git.checkout('master')
 
         # We know that locking was done correctly - if the issue is still open, close it. The issue
         # should be automatically closed by merging the generated PR.
