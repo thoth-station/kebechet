@@ -62,6 +62,7 @@ def cli(ctx=None, verbose=0, github_token=None):
         if github_token:
             report['github_token'] = report['github_token'][:3] + ('*' * len(report['github_token'][3:]))
 
+        report.pop('ctx', None)
         _LOGGER.debug(f"Passed options: {report}")
 
     if github_token:
