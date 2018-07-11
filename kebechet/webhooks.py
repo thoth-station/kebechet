@@ -56,7 +56,7 @@ def handle_github_open_issue(issue):
         return
 
     notify_channel(f"[{issue['user']['login']}]({issue['user']['url']}) just "
-                   f"opened an issue: [{issue['title']}]({issue['html_url']})...")
+                   f"opened an issue: [{issue['title']}]({issue['html_url']})... :glowstick:")
 
 
 def handle_github_open_pullrequest(pullrequest):
