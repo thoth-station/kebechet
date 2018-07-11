@@ -56,7 +56,14 @@ def cli(ctx=None, verbose=0, github_token=None):
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
         _LOGGER.debug("Debug mode turned on")
-        _LOGGER.debug(f"Passed options: {locals()}")
+
+        # Hide token in logs.
+        report = dict(locals())
+        if github_token:
+            report['github_token'] = report['github_token'][:3] + ('*' * len(report['github_token'][3:]))
+
+        report.pop('ctx', None)
+        _LOGGER.debug(f"Passed options: {report}")
 
     if github_token:
         config.github_token = github_token
