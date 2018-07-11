@@ -50,14 +50,38 @@ def notify_channel(message):
 
 def handle_github_open_issue(issue):
     """Will handle with care."""
+    _LOGGER.info(f"An Issue has been opened: {issue['url']}")
+
+    if issue['title'].startswith('Automatic update of dependency'):
+        return
+
     notify_channel(f"[{issue['user']['login']}]({issue['user']['url']}) just "
                    f"opened an issue: [{issue['title']}]({issue['html_url']})...")
 
 
 def handle_github_open_pullrequest(pullrequest):
     """Will handle with care."""
+    _LOGGER.info(f"A Pull Request has been opened: {pullrequest['url']}")
+
+    if pullrequest['title'].startswith('Automatic update of dependency'):
+        return
+
     notify_channel(f"[{pullrequest['user']['login']}]({pullrequest['user']['url']}) just "
-                   f"opened a pull request: [{pullrequest['title']}]({pullrequest['html_url']})...")
+                   f"opened a pull request: '[{pullrequest['title']}]({pullrequest['html_url']})'...")
+
+
+def handle_github_open_pullrequest_merged_successfully(pullrequest):
+    """Will handle with care."""
+    _LOGGER.info(
+        f"A Pull Request has been successfully merged: {pullrequest}")
+
+    if pullrequest['title'].startswith('Automatic update of dependency'):
+        return
+
+    notify_channel(
+        f":tada: Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})' of "
+        f"[{pullrequest['head']['repo']['full_name']}]({pullrequest['head']['repo']['html_url']}) "
+        f"has been successfully merged!")
 
 
 @webhook.route('/github', methods=['POST'])
@@ -80,10 +104,14 @@ def handle_github_webhook():
 
         if 'issue' in payload.keys():
             if payload['action'] == 'opened':
-                _LOGGER.info(
-                    f"An Issue has been opened: {payload['issue']['url']}")
-
                 handle_github_open_issue(payload['issue'])
+        if 'pull_request' in payload.keys():
+            if payload['action'] == 'opened':
+                handle_github_open_issue(payload['pull_request'])
+            elif payload['action'] == 'closed':
+                if payload['pull_request']['merged']:
+                    handle_github_open_pullrequest_merged_successfully(
+                        payload['pull_request'])
         else:
             _LOGGER.debug(
                 f"Received a github webhook {json.dumps(request.json)}")

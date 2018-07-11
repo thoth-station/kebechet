@@ -1,7 +1,7 @@
 [all]
 bears = LineCountBear, FilenameBear
 files = **.py, **.yaml
-file_naming_convention = camel
+file_naming_convention = auto
 ignore = **/__pycache__/**, **/__pycache__, __pycache__, __pycache__/**, **/*.pyc, *.pyc
 max_lines_per_file = 1000
 max_line_length = 120
@@ -9,9 +9,11 @@ max_line_length = 120
 [all.python]
 bears = PycodestyleBear, PyDocStyleBear
 files = **.py
+file_naming_convention = snake
 language = Python
 ignore = setup.py, test, test/**
 
 [all.yaml]
 bears = YAMLLintBear
 files = **.yaml
+file_naming_convention = camel
