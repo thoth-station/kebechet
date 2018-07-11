@@ -38,7 +38,7 @@ _LOGGER.setLevel(logging.DEBUG)
 webhook = Blueprint('webhook', __name__, url_prefix='')
 
 
-def notify_channel(message):
+def notify_channel(message: str) -> None:
     """Send message to Mattermost Channel."""
     payload = {'text': message,
                'icon_url': 'https://avatars1.githubusercontent.com/u/33906690'}
@@ -48,7 +48,7 @@ def notify_channel(message):
         _LOGGER.error(f"cant POST to {ENDPOINT_URL}")
 
 
-def handle_github_open_issue(issue):
+def handle_github_open_issue(issue: dict) -> None:
     """Will handle with care."""
     _LOGGER.info(f"An Issue has been opened: {issue['url']}")
 
@@ -59,7 +59,7 @@ def handle_github_open_issue(issue):
                    f"opened an issue: [{issue['title']}]({issue['html_url']})... :glowstick:")
 
 
-def handle_github_open_pullrequest(pullrequest):
+def handle_github_open_pullrequest(pullrequest: dict) -> None:
     """Will handle with care."""
     _LOGGER.info(f"A Pull Request has been opened: {pullrequest['url']}")
 
@@ -70,7 +70,7 @@ def handle_github_open_pullrequest(pullrequest):
                    f"opened a pull request: '[{pullrequest['title']}]({pullrequest['html_url']})'...")
 
 
-def handle_github_open_pullrequest_merged_successfully(pullrequest):
+def handle_github_open_pullrequest_merged_successfully(pullrequest: dict) -> None:
     """Will handle with care."""
     _LOGGER.info(
         f"A Pull Request has been successfully merged: {pullrequest}")
@@ -79,9 +79,13 @@ def handle_github_open_pullrequest_merged_successfully(pullrequest):
         return
 
     notify_channel(
-        f":tada: Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})' of "
-        f"[{pullrequest['head']['repo']['full_name']}]({pullrequest['head']['repo']['html_url']}) "
-        f"has been successfully merged!")
+        f":tada: Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})' was successfully "
+        f"merged into [{pullrequest['base']['repo']['full_name']}]({pullrequest['base']['repo']['html_url']}) ")
+
+
+def handle_github_pull_request_review(pull_request: dict, review: dict) -> None:
+    """Will handle with care."""
+    return
 
 
 @webhook.route('/github', methods=['POST'])
@@ -102,16 +106,22 @@ def handle_github_webhook():
     if hmac.compare_digest(hashhex, signature):
         payload = request.json
 
-        if 'issue' in payload.keys():
+        # this will give use the event type...
+        event_type = payload.keys()
+
+        if 'pull_request' in event_type:
             if payload['action'] == 'opened':
-                handle_github_open_issue(payload['issue'])
-        if 'pull_request' in payload.keys():
-            if payload['action'] == 'opened':
-                handle_github_open_issue(payload['pull_request'])
+                handle_github_open_pullrequest(payload['pull_request'])
             elif payload['action'] == 'closed':
                 if payload['pull_request']['merged']:
                     handle_github_open_pullrequest_merged_successfully(
                         payload['pull_request'])
+        elif 'issue' in event_type:
+            if payload['action'] == 'opened':
+                handle_github_open_issue(payload['issue'])
+        elif 'pull_request_review' in event_type:
+            handle_github_pull_request_review(
+                payload['pull_request'], payload['review'])
         else:
             _LOGGER.debug(
                 f"Received a github webhook {json.dumps(request.json)}")
