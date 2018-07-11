@@ -345,7 +345,7 @@ class UpdateManager(Manager):
         # We use lock_func to optimize run - it will be called only if actual locking needs to be performed.
         if not pipenv_used and not os.path.isfile('requirements.txt'):
             _LOGGER.info("Initial lock based on requirements.in will be done")
-            lock_func = partial(self._pipenv_lock_requirements, self)
+            lock_func = self._pipenv_lock_requirements
         elif pipenv_used and not os.path.isfile('Pipfile.lock'):
             _LOGGER.info("Initial lock based on Pipfile will be done")
             lock_func = partial(self.run_pipenv, 'pipenv lock')
