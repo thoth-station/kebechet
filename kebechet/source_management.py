@@ -16,100 +16,169 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Abstract calls to GitHub and GitLab APIs."""
-# TODO: replace calls to a lib that abstracts APIs of github/gitlab
 
 import logging
 import typing
 
-from .github import github_add_comment
-from .github import github_add_labels
-from .github import github_close_issue
-from .github import github_create_pr
-from .github import github_delete_branch
-from .github import github_list_branches
-from .github import github_list_issue_comments
-from .github import github_list_issues
-from .github import github_list_pull_requests
-from .github import github_open_issue
+import requests
+
+from IGitt.Interfaces import Issue
+from IGitt.Interfaces import MergeRequest
+from IGitt.GitHub.GitHubRepository import GitHubRepository
+from IGitt.GitHub import GitHubToken
+from IGitt.GitHub.GitHubMergeRequest import GitHubMergeRequest
+from IGitt.GitLab.GitLabMergeRequest import GitLabMergeRequest
+from IGitt.GitLab.GitLabRepository import GitLabRepository
+from IGitt.GitLab import GitLabOAuthToken
+from IGitt.GitLab import GL_INSTANCE_URL
+from IGitt.GitLab import BASE_URL as GL_BASE_URL
+from IGitt.GitHub import GH_INSTANCE_URL
+from IGitt.GitHub import BASE_URL as GH_BASE_URL
+
+from .enums import ServiceType
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_issue(slug: str, title: str) -> typing.Optional[dict]:
-    """Retrieve issue with the given title."""
-    for issue in github_list_issues(slug):
-        if issue['title'] == title:
+class SourceManagement:
+    """Abstract source code management services like GitHub and GitLab."""
+
+    def __init__(self, service_type: ServiceType, service_url: str, token: str, slug: str):
+        """Initialize source code management tools abstraction.
+
+        Note that we are using IGitt for calls. IGitt keeps URL to services in its global context per GitHub/GitLab.
+        This is global context is initialized in the manager with a hope to fix this behavior for our needs.
+        """
+        self.service_type = service_type
+        self.slug = slug
+        self.service_url = service_url
+        self.token = token
+
+        if self.service_type == ServiceType.GITHUB:
+            self.repository = GitHubRepository(token=GitHubToken(token), repository=slug)
+        elif self.service_type == ServiceType.GITLAB:
+            self.repository = GitLabRepository(token=GitLabOAuthToken(token), repository=slug)
+        else:
+            raise NotImplementedError
+
+    def get_issue(self, title: str) -> Issue:
+        """Retrieve issue with the given title."""
+        for issue in self.repository.issues:
+            if issue.title == title:
+                return issue
+
+        return None
+
+    def open_issue_if_not_exist(self, title: str, body: typing.Callable,
+                                refresh_comment: typing.Callable = None, labels: list = None) -> Issue:
+        """Open the given issue if does not exist already (as opened)."""
+        _LOGGER.debug(f"Reporting issue {title!r}")
+        issue = self.get_issue(title)
+        if issue:
+            _LOGGER.info(f"Issue already noted on upstream with id #{issue['number']}")
+            if not refresh_comment:
+                return None
+
+            comment_body = refresh_comment(issue)
+            if comment_body:
+                issue.add_comment(comment_body)
+                _LOGGER.info(f"Added refresh comment to issue #{issue['number']}")
+            else:
+                _LOGGER.debug(f"Refresh comment not added")
+        else:
+            issue = self.repository.create_issue(title, body())
+            issue.labels = set(labels)
+            _LOGGER.info(f"Reported issue {title!r} with id #{issue.number}")
             return issue
 
-    return None
+        return None
 
+    def close_issue_if_exists(self, title: str, comment: str = None):
+        """Close the given issue (referenced by its title) and close it with a comment."""
+        issue = self.get_issue(title)
+        if not issue:
+            _LOGGER.debug(f"Issue {title!r} not found, not closing it")
+            return
 
-def open_issue_if_not_exist(slug: str, title: str, body: typing.Callable,
-                            refresh_comment: typing.Callable = None, labels: list = None) -> typing.Optional[int]:
-    """Open the given issue if does not exist already (as opened)."""
-    _LOGGER.debug(f"Reporting issue {title!r}")
-    issue = get_issue(slug, title)
-    if issue:
-        _LOGGER.info(f"Issue already noted on upstream with id #{issue['number']}")
-        if not refresh_comment:
-            return None
-
-        comment_body = refresh_comment(issue)
-        if comment_body:
-            github_add_comment(slug, issue['number'], comment_body)
-            _LOGGER.info(f"Added refresh comment to issue #{issue['number']}")
+        if self.service_type == ServiceType.GITHUB:
+            issue.add_comment(comment)
+            issue.close()
         else:
-            _LOGGER.debug(f"Refresh comment not added")
-    else:
-        issue_id = github_open_issue(slug, title, body(), labels)['number']
-        _LOGGER.info(f"Reported issue {title!r} with id #{issue_id}")
-        return issue_id
+            raise NotImplementedError
 
-    return None
+    def _github_open_merge_request(self, commit_msg, body, branch_name) -> GitHubMergeRequest:
+        """Create a GitHub pull request with the given dependency update."""
+        url = GH_BASE_URL + f'/repos/{self.slug}/pulls'
+        response = requests.post(
+            url,
+            headers={
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': f'token {self.token}'
+            },
+            json={
+                'title': commit_msg,
+                'body': body,
+                'head': branch_name,
+                'base': 'master',
+                'maintainer_can_modify': True
+            }
+        )
+        try:
+            response.raise_for_status()
+        except Exception as exc:
+            raise RuntimeError(f"Failed to create a pull request: {response.text}") from exc
 
+        _LOGGER.info(f"Newly created pull request #{response.json()['number']} "
+                     f"available at {response.json()['html_url']}")
+        return GitHubMergeRequest.from_data(response.json())
 
-def close_issue_if_exists(slug: str, title: str, comment: str = None):
-    """Close the given issue (referenced by its title) and close it with a comment."""
-    issue = get_issue(slug, title)
-    if not issue:
-        _LOGGER.debug(f"Issue {title!r} not found, not closing it")
-        return
+    def _gitlab_open_merge_request(self, commit_msg, pr_body, branch_name) -> GitLabMergeRequest:
+        raise NotImplementedError
 
-    github_add_comment(slug, issue['number'], comment, force_add=True)
-    github_close_issue(slug, issue['number'])
+    def open_merge_request(self, commit_msg: str, branch_name: str, pr_body: str, labels: list) -> MergeRequest:
+        """Open a merge request for the given branch."""
+        if self.service_type == ServiceType.GITHUB:
+            merge_request = self._github_open_merge_request(commit_msg, pr_body, branch_name)
+        elif self.service_type == ServiceType.GITLAB:
+            merge_request = self._gitlab_open_merge_request(commit_msg, pr_body, branch_name)
+        else:
+            raise NotImplementedError
 
+        merge_request.labels = set(labels)
+        return merge_request
 
-def open_pull_request(slug: str, commit_msg: str, branch_name: str, pr_body: str, labels: list) -> int:
-    """Open a pull request for the given branch."""
-    pr_id = github_create_pr(slug, commit_msg, pr_body, branch_name)
-    if labels:
-        _LOGGER.debug(f"Adding labels to newly created PR #{pr_id}: {labels}")
-        github_add_labels(slug, pr_id, labels)
+    def _github_delete_branch(self, branch: str) -> None:
+        """Delete the given branch from remote repository."""
+        response = requests.delete(
+            f'https://api.github.com/repos/{self.slug}/git/refs/heads/{branch}',
+            headers={f'Authorization': f'token {config.github_token}'}
+        )
 
-    return pr_id
+        response.raise_for_status()
+        # GitHub returns an empty string, noting to return.
 
+    def _github_list_branches(self) -> typing.List[str]:
+        """Get listing of all branches available on remote repository."""
+        response = requests.get(
+            f'https://api.github.com/repos/{self.slug}/branches',
+            headers={f'Authorization': f'token {self.token}'}
+        )
 
-def add_comment(slug: str, number: int, comment: str) -> None:
-    """Add a comment to an issue or pull request."""
-    github_add_comment(slug, number, comment)
+        response.raise_for_status()
+        # TODO: pagination
+        return response.json()
 
+    def list_branches(self) -> list:
+        """Get branches available on remote."""
+        if self.service_type == ServiceType.GITHUB:
+            return self._github_list_branches()
+        else:
+            raise NotImplementedError
 
-def list_pull_requests(slug: str, head: str = None) -> list:
-    """List pull requests available."""
-    return github_list_pull_requests(slug, head=head)
-
-
-def list_issue_comments(slug: str, issue_number: int) -> list:
-    """List comments added to an issue."""
-    return github_list_issue_comments(slug, issue_number)
-
-
-def list_branches(slug: str) -> list:
-    """Get branches available on remote."""
-    return github_list_branches(slug)
-
-
-def delete_branch(slug: str, branch_name: str) -> None:
-    """Delete the given branch from remote."""
-    return github_delete_branch(slug, branch_name)
+    def delete_branch(self, branch_name: str) -> None:
+        """Delete the given branch from remote."""
+        if self.service_type == ServiceType.GITHUB:
+            return self._github_delete_branch(branch_name)
+        else:
+            raise NotImplementedError

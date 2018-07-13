@@ -69,15 +69,6 @@ def cli(ctx=None, verbose=0, github_token=None):
         config.github_token = github_token
 
 
-@cli.command('update')
-@click.option('--label', type=str, default=None, metavar='LABEL1,LABEL2',
-              help="Labels to be applied for opened pull requests.")
-@click.argument('slug')
-def cli_update(slug, label=None):
-    """Update packages in the given repository (slug is org/repo) and open pull requests."""
-    UpdateManager().run(slug, label.split(',') if label else None)
-
-
 @cli.command('run')
 @click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION_PATH')
 def cli_run(configuration):

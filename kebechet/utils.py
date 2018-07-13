@@ -40,8 +40,17 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(repo_url: str):
+def cloned_repo(service_url: str, slug: str):
     """Clone the given Git repository and cd into it."""
+    if service_url.startswith('https://'):
+        service_url = service_url[len('https://'):]
+    elif service_url.startswith('http://'):
+        service_url = service_url[len('http://'):]
+    else:
+        # This is mostly internal error - we require service URL to have protocol explicitly set
+        raise NotImplementedError
+
+    repo_url = f'git@{service_url}:{slug}.git'
     with TemporaryDirectory() as repo_path, cwd(repo_path):
         _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
         repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)

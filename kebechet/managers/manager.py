@@ -25,12 +25,56 @@ import delegator
 import kebechet
 
 from kebechet.exception import PipenvError
+from kebechet.enums import ServiceType
+from kebechet.source_management import SourceManagement
+
+from IGitt.GitHub import GH_INSTANCE_URL
+from IGitt.GitHub import BASE_URL as GH_BASE_URL
+from IGitt.GitLab import GL_INSTANCE_URL
+from IGitt.GitLab import BASE_URL as GL_BASE_URL
+
 
 _LOGGER = logging.getLogger(__name__)
 
 
+def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> str:
+    """Initialize IGitt library for calls to services.
+
+    IGitt uses environment variables to distinguish from services - we don't want this behaviour - we want to
+    have service configuration explicitly configurable (possible use multiple times and talking to
+    different services). Let's override IGitt behavior based on configuration.
+    """
+    if service_type == ServiceType.GITHUB:
+        global GH_INSTANCE_URL
+        global GH_BASE_URL
+
+        GH_INSTANCE_URL = service_url or 'https://github.com'
+        GH_BASE_URL = GH_INSTANCE_URL.replace('github.com', 'api.github.com')
+        service_url = GH_INSTANCE_URL
+    elif service_type == ServiceType.GITLAB:
+        global GL_INSTANCE_URL
+        global GL_BASE_URL
+
+        GL_INSTANCE_URL = service_url or 'https://gitlab.com'
+        GL_BASE_URL = GL_INSTANCE_URL + '/api/v4'
+        service_url = GL_INSTANCE_URL
+    else:
+        raise NotImplementedError
+
+    return service_url
+
+
 class Manager:
     """A base class for manager instances holding common and useful utilities."""
+
+    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
+        """Initialize manager instance for talking to services."""
+        self.service_type = service_type or ServiceType.GITHUB
+        self.service_url = _init_igitt(service_type, service_url)
+        # Allow token expansion from env vars.
+        self.slug = slug
+        self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
+        self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
 
     @classmethod
     def get_environment_details(cls, as_dict=False) -> str:
@@ -41,11 +85,11 @@ class Manager:
             pipenv_version = f"Failed to obtain pipenv version:\n{exc.stderr}"
 
         return f"""
-    Kebechet version: {kebechet.__version__}
-    Python version: {platform.python_version()}
-    Platform: {platform.platform()}
-    pipenv version: {pipenv_version}
-    """ if not as_dict else {
+Kebechet version: {kebechet.__version__}
+Python version: {platform.python_version()}
+Platform: {platform.platform()}
+pipenv version: {pipenv_version}
+""" if not as_dict else {
             'kebechet_version': kebechet.__version__,
             'python_version': platform.python_version(),
             'platform': platform.platform(),
@@ -74,6 +118,6 @@ class Manager:
                 raise
             return f"Unable to obtain dependency graph:\n\n{exc.stderr}"
 
-    def run(self, slug: str, labels: list) -> typing.Optional[dict]:
+    def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
         raise NotImplementedError

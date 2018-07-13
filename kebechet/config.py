@@ -25,6 +25,7 @@ import yaml
 import requests
 
 from .exception import ConfigurationError
+from .enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,26 +51,22 @@ class _Config:
         except Exception as exc:
             raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
 
-        # TODO: make possible to pass GitLab/GitHub API for each entry
-        # TODO: make possible to use different GitLab/GitHub tokens for each entry
-
-    @property
-    def github_token(self) -> typing.Union[str, None]:
-        """Get provided GitHub OAuth token for use of GitHub API."""
-        return self._github_token or os.getenv('GITHUB_OAUTH_TOKEN')
-
-    @github_token.setter
-    def github_token(self, token):
-        """Set GitHub OAuth token."""
-        if token:
-            self._github_token = token
-
-    def iter_entries(self):
-        """Iterate over repositories listed for updates."""
+    def iter_entries(self) -> tuple:
+        """Iterate over repositories listed."""
         for entry in self._repositories or []:
             try:
-                # TODO: once we support different github/gitlab APIs and tokens per each, assign changes here
-                yield entry['slug'], entry.get('labels'), entry['managers']
+                items = dict(entry)
+                value = items.pop('managers'), \
+                    items.pop('slug'), \
+                    items.pop('service_type', None), \
+                    items.pop('service_url', None), \
+                    items.pop('token', None), \
+                    items.pop('labels', [])
+
+                if items:
+                    _LOGGER.warning(f"Unknown configuration entry in configuration of {slug!r}: {items}")
+
+                yield value
             except KeyError:
                 _LOGGER.exception("An error in your configuration - ignoring the given configuration entry...")
 
@@ -81,7 +78,22 @@ class _Config:
 
         config.from_file(configuration_file)
 
-        for slug, labels, managers in config.iter_entries():
+        for managers, slug, service_type, service_url, token, labels in config.iter_entries():
+            if service_url and not service_url.startswith(('https://', 'http://')):
+                # We need to have this explicitly set for IGitt and also for security reasons.
+                _LOGGER.error(
+                    "You have to specify protocol ('https://' or 'http://') in service URL "
+                    "configuration entry - invalid configuration {service_url!}"
+                )
+                continue
+
+            if service_url and service_url.endswith('/'):
+                service_url = service_url[:-1]
+
+            if token:
+                # Allow token expansion based on env variables.
+                token.format(**os.environ)
+
             for manager in managers:
                 kebechet_manager = REGISTERED_MANAGERS.get(manager)
 
@@ -90,7 +102,7 @@ class _Config:
 
                 _LOGGER.info(f"Running manager {manager!r} for {slug!r}")
                 try:
-                    kebechet_manager().run(slug, labels)
+                    kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token).run(labels)
                 except Exception as exc:
                     _LOGGER.exception(
                         f"An error occurred during run of manager {manager!r} {kebechet_manager} for {slug}, skipping"

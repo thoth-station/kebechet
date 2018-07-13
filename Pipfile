@@ -12,6 +12,7 @@ toml = "*"
 "delegator.py" = "*"
 gitpython = "*"
 pyyaml = "*"
+igitt = "*"
 
 [dev-packages]
 pytest = "*"
@@ -22,6 +23,7 @@ coala = "*"
 pycodestylebear = "*"
 yamllintbear = "*"
 pydocstylebear = "*"
+filenamebear = "*"
 
 [requires]
 python_version = "3.6"
