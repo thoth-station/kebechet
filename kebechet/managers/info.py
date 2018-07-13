@@ -18,12 +18,8 @@
 """Report information about repository and Kebechet itself."""
 
 import logging
-from tempfile import TemporaryDirectory
 import typing
 
-import git
-from kebechet.source_management import close_issue_if_exists
-from kebechet.source_management import get_issue
 from kebechet.utils import cloned_repo
 
 from .manager import Manager
@@ -37,22 +33,21 @@ _LOGGER = logging.getLogger(__name__)
 class InfoManager(Manager):
     """Manager for submitting information about running Kebechet instance."""
 
-    def run(self, slug: str, labels: list) -> typing.Optional[dict]:
+    def run(self, labels: list) -> typing.Optional[dict]:
         """Check for info issue and close it with a report."""
-        issue = get_issue(slug, _INFO_ISSUE_NAME)
+        issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
             _LOGGER.info("No issue to report to, exiting")
             return
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
-        with cloned_repo(f'git@github.com:{slug}.git') as repo:
+        with cloned_repo(self.service_url, self.slug) as repo:
             # We could optimize this as the get_issue() does API calls as well. Keep it this simple now.
-            close_issue_if_exists(
-                slug,
+            self.sm.close_issue_if_exists(
                 _INFO_ISSUE_NAME,
                 INFO_REPORT.format(
                     sha=repo.head.commit.hexsha,
-                    slug=slug,
+                    slug=self.slug,
                     environment_details=self.get_environment_details(),
                     dependency_graph=self.get_dependency_graph(graceful=True),
                 )

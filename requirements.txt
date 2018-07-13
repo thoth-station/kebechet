@@ -4,5 +4,7 @@ pipenv
 requests
 toml
 delegator.py
-gitpython
 pyyaml
+igitt
+# Pinned due to igitt pinning.
+gitpython==1.0.1
