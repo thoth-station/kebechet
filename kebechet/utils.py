@@ -21,7 +21,9 @@
 import os
 import logging
 from contextlib import contextmanager
+from tempfile import TemporaryDirectory
 
+import git
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,3 +37,12 @@ def cwd(path: str):
         yield previous_dir
     finally:
         os.chdir(previous_dir)
+
+
+@contextmanager
+def cloned_repo(repo_url: str):
+    """Clone the given Git repository and cd into it."""
+    with TemporaryDirectory() as repo_path, cwd(repo_path):
+        _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
+        repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)
+        yield repo

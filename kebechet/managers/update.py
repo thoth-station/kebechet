@@ -31,7 +31,7 @@ import git
 from kebechet.exception import PipenvError
 from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
-from kebechet.utils import cwd
+from kebechet.utils import cloned_repo
 from kebechet.source_management import open_issue_if_not_exist
 from kebechet.source_management import open_pull_request
 from kebechet.source_management import close_issue_if_exists
@@ -584,10 +584,9 @@ class UpdateManager(Manager):
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ['PIPENV_VENV_IN_PROJECT'] = '1'
 
-        with TemporaryDirectory() as repo_path, cwd(repo_path):
-            repo_url = f'git@github.com:{slug}.git'
-            _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-            self.repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)
+        with cloned_repo(f'git@github.com:{slug}.git') as repo:
+            # Make repo available in the instance.
+            self.repo = repo
 
             close_no_management_issue = partial(
                 close_issue_if_exists,
