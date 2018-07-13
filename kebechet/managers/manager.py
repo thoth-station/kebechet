@@ -28,10 +28,8 @@ from kebechet.exception import PipenvError
 from kebechet.enums import ServiceType
 from kebechet.source_management import SourceManagement
 
-from IGitt.GitHub import GH_INSTANCE_URL
-from IGitt.GitHub import BASE_URL as GH_BASE_URL
-from IGitt.GitLab import GL_INSTANCE_URL
-from IGitt.GitLab import BASE_URL as GL_BASE_URL
+import IGitt.GitHub
+import IGitt.GitLab
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,19 +43,13 @@ def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> st
     different services). Let's override IGitt behavior based on configuration.
     """
     if service_type == ServiceType.GITHUB:
-        global GH_INSTANCE_URL
-        global GH_BASE_URL
-
-        GH_INSTANCE_URL = service_url or 'https://github.com'
-        GH_BASE_URL = GH_INSTANCE_URL.replace('github.com', 'api.github.com')
-        service_url = GH_INSTANCE_URL
+        IGitt.GitHub.GH_INSTANCE_URL = service_url or 'https://github.com'
+        IGitt.GitHub.BASE_URL = IGitt.GitHub.GH_INSTANCE_URL.replace('github.com', 'api.github.com')
+        service_url = IGitt.GitHub.GH_INSTANCE_URL
     elif service_type == ServiceType.GITLAB:
-        global GL_INSTANCE_URL
-        global GL_BASE_URL
-
-        GL_INSTANCE_URL = service_url or 'https://gitlab.com'
-        GL_BASE_URL = GL_INSTANCE_URL + '/api/v4'
-        service_url = GL_INSTANCE_URL
+        IGitt.GitLab.GL_INSTANCE_URL = service_url or 'https://gitlab.com'
+        IGitt.GitLab.BASE_URL = IGitt.GitLab.GL_INSTANCE_URL + '/api/v4'
+        service_url = IGitt.GitLab.GL_INSTANCE_URL
     else:
         raise NotImplementedError
 
@@ -70,6 +62,7 @@ class Manager:
     def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
+        # This needs to be called before instantiation of SourceManagement due to changes in global variables.
         self.service_url = _init_igitt(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug

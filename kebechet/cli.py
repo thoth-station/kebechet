@@ -46,9 +46,7 @@ def _print_version(ctx, _, value):
               help="Be verbose about what's going on.")
 @click.option('--version', is_flag=True, is_eager=True, callback=_print_version, expose_value=False,
               help="Print version and exit.")
-@click.option('--github-token', type=str, default=None, metavar='TOKEN', envvar='KEBECHET_TOKEN',
-              help="A GitHub token to be used to open pull requests.")
-def cli(ctx=None, verbose=0, github_token=None):
+def cli(ctx=None, verbose=0):
     """The CLI."""
     if ctx:
         ctx.auto_envvar_prefix = 'KEBECHET'
@@ -56,17 +54,6 @@ def cli(ctx=None, verbose=0, github_token=None):
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
         _LOGGER.debug("Debug mode turned on")
-
-        # Hide token in logs.
-        report = dict(locals())
-        if github_token:
-            report['github_token'] = report['github_token'][:3] + ('*' * len(report['github_token'][3:]))
-
-        report.pop('ctx', None)
-        _LOGGER.debug(f"Passed options: {report}")
-
-    if github_token:
-        config.github_token = github_token
 
 
 @cli.command('run')

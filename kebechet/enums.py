@@ -15,10 +15,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .manager import Manager
+"""Enumerations used in Kebechet."""
+
+from enum import Enum
+from enum import auto
 
 
-class OpenShiftManager(Manager):
+class ServiceType(Enum):
+    """A service Kebechet talks to."""
 
-    def run(self, slug: str, labels: list):
-        pass
+    GITHUB = auto()
+    GITLAB = auto()
+
+    @classmethod
+    def by_name(cls, name: str):
+        """Get service type by its name."""
+        # Use GitHub by default.
+        if name is None:
+            return cls.GITHUB
+
+        name = name.lower()
+
+        if name == 'github':
+            return cls.GITHUB
+        elif name == 'gitlab':
+            return cls.GITLAB
+        else:
+            raise NotImplementedError(f"Unsupported service {name!r}, available ones are 'github' and 'gitlab'")

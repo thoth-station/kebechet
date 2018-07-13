@@ -19,9 +19,10 @@
 
 import logging
 import os
-import typing
+from functools import partialmethod
 import yaml
 
+import urllib3
 import requests
 
 from .exception import ConfigurationError
@@ -34,7 +35,6 @@ class _Config:
     """Library-wide configuration."""
 
     def __init__(self):
-        self._github_token = None
         self._repositories = None
 
     def from_file(self, config_path: str):
@@ -61,7 +61,8 @@ class _Config:
                     items.pop('service_type', None), \
                     items.pop('service_url', None), \
                     items.pop('token', None), \
-                    items.pop('labels', [])
+                    items.pop('labels', []), \
+                    items.pop('tls_verify', True)
 
                 if items:
                     _LOGGER.warning(f"Unknown configuration entry in configuration of {slug!r}: {items}")
@@ -69,6 +70,26 @@ class _Config:
                 yield value
             except KeyError:
                 _LOGGER.exception("An error in your configuration - ignoring the given configuration entry...")
+
+    @staticmethod
+    def _tls_verification(service_url: str, slug: str, verify: bool) -> None:
+        """Turn off or on TLS verification based on configuration."""
+        # We manage our own warnings, of course better ones!
+        urllib3.disable_warnings()
+        if not verify:
+            _LOGGER.warning(f"Turning off TLS certificate verification for {slug} hosted at {service_url}")
+
+        to_patch = {
+            'post': requests.Session.post,
+            'delete': requests.Session.delete,
+            'put': requests.Session.put,
+            'get': requests.Session.get,
+            'head': requests.Session.head,
+            'patch': requests.Session.patch
+        }
+        for name, method in to_patch.items():
+            # The last partial method will apply.
+            setattr(requests.Session, name, partialmethod(method, verify=verify))
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
@@ -78,7 +99,9 @@ class _Config:
 
         config.from_file(configuration_file)
 
-        for managers, slug, service_type, service_url, token, labels in config.iter_entries():
+        for managers, slug, service_type, service_url, token, labels, tls_verify in config.iter_entries():
+            cls._tls_verification(service_url, slug, verify=tls_verify)
+
             if service_url and not service_url.startswith(('https://', 'http://')):
                 # We need to have this explicitly set for IGitt and also for security reasons.
                 _LOGGER.error(

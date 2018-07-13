@@ -21,6 +21,7 @@ import logging
 import typing
 
 import requests
+from urllib.parse import quote_plus
 
 from IGitt.Interfaces import Issue
 from IGitt.Interfaces import MergeRequest
@@ -29,11 +30,8 @@ from IGitt.GitHub import GitHubToken
 from IGitt.GitHub.GitHubMergeRequest import GitHubMergeRequest
 from IGitt.GitLab.GitLabMergeRequest import GitLabMergeRequest
 from IGitt.GitLab.GitLabRepository import GitLabRepository
-from IGitt.GitLab import GitLabOAuthToken
-from IGitt.GitLab import GL_INSTANCE_URL
-from IGitt.GitLab import BASE_URL as GL_BASE_URL
-from IGitt.GitHub import GH_INSTANCE_URL
-from IGitt.GitHub import BASE_URL as GH_BASE_URL
+from IGitt.GitLab import GitLabPrivateToken
+import IGitt.GitLab
 
 from .enums import ServiceType
 
@@ -58,7 +56,7 @@ class SourceManagement:
         if self.service_type == ServiceType.GITHUB:
             self.repository = GitHubRepository(token=GitHubToken(token), repository=slug)
         elif self.service_type == ServiceType.GITLAB:
-            self.repository = GitLabRepository(token=GitLabOAuthToken(token), repository=slug)
+            self.repository = GitLabRepository(token=GitLabPrivateToken(token), repository=slug)
         else:
             raise NotImplementedError
 
@@ -101,16 +99,13 @@ class SourceManagement:
             _LOGGER.debug(f"Issue {title!r} not found, not closing it")
             return
 
-        if self.service_type == ServiceType.GITHUB:
-            issue.add_comment(comment)
-            issue.close()
-        else:
-            raise NotImplementedError
+        issue.add_comment(comment)
+        issue.close()
 
     def _github_open_merge_request(self, commit_msg, body, branch_name) -> GitHubMergeRequest:
         """Create a GitHub pull request with the given dependency update."""
-        url = GH_BASE_URL + f'/repos/{self.slug}/pulls'
-        response = requests.post(
+        url = f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/pulls'
+        response = requests.Session().post(
             url,
             headers={
                 'Accept': 'application/vnd.github.v3+json',
@@ -129,19 +124,43 @@ class SourceManagement:
         except Exception as exc:
             raise RuntimeError(f"Failed to create a pull request: {response.text}") from exc
 
-        _LOGGER.info(f"Newly created pull request #{response.json()['number']} "
-                     f"available at {response.json()['html_url']}")
-        return GitHubMergeRequest.from_data(response.json())
+        mr_number = response.json()['number']
+        _LOGGER.info(f"Newly created pull request #{mr_number} available at {response.json()['html_url']}")
+        return GitHubMergeRequest.from_data(
+            response.json(), token=GitHubToken(self.token), repository=self.slug, number=mr_number
+        )
 
-    def _gitlab_open_merge_request(self, commit_msg, pr_body, branch_name) -> GitLabMergeRequest:
-        raise NotImplementedError
+    def _gitlab_open_merge_request(self, commit_msg, body, branch_name) -> GitLabMergeRequest:
+        url = f'{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/merge_requests'
+        # Use Session as these calls are mocked based on tls_verify configuration.
+        response = requests.Session().post(
+            url,
+            params={'private_token': self.token},
+            json={
+                'title': commit_msg,
+                'description': body,
+                'source_branch': branch_name,
+                'target_branch': 'master',
+                'allow_collaboration': True
+            }
+        )
+        try:
+            response.raise_for_status()
+        except Exception as exc:
+            raise RuntimeError(f"Failed to create a pull request: {response.text}") from exc
 
-    def open_merge_request(self, commit_msg: str, branch_name: str, pr_body: str, labels: list) -> MergeRequest:
+        mr_number = response.json()['iid']
+        _LOGGER.info(f"Newly created pull request #{mr_number} available at {response.json()['web_url']}")
+        return GitLabMergeRequest.from_data(
+            response.json(), token=GitLabPrivateToken(self.token), repository=self.slug, number=mr_number
+        )
+
+    def open_merge_request(self, commit_msg: str, branch_name: str, body: str, labels: list) -> MergeRequest:
         """Open a merge request for the given branch."""
         if self.service_type == ServiceType.GITHUB:
-            merge_request = self._github_open_merge_request(commit_msg, pr_body, branch_name)
+            merge_request = self._github_open_merge_request(commit_msg, body, branch_name)
         elif self.service_type == ServiceType.GITLAB:
-            merge_request = self._gitlab_open_merge_request(commit_msg, pr_body, branch_name)
+            merge_request = self._gitlab_open_merge_request(commit_msg, body, branch_name)
         else:
             raise NotImplementedError
 
@@ -150,35 +169,60 @@ class SourceManagement:
 
     def _github_delete_branch(self, branch: str) -> None:
         """Delete the given branch from remote repository."""
-        response = requests.delete(
-            f'https://api.github.com/repos/{self.slug}/git/refs/heads/{branch}',
-            headers={f'Authorization': f'token {config.github_token}'}
+        response = requests.Session().delete(
+            f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/git/refs/heads/{branch}',
+            headers={f'Authorization': f'token {self.token}'},
         )
 
         response.raise_for_status()
         # GitHub returns an empty string, noting to return.
 
-    def _github_list_branches(self) -> typing.List[str]:
-        """Get listing of all branches available on remote repository."""
-        response = requests.get(
-            f'https://api.github.com/repos/{self.slug}/branches',
-            headers={f'Authorization': f'token {self.token}'}
+    def _gitlab_delete_branch(self, branch: str) -> None:
+        """Delete the given branch from remote repository."""
+        response = requests.Session().delete(
+            f'{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/repository/branches/{branch}',
+            params={'private_token': self.token},
+        )
+        response.raise_for_status()
+
+    def _github_list_branches(self) -> typing.Set[str]:
+        """Get listing of all branches available on the remote GitHub repository."""
+        response = requests.Session().get(
+            f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/branches',
+            headers={f'Authorization': f'token {self.token}'},
         )
 
         response.raise_for_status()
-        # TODO: pagination
+        # TODO: pagination?
         return response.json()
 
-    def list_branches(self) -> list:
+    def _gitlab_list_branches(self) -> typing.Set[str]:
+        """Get listing of all branches available on the remote GitLab repository."""
+        response = requests.Session().get(
+            f"{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/repository/branches",
+            params={'private_token': self.token},
+        )
+
+        response.raise_for_status()
+        # TODO: pagination?
+        return response.json()
+
+    def list_branches(self) -> set:
         """Get branches available on remote."""
+        # TODO: remove this logic once IGitt will support branch operations
         if self.service_type == ServiceType.GITHUB:
             return self._github_list_branches()
+        elif self.service_type == ServiceType.GITLAB:
+            return self._gitlab_list_branches()
         else:
             raise NotImplementedError
 
     def delete_branch(self, branch_name: str) -> None:
         """Delete the given branch from remote."""
+        # TODO: remove this logic once IGitt will support branch operations
         if self.service_type == ServiceType.GITHUB:
             return self._github_delete_branch(branch_name)
+        elif self.service_type == ServiceType.GITLAB:
+            return self._gitlab_delete_branch(branch_name)
         else:
             raise NotImplementedError

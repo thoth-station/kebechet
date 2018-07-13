@@ -7,7 +7,7 @@ ENV USER=kebechet \
     LANG=en_US.UTF-8
 
 # Add the ssh key from local dir to container dir.
-ADD github /home/user/.ssh/id_rsa
+# ADD github /home/user/.ssh/id_rsa
 
 RUN \
     dnf install -y --setopt=tsflags=nodocs git python3-pip gcc redhat-rpm-config python3-devel which gcc-c++ &&\
@@ -17,8 +17,7 @@ RUN \
 ADD ./ /tmp/kebechet
 RUN  pip3 install virtualenv && mkdir -p /usr/local/lib/python3.6/site-packages/ && cd /tmp/kebechet/ && python3 setup.py install
 
-ADD docker-entrypoint.sh /
-ADD config/thoth.yaml /tmp/thoth.yaml
+COPY docker-entrypoint.sh /
 
 # Arbitrary User
 USER 1042 
