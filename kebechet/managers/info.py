@@ -24,7 +24,7 @@ import typing
 import git
 from kebechet.source_management import close_issue_if_exists
 from kebechet.source_management import get_issue
-from kebechet.utils import cwd
+from kebechet.utils import cloned_repo
 
 from .manager import Manager
 from .messages import INFO_REPORT
@@ -45,12 +45,7 @@ class InfoManager(Manager):
             return
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
-        with TemporaryDirectory() as repo_path, cwd(repo_path):
-            # TODO: we should abstract this into the base Manager class once we introduce more managers.
-            repo_url = f'git@github.com:{slug}.git'
-            _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-            repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)
-
+        with cloned_repo(f'git@github.com:{slug}.git') as repo:
             # We could optimize this as the get_issue() does API calls as well. Keep it this simple now.
             close_issue_if_exists(
                 slug,
