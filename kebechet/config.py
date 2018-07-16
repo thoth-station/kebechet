@@ -115,7 +115,8 @@ class _Config:
 
             if token:
                 # Allow token expansion based on env variables.
-                token.format(**os.environ)
+                token = token.format(**os.environ)
+                _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
 
             for manager in managers:
                 kebechet_manager = REGISTERED_MANAGERS.get(manager)
