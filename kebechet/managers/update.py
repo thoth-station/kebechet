@@ -392,7 +392,7 @@ class UpdateManager(Manager):
 
     def _add_refresh_comment(self, exc: PipenvError, issue: Issue) -> typing.Optional[str]:
         """Create a refresh comment to an issue if the given master has some changes."""
-        if self.sha in issue['body']:
+        if self.sha in issue.body:
             _LOGGER.debug("No need to update refresh comment, the issue is up to date")
             return
 
