@@ -74,7 +74,7 @@ class SourceManagement:
         _LOGGER.debug(f"Reporting issue {title!r}")
         issue = self.get_issue(title)
         if issue:
-            _LOGGER.info(f"Issue already noted on upstream with id #{issue.number]}")
+            _LOGGER.info(f"Issue already noted on upstream with id #{issue.number}")
             if not refresh_comment:
                 return None
 
