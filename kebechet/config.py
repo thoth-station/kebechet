@@ -132,5 +132,7 @@ class _Config:
                         f"An error occurred during run of manager {manager!r} {kebechet_manager} for {slug}, skipping"
                     )
 
+            _LOGGER.info(f"Finished management for {slug!r}")
+
 
 config = _Config()
