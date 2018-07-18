@@ -56,7 +56,7 @@ def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> st
     return service_url
 
 
-class Manager:
+class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
     def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
