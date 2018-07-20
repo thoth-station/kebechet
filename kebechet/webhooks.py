@@ -83,9 +83,19 @@ def handle_github_open_pullrequest_merged_successfully(pullrequest: dict) -> Non
         f"merged into [{pullrequest['base']['repo']['full_name']}]({pullrequest['base']['repo']['html_url']}) ")
 
 
-def handle_github_pull_request_review(pull_request: dict, review: dict) -> None:
+def handle_github_pull_request_review(pullrequest: dict, review: dict) -> None:
     """Will handle with care."""
     return
+
+
+def handle_github_pull_request_review_requested(
+        pullrequest: dict) -> None:
+    """Will handle with care."""
+
+    for requested_reviewer in pullrequest['requested_reviewers']:
+        notify_channel(
+            f":play_or_pause_button: a review by _{requested_reviewer['login']}_ has been requested for "
+            f"Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})'")
 
 
 @webhook.route('/github', methods=['POST'])
@@ -107,7 +117,7 @@ def handle_github_webhook():
         payload = request.json
 
         # this will give use the event type...
-        event_type = payload.keys()
+        event_type = payload['action']
 
         if 'pull_request' in event_type:
             if payload['action'] == 'opened':
@@ -122,6 +132,9 @@ def handle_github_webhook():
         elif 'pull_request_review' in event_type:
             handle_github_pull_request_review(
                 payload['pull_request'], payload['review'])
+        elif 'review_requested' in event_type:
+            handle_github_pull_request_review_requested(
+                payload['pull_request'])
         else:
             _LOGGER.debug(
                 f"Received a github webhook {json.dumps(request.json)}")
