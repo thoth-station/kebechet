@@ -31,11 +31,36 @@ from git import Repo
 
 ENDPOINT_URL = os.getenv('KEBESCHET_MATTERMOST_ENDPOINT_URL', None)
 
+GITHUB_MATTERMOST_MAPPING = {
+    "goern": "goern",
+    "fridex": "fridolin",
+    "hashard16": "hnalla",
+    "ace2107": "akash2107",
+    "durandom": "hild",
+    "sub-mod": "subin",
+    "sushmithaaredhatdev": "sushmitha_nagarajan",
+    "vpavlin": "vpavlin"
+}
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
 webhook = Blueprint('webhook', __name__, url_prefix='')
+
+
+def mattermost_username_by_github_user(github: str) -> str:
+    """Map a GitHub User to a Mattermost User."""
+    mattermost = None
+
+    try:
+        mattermost = GITHUB_MATTERMOST_MAPPING[github]
+    except KeyError as exp:
+        _LOGGER.exception(exp)
+
+    if not mattermost:
+        mattermost = github
+
+    return f'@{mattermost}'
 
 
 def notify_channel(message: str) -> None:
@@ -66,7 +91,7 @@ def handle_github_open_pullrequest(pullrequest: dict) -> None:
     if pullrequest['title'].startswith('Automatic update of dependency'):
         return
 
-    notify_channel(f"[{pullrequest['user']['login']}]({pullrequest['user']['url']}) just "
+    notify_channel(f"_{mattermost_username_by_github_user(pullrequest['user']['login'])}_ just "
                    f"opened a pull request: '[{pullrequest['title']}]({pullrequest['html_url']})'...")
 
 
@@ -94,7 +119,8 @@ def handle_github_pull_request_review_requested(
 
     for requested_reviewer in pullrequest['requested_reviewers']:
         notify_channel(
-            f":play_or_pause_button: a review by _{requested_reviewer['login']}_ has been requested for "
+            f":play_or_pause_button: a review by _{mattermost_username_by_github_user(requested_reviewer['login'])}_"
+            f" has been requested for "
             f"Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})'")
 
 
