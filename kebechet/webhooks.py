@@ -123,6 +123,12 @@ def handle_github_pull_request_review_requested(
             f"Pull Request '[{pullrequest['title']}]({pullrequest['html_url']})'")
 
 
+def handle_github_pull_request_review_submitted(pullrequest: dict, review: dict) -> None:
+    """Will handle with care."""
+    if review['state'].startswith('approved'):
+        _LOGGER.info("TODO set label 'approved' for {pullrequest['html_url']}")
+
+
 @webhook.route('/github', methods=['POST'])
 def handle_github_webhook():
     """Entry point for github webhook."""
@@ -143,6 +149,7 @@ def handle_github_webhook():
 
         # this will give use the event type...
         event_type = payload['action']
+        # TODO lets use the X-GitHub-Event too
 
         if 'pull_request' in event_type:
             if payload['action'] == 'opened':
@@ -160,6 +167,9 @@ def handle_github_webhook():
         elif 'review_requested' in event_type:
             handle_github_pull_request_review_requested(
                 payload['pull_request'])
+        elif 'submitted' in event_type:
+            handle_github_pull_request_review_submitted(
+                payload['pull_request'], payload['review'])
         else:
             _LOGGER.debug(
                 f"Received a github webhook {json.dumps(request.json)}")
