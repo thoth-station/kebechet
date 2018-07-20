@@ -15,27 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""Manages the 'approved' label."""
 
-"""This will handle al the GitHub webhooks."""
+import logging
+import typing
 
-import os
-from flask import Flask
+from kebechet.utils import cloned_repo
 
-from .enums import ServiceType
-from .managers import UpdateManager, InfoManager
-from .webhooks import webhook
-
-
-__name__ = 'kebechet'
-__version__ = '1.1.0-dev'
-__author__ = 'Fridolin Pokorny <fridolin.pokorny@gmail.com>'
+from .manager import Manager
 
 
-def create_webhook_receiver():
-    """Create, configure and return the Flask application."""
-    app = Flask(__name__)
-    app.config['KEBECHET_GITHUB_WEBHOOK_SECRET'] = os.environ.get(
-        'KEBECHET_GITHUB_WEBHOOK_SECRET')
-    app.register_blueprint(webhook)
+_LOGGER = logging.getLogger(__name__)
 
-    return(app)
+
+class ApprovelManager(Manager):
+    """Manager for adding or removing the 'approved' label of Merge/Pull Requests."""
+
+    def run(self, mr_url: str) -> typing.Optional[dict]:
+        """Add or remove the 'approved' label of the given Merge/Pull Request."""
+        pass

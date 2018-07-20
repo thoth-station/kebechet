@@ -6,66 +6,67 @@ labels:
 metadata:
   name: kebechet-cronjob
   annotations:
-    description: This is Kebechet CronJob Config, this template is meant to be used by Bots, but could also be used by humans...
+    description: >
+      This is Kebechet CronJob Config, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet CronJob
-    version: 1.0.0
+    version: 1.1.0-dev
     tags: poc,thoth,ai-stacks,kebechet
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
 objects:
-- apiVersion: batch/v2alpha1
-  kind: CronJob
-  metadata:
-    name: kebechet
-    labels:
-      app: kebechet
-  spec:
-    schedule: "*/20 * * * *"
-    suspend: false
-    successfulJobsHistoryLimit: 10
-    failedJobsHistoryLimit: 1
-    concurrencyPolicy: Forbid
-    jobTemplate:
-      spec:
-        template:
-          spec:
-            containers:
-            - image: kebechet-job
-              name: kebechet
-              volumeMounts:
-              - name: ssh-config
-                mountPath: /home/user/.ssh
-              env:
-              - name: KEBECHET_TOKEN
-                valueFrom:
-                  secretKeyRef:
-                    key: github-oauth-token
-                    name: kebechet-secret
-              - name: KEBECHET_CONFIGURATION_PATH
-                valueFrom:
-                  configMapKeyRef:
-                    key: kebechet-config
-                    name: kebechet-configmap
-              - name: KEBECHET_VERBOSE
-                valueFrom:
-                  configMapKeyRef:
-                    key: kebechet-verbose
-                    name: kebechet-configmap
-              resources:
-                requests:
-                  memory: "2Gi"
-                  cpu: "2"
-                limits:
-                  memory: "2Gi"
-                  cpu: "2"
-            volumes:
-            - name: ssh-config
-              secret:
-                secretName: kebechet-secret
-                items:
-                - key: ssh-privatekey
-                  path: id_rsa
-                  mode: 0600
-            restartPolicy: Never
+  - apiVersion: batch/v2alpha1
+    kind: CronJob
+    metadata:
+      name: kebechet
+      labels:
+        app: kebechet
+    spec:
+      schedule: "*/20 * * * *"
+      suspend: false
+      successfulJobsHistoryLimit: 10
+      failedJobsHistoryLimit: 1
+      concurrencyPolicy: Forbid
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - image: kebechet-job
+                  name: kebechet
+                  volumeMounts:
+                    - name: ssh-config
+                      mountPath: /home/user/.ssh
+                  env:
+                    - name: KEBECHET_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          key: github-oauth-token
+                          name: kebechet-secret
+                    - name: KEBECHET_CONFIGURATION_PATH
+                      valueFrom:
+                        configMapKeyRef:
+                          key: kebechet-config
+                          name: kebechet-configmap
+                    - name: KEBECHET_VERBOSE
+                      valueFrom:
+                        configMapKeyRef:
+                          key: kebechet-verbose
+                          name: kebechet-configmap
+                  resources:
+                    requests:
+                      memory: "2Gi"
+                      cpu: "2"
+                    limits:
+                      memory: "2Gi"
+                      cpu: "2"
+              volumes:
+                - name: ssh-config
+                  secret:
+                    secretName: kebechet-secret
+                    items:
+                      - key: ssh-privatekey
+                        path: id_rsa
+                        mode: 0600
+              restartPolicy: Never

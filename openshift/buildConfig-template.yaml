@@ -6,66 +6,107 @@ labels:
 metadata:
   name: kebechet-buildconfig
   annotations:
-    description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots, but could also be used by humans...
+    description: >
+      This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots,
+      but could also be used by humans...
     openshift.io/display-name: Kebechet BuildConfig
-    version: 1.0.0
+    version: 1.1.0-dev
     tags: poc,thoth,ai-stacks,kebechet
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
 
 objects:
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    labels:
-      app: kebechet
-    name: kebechet-job
-  spec:
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "1"
-      limits:
-        memory: "1Gi"
-        cpu: "1"
-    output:
-      to:
-        kind: ImageStreamTag
-        name: "kebechet-job:${IMAGE_STREAM_TAG}"
-    runPolicy: Serial
-    source:
-      type: Git
-      git:
-        uri: ${GITHUB_URL}
-        ref: ${GITHUB_REF}
-    strategy:
-      type: Docker
-      dockerStrategy:
-        dockerfilePath: Dockerfile
-    triggers:
-    - imageChange: {}
-      type: ImageChange
-    - type: Generic
-      generic:
-        secret: secret101
-        allowEnv: false
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: kebechet
+      name: kebechet-job
+    spec:
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "1"
+        limits:
+          memory: "1Gi"
+          cpu: "1"
+      output:
+        to:
+          kind: ImageStreamTag
+          name: "kebechet-job:${IMAGE_STREAM_TAG}"
+      runPolicy: Serial
+      source:
+        type: Git
+        git:
+          uri: ${GITHUB_URL}
+          ref: ${GITHUB_REF}
+      strategy:
+        type: Docker
+        dockerStrategy:
+          dockerfilePath: Dockerfile
+      triggers:
+        - imageChange: {}
+          type: ImageChange
+        - type: Generic
+          generic:
+            secret: secret101
+            allowEnv: false
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        app: kebechet
+      name: kebechet-webhooks
+    spec:
+      failedBuildsHistoryLimit: 5
+      output:
+        to:
+          kind: ImageStreamTag
+          name: kebechet-webhooks:latest
+      resources:
+        limits:
+          cpu: "2"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 768Mi
+      source:
+        type: Git
+        git:
+          ref: feature/webhooks
+          uri: https://github.com/goern/thoth-kebechet.git
+      strategy:
+        type: Source
+        sourceStrategy:
+          env:
+            - name: ENABLE_PIPENV
+              value: "1"
+          from:
+            kind: ImageStreamTag
+            name: python-36-centos7:latest
+      successfulBuildsHistoryLimit: 2
+      triggers:
+        - type: ImageChange
+          imageChange: {}
+        - type: ConfigChange
 
 parameters:
-- description: Git repository for Thoth's Kebechet
-  displayName: Thoth Kebechet git repository
-  required: true
-  name: GITHUB_URL
-  value: 'https://github.com/thoth-station/kebechet'
+  - description: Git repository for Thoth's Kebechet
+    displayName: Thoth Kebechet git repository
+    required: true
+    name: GITHUB_URL
+    value: 'https://github.com/thoth-station/kebechet'
 
-- description: Git repository for Thoth's Graph Sync Job
-  displayName: Thoth Kebechet git reference
-  required: true
-  name: GITHUB_REF
-  value: 'master'
+  - description: Git repository for Thoth's Graph Sync Job
+    displayName: Thoth Kebechet git reference
+    required: true
+    name: GITHUB_REF
+    value: 'master'
 
-- description: Tag of the output ImageStream the resulting container image should go to
-  displayName: ImageStream Tag
-  required: true
-  name: IMAGE_STREAM_TAG
-  value: 'latest'
+  - description: Tag of the output ImageStream the resulting container image should go to
+    displayName: ImageStream Tag
+    required: true
+    name: IMAGE_STREAM_TAG
+    value: 'latest'
