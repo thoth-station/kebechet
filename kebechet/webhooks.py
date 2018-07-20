@@ -116,7 +116,6 @@ def handle_github_pull_request_review(pullrequest: dict, review: dict) -> None:
 def handle_github_pull_request_review_requested(
         pullrequest: dict) -> None:
     """Will handle with care."""
-
     for requested_reviewer in pullrequest['requested_reviewers']:
         notify_channel(
             f":play_or_pause_button: a review by _{mattermost_username_by_github_user(requested_reviewer['login'])}_"
