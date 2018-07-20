@@ -34,7 +34,7 @@ ENDPOINT_URL = os.getenv('KEBESCHET_MATTERMOST_ENDPOINT_URL', None)
 GITHUB_MATTERMOST_MAPPING = {
     "goern": "goern",
     "fridex": "fridolin",
-    "hashard16": "hnalla",
+    "harshad16": "hnalla",
     "ace2107": "akash2107",
     "durandom": "hild",
     "sub-mod": "subin",
