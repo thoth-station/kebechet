@@ -10,7 +10,7 @@ pipenv = "*"
 requests = "*"
 toml = "*"
 "delegator.py" = "*"
-gitpython = "*"
+gitpython = "==1.0.1"
 pyyaml = "*"
 igitt = "*"
 
