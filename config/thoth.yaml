@@ -36,3 +36,5 @@ repositories:
     slug: thoth-station/kebechet
   - <<: *update_config
     slug: thoth-station/jupyter-notebook
+  - <<: *update_config
+    slug: thoth-station/sesheta
