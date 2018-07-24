@@ -20,9 +20,9 @@
 import logging
 import typing
 
+from kebechet.managers.manager import ManagerBase
 from kebechet.utils import cloned_repo
 
-from .manager import Manager
 from .messages import INFO_REPORT
 
 _INFO_ISSUE_NAME = 'Kebechet info'
@@ -30,7 +30,7 @@ _INFO_ISSUE_NAME = 'Kebechet info'
 _LOGGER = logging.getLogger(__name__)
 
 
-class InfoManager(Manager):
+class InfoManager(ManagerBase):
     """Manager for submitting information about running Kebechet instance."""
 
     def run(self, labels: list) -> typing.Optional[dict]:

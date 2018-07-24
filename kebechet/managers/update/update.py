@@ -28,14 +28,14 @@ from functools import partial
 
 import git
 
-from kebechet.exception import PipenvError
 from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
-from kebechet.utils import cloned_repo
+from kebechet.exception import PipenvError
+from kebechet.managers.manager import ManagerBase
 from kebechet.source_management import Issue
 from kebechet.source_management import MergeRequest
+from kebechet.utils import cloned_repo
 
-from .manager import Manager
 from .messages import ISSUE_CLOSE_COMMENT
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_INITIAL_LOCK
@@ -56,7 +56,7 @@ _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 # updated on subsequent calls.
 
 
-class UpdateManager(Manager):
+class UpdateManager(ManagerBase):
     """Manage updates of dependencies."""
 
     def __init__(self, *args, **kwargs):
