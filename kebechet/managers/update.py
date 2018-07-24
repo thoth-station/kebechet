@@ -396,7 +396,7 @@ class UpdateManager(Manager):
             _LOGGER.debug("No need to update refresh comment, the issue is up to date")
             return
 
-        for issue_comment in issue.commnets:
+        for issue_comment in issue.comments:
             if self.sha in issue_comment.body:
                 _LOGGER.debug(f"No need to update refresh comment, comment for the current "
                               f"master {self.sha[:7]!r} found in a comment")
