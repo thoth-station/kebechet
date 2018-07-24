@@ -3,11 +3,11 @@ repositories:
   - &update_config
     slug: thoth-station/adviser
     token: '{KEBECHET_TOKEN}'
-    labels:
-      - bot
     managers:
-      - update
-      - info
+      - name: update
+        configuration:
+          labels: bot
+      - name: info
   - <<: *update_config
     slug: thoth-station/analyzer
   - <<: *update_config
