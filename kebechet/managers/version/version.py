@@ -127,6 +127,7 @@ class VersionManager(ManagerBase):
                 repo.index.commit(message)
                 # If this PR already exists, this will fail.
                 repo.remote().push(version_identifier)
+                repo.remote().push(tags=True)
 
                 request = self.sm.open_merge_request(message, branch_name, body='', labels=labels)
 
