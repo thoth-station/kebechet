@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def get_install_requires():
@@ -31,9 +31,6 @@ setup(
     author='Fridolin Pokorny',
     author_email='fridolin@redhat.com',
     license='GPLv3+',
-    packages=[
-        'kebechet',
-        'kebechet.managers',
-    ],
+    packages=find_packages(),
     install_requires=get_install_requires()
 )
