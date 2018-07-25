@@ -29,6 +29,8 @@ from IGitt.Interfaces.Issue import Issue
 _LOGGER = logging.getLogger(__name__)
 _VERSION_REQUEST_ISSUE = ' release'
 _VERSION_PULL_REQUEST_NAME = 'Release of version {}'
+_NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to release "
+_MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to release "
 
 
 class VersionManager(ManagerBase):
@@ -51,7 +53,7 @@ class VersionManager(ManagerBase):
                     continue
 
                 old_version = parts[1]
-                _LOGGER.info("Old version found in sources: %r", old_version)
+                _LOGGER.info("Old version found in sources: %s", old_version)
 
                 content[idx] = f'__version__ = "{new_version}"'
                 changed = True
@@ -76,20 +78,20 @@ class VersionManager(ManagerBase):
                     file_path = os.path.join(root, file_name)
                     adjusted = self._adjust_version_file(file_path, new_version)
                     if adjusted:
-                        repo.git.add(file_path[len(os.getcwd()):])
+                        repo.git.add(file_path)
                         adjusted_count += 1
 
         if adjusted_count == 0:
-            error_msg = f"No version identifier found in sources to release {new_version}"
+            error_msg = _NO_VERSION_FOUND_ISSUE_NAME + new_veresion
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda x: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
+                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
                 labels
             )
 
         if adjusted_count > 1:
-            error_msg = f"Multiple version identifiers found in sources to release {new_version}"
+            error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME + new_veresion
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
@@ -101,8 +103,13 @@ class VersionManager(ManagerBase):
 
     def run(self, labels: list = None) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
+        reported_issues = []
         for issue in self.sm.repository.issues:
             issue_title = issue.title.strip()
+
+            if issue_title.startswith((_NO_VERSION_FOUND_ISSUE_NAME, _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME)):
+                # Reported issues that should be closed on success version change.
+                reported_issues.append(issue)
 
             if not issue_title.endswith(_VERSION_REQUEST_ISSUE):
                 continue
@@ -111,13 +118,13 @@ class VersionManager(ManagerBase):
             if len(parts) != 2:
                 continue
 
-            _LOGGER.info(f"Found an issue which requests new version release with number: {issue.number}")
+            _LOGGER.info("Found an issue #%s which requests new version release: %s", issue.number, issue.title)
             # The first part is our version, the second is the 'release' keyword.
             version_identifier = parts[0]
             branch_name = 'v' + version_identifier
 
             with cloned_repo(self.service_url, self.slug) as repo:
-                if not self._adjust_version_in_sources(version_identifier, labels, issue):
+                if not self._adjust_version_in_sources(repo, version_identifier, labels, issue):
                     _LOGGER.error("Giving up with automated release")
                     return
 
@@ -126,12 +133,21 @@ class VersionManager(ManagerBase):
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
                 repo.index.commit(message)
                 # If this PR already exists, this will fail.
-                repo.remote().push(version_identifier)
+                repo.remote().push(branch_name)
                 repo.remote().push(tags=True)
 
-                request = self.sm.open_merge_request(message, branch_name, body='', labels=labels)
+                request = self.sm.open_merge_request(
+                    message,
+                    branch_name,
+                    body='Fixes: #' + str(issue.number),
+                    labels=labels
+                )
 
                 _LOGGER.info(
                     f"Opened merge request with {request.number} for new release of {self.slug} "
                     f"in version {version_identifier}"
                 )
+
+        for reported_issue in reported_issues:
+            reported_issue.add_comment("Closing as this issue is no longer relevant.")
+            reported_issue.close()

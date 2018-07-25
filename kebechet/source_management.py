@@ -86,7 +86,7 @@ class SourceManagement:
                 _LOGGER.debug(f"Refresh comment not added")
         else:
             issue = self.repository.create_issue(title, body())
-            issue.labels = set(labels)
+            issue.labels = set(labels or [])
             _LOGGER.info(f"Reported issue {title!r} with id #{issue.number}")
             return issue
 
@@ -164,7 +164,7 @@ class SourceManagement:
         else:
             raise NotImplementedError
 
-        merge_request.labels = set(labels)
+        merge_request.labels = set(labels or [])
         return merge_request
 
     def _github_delete_branch(self, branch: str) -> None:
