@@ -189,27 +189,3 @@ See attached report below to inspect this issue.
 {environment_details}
 ```
 """
-
-INFO_REPORT = \
-    """
-Information about dependency management for the current master branch with SHA {sha}.
-
-<details>
-  <summary>Dependency graph</summary>
-
-```
-{dependency_graph}
-```
-
-</details>
-
-<details>
-  <summary>Environment details</summary>
-
-```
-{environment_details}
-```
-
-</details>
-
-"""
