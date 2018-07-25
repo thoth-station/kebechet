@@ -61,11 +61,10 @@ class _Config:
                     items.pop('service_type', None), \
                     items.pop('service_url', None), \
                     items.pop('token', None), \
-                    items.pop('labels', []), \
                     items.pop('tls_verify', True)
 
                 if items:
-                    _LOGGER.warning(f"Unknown configuration entry in configuration of {slug!r}: {items}")
+                    _LOGGER.warning(f"Unknown configuration entry in configuration of {value[1]!r}: {items}")
 
                 yield value
             except KeyError:
@@ -99,7 +98,7 @@ class _Config:
 
         config.from_file(configuration_file)
 
-        for managers, slug, service_type, service_url, token, labels, tls_verify in config.iter_entries():
+        for managers, slug, service_type, service_url, token, tls_verify in config.iter_entries():
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
             if service_url and not service_url.startswith(('https://', 'http://')):
@@ -127,10 +126,10 @@ class _Config:
 
                 kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
                 if not kebechet_manager:
-                    _LOGGER.error("Unable to find requested manager {manager!r}, skipping")
+                    _LOGGER.error("Unable to find requested manager %r, skipping", manager_name)
                     continue
 
-                _LOGGER.info(f"Running manager {manager!r} for {slug!r}")
+                _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
                 manager_configuration = manager.pop('configuration', {})
                 if manager:
                     _LOGGER.warning(f"Ignoring option {manager} in manager entry for {slug}")
