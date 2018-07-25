@@ -8,6 +8,7 @@ repositories:
         configuration:
           labels: bot
       - name: info
+      - name: version
   - <<: *update_config
     slug: thoth-station/analyzer
   - <<: *update_config
