@@ -119,14 +119,25 @@ class _Config:
                 _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
 
             for manager in managers:
-                kebechet_manager = REGISTERED_MANAGERS.get(manager)
+                try:
+                    manager_name = manager.pop('name')
+                except Exception:
+                    _LOGGER.exception(f"No manager name provided in configuration entry for {slug}, ignoring entry")
+                    continue
 
+                kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
                 if not kebechet_manager:
                     _LOGGER.error("Unable to find requested manager {manager!r}, skipping")
+                    continue
 
                 _LOGGER.info(f"Running manager {manager!r} for {slug!r}")
+                manager_configuration = manager.pop('configuration', {})
+                if manager:
+                    _LOGGER.warning(f"Ignoring option {manager} in manager entry for {slug}")
+
                 try:
-                    kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token).run(labels)
+                    instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
+                    instance.run(**manager_configuration)
                 except Exception as exc:
                     _LOGGER.exception(
                         f"An error occurred during run of manager {manager!r} {kebechet_manager} for {slug}, skipping"
