@@ -20,17 +20,20 @@
 import os
 import logging
 
+from git import Repo
+from IGitt.Interfaces.Issue import Issue
+import yaml
+
 from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
 
-from git import Repo
-from IGitt.Interfaces.Issue import Issue
 
 _LOGGER = logging.getLogger(__name__)
 _VERSION_REQUEST_ISSUE = ' release'
 _VERSION_PULL_REQUEST_NAME = 'Release of version {}'
 _NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to release "
 _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to release "
+_NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository",
 
 
 class VersionManager(ManagerBase):
@@ -82,7 +85,7 @@ class VersionManager(ManagerBase):
                         adjusted_count += 1
 
         if adjusted_count == 0:
-            error_msg = _NO_VERSION_FOUND_ISSUE_NAME + new_veresion
+            error_msg = _NO_VERSION_FOUND_ISSUE_NAME + new_version
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
@@ -91,7 +94,7 @@ class VersionManager(ManagerBase):
             )
 
         if adjusted_count > 1:
-            error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME + new_veresion
+            error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME + new_version
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
@@ -101,7 +104,29 @@ class VersionManager(ManagerBase):
 
         return adjusted_count == 1
 
-    def run(self, labels: list = None) -> None:
+    def _get_maintainers(self, labels: list = None) -> list:
+        """Get maintainers based on configuration.
+
+        Maintainers can be either stated in the configuration or in the OWNERS file in the repo itself.
+        """
+        try:
+            with open('OWNERS', 'r') as owners_file:
+                owners = yaml.load(owners_file)
+            maintainers = list(map(str, owners['maintainers']))
+        except (FileNotFoundError, KeyError, ValueError, yaml.ParseError):
+            _LOGGER.exception("Failed to load maintainers file")
+            self.sm.open_issue_if_not_exist(
+                _NO_MAINTAINERS_ERROR,
+                lambda: "This repository is not correctly setup for automated version releases. "
+                        "Please revisit bot configuration.",
+                labels=labels
+            )
+            return []
+
+        self.sm.close_issue_if_exists(_NO_MAINTAINERS_ERROR, "No longer relevant for the current bot setup.")
+        return maintainers
+
+    def run(self, maintainers: list = None, labels: list = None) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         reported_issues = []
         for issue in self.sm.repository.issues:
@@ -124,6 +149,17 @@ class VersionManager(ManagerBase):
             branch_name = 'v' + version_identifier
 
             with cloned_repo(self.service_url, self.slug) as repo:
+                maintainers = maintainers or self._get_maintainers(labels)
+                if issue.author.username not in maintainers:
+                    issue.add_comment(
+                        f"Sorry, @{issue.author.username} but you are not stated in maintainers section for "
+                        f"this project. Maintainers are @" + ', @'.join(maintainers)
+                        if maintainers else "Sorry, no maintainers configured."
+                    )
+                    issue.close()
+                    # Next issue.
+                    continue
+
                 if not self._adjust_version_in_sources(repo, version_identifier, labels, issue):
                     _LOGGER.error("Giving up with automated release")
                     return

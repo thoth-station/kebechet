@@ -6,9 +6,14 @@ repositories:
     managers:
       - name: update
         configuration:
-          labels: bot
+          labels: [bot]
       - name: info
       - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          labels: [bot]
   - <<: *update_config
     slug: thoth-station/analyzer
   - <<: *update_config
