@@ -33,7 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 class InfoManager(ManagerBase):
     """Manager for submitting information about running Kebechet instance."""
 
-    def run(self, labels: list) -> typing.Optional[dict]:
+    def run(self) -> typing.Optional[dict]:
         """Check for info issue and close it with a report."""
         issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
