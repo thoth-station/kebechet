@@ -118,6 +118,9 @@ class _Config:
                 _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
 
             for manager in managers:
+                # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
+                # YAML references, we do not break.
+                manager = dict(manager)
                 try:
                     manager_name = manager.pop('name')
                 except Exception:
