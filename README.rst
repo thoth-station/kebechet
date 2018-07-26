@@ -50,9 +50,9 @@ To deploy kebechet on OpenShift cluster. Use the following Ansible command with 
     --extra-vars=OCP_TOKEN=<openshift_cluster_token> \
     --extra-vars=KEBECHET_INFRA_NAMESPACE=<openshift_cluster_namespace> \
     --extra-vars=KEBECHET_APPLICATION_NAMESPACE=<openshift_cluster_namespace> \
-    --extra-vars=KEBECHET_CONFIGURATION_PATH=<github_repo_config.yaml> \
-    --extra-vars=KEBECHET_TOKEN=<github_oauth_token> \
-    --extra-vars=KEBECHET_SSH_PRIVATE_KEY_PATH=<github_ssh_private_key_path> \
+    --extra-vars=KEBECHET_CONFIGURATION_PATH=<config.yaml> \
+    --extra-vars=KEBECHET_TOKEN=<oauth_token> \
+    --extra-vars=KEBECHET_SSH_PRIVATE_KEY_PATH=<git_ssh_private_key_path> \
     playbooks/provision.yaml
 
 
