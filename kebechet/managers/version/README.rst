@@ -3,7 +3,9 @@ Kebechet Version Manager
 
 Edit version information in sources and open a pull request with tagged commit.
 
-This manager can simplify package releases for you. If you open an issue that states requests
+This manager can simplify package releases for you. If you open an issue that requests new version release, this manager will do actions needed on source code level.
+
+A requirement to make this manager operational is that your version should be stated as a string in your `setup.py` or `__init__.py` file in a variable named `__version__`.
 
 
 Available Package release commands
