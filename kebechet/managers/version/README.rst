@@ -42,7 +42,7 @@ An example configuration:
       token: '{SECRET_TOKEN_IN_ENV}'
       service_type: github  # or gitlab
       # Optionally for self-hosted services:
-      # servie_url: <URL>
+      # service_url: <URL>
       # tls_verify: true/false
       managers:
         - name: update
