@@ -1,7 +1,7 @@
 Kebechet
 --------
 
-  I'm Kebechet, goddess of freshness. I will keep your repository and dependencies fresh and up-to-date.
+  I'm Kebechet, goddess of freshness. I will keep your sources and dependencies fresh and up-to-date.
 
 Kebechet is a SourceOps bot that automates updating dependencies of your project. Currently, it supports managing and updating Python projects based on `pipenv <https://docs.pipenv.org/>`_ files (``Pipfile`` and ``Pipfile.lock``) or ``requirements.txt``/``requirements.in`` files (see `pip-tools <https://pypi.org/project/pip-tools/>`_ - Kebechet is a replacement for it)
 
@@ -10,9 +10,9 @@ Configuration of Kebechet
 
 Kebechet is configured using a simple YAML configuration file. Check documentation of managers to get all the available options.
 
-Each codfigration entry configures a manager. Please check `managers and examples <https://github.com/thoth-station/kebechet/tree/master/kebechet/managers>`_ to get info about configuration options.
+Each configuration entry configures a manager. Please check `managers and examples <https://github.com/thoth-station/kebechet/tree/master/kebechet/managers>`_ to get info about configuration options.
 
-The YAML configuration file can be supplied directly as a path to a file on filesystem as well as as a URL to a file - handy for managing configuration of your Kebechet deployment in a Git repository (you have to supply a URL to a raw YAML configuration file).
+The YAML configuration file can be supplied directly as a path to a file on filesystem as well as a URL to a file - handy for managing configuration of your Kebechet deployment in a Git repository (you have to supply a URL to a raw YAML configuration file).
 
 Managers
 ========

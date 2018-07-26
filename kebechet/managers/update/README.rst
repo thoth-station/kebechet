@@ -1,7 +1,7 @@
 Kebechet Update Manager
 -----------------------
 
-This manager is responsible for automatic updates of packages in a repository based on `Pipfile` or `requirements.txt`
+This manager is responsible for automatic updates of dependencies in a repository based on `Pipfile` or `requirements.txt`
 file.
 
 A prerequisite for this manager is to have `Pipfile`, `requirements.in` or `requirements-dev.in` present in the repo.
@@ -70,7 +70,7 @@ An example configuration:
               # Labels for opened issues and pull requests.
               - bot
 
-You can find this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.
+You can see this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.
 
 Manager Author
 ==============

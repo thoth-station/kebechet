@@ -35,4 +35,4 @@ If you wish to operate on repository source code, you can request to clone it:
             repo.git.add(my_file)
             repo.git.push()
 
-The last thing you need to do, is to register your manager to `REGISTERED_MANAGERS` so Kebechet knows about your manager. Manager can be referenced by its name in lowercase (class name without the "manager" suffix).
+The last thing you need to do, is to register your manager to `REGISTERED_MANAGERS` constant (you can find it in `kebechet/managers/__init__.py` file) so Kebechet knows about your manager. Manager can be referenced by its name in lowercase (class name without the "manager" suffix).
