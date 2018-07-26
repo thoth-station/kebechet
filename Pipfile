@@ -13,6 +13,7 @@ toml = "*"
 gitpython = "==1.0.1"
 pyyaml = "*"
 igitt = "*"
+semver = "*"
 
 [dev-packages]
 pytest = "*"
