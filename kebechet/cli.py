@@ -24,7 +24,6 @@ import click
 import daiquiri
 
 from kebechet import __version__ as kebechet_version
-from kebechet.managers import UpdateManager
 from kebechet.config import config
 
 daiquiri.setup(level=logging.INFO)
