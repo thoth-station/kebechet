@@ -17,24 +17,26 @@ The YAML configuration file can be supplied directly as a path to a file on file
 Managers
 ========
 
-A list of managers with their configuration (documentation lives in a manger directory) can be found `in the repo <https://github.com/thoth-station/kebechet/tree/master/kebechet/managers>`_.
+Kebechet consists of managers that perform certain actions.
+
+A list of managers with their configuration (documentation lives in the manger directory) can be found `in the repo <https://github.com/thoth-station/kebechet/tree/master/kebechet/managers>`_.
 
 Issues created by Kebechet
 ==========================
 
-If there are any issues that have serious impact on Kebechet functionality, Kebechet will automatically open an issue in the given repository. These issues can be configuration issues of Kebechet itself or issues on manager when there are issues in the manager itself.
+If there are any issues that have serious impact on Kebechet functionality, Kebechet will automatically open an issue in the given repository. These issues can be configuration issues of Kebechet itself or issues in manager itself.
 
 Suppressing bot verbosity
 =========================
 
 Bot updates pull requests and issues and notifies about updates via comments (to issues or pull requests). You can suppress this behaviour by setting lable 'silent-bot' to issue or to a pull request. The bot will still perform updates but update comments will not be added.
 
-This is especially helpful if you have failing updates of your dependency and you would like to keep the pull request opened and check for fix later. Setting 'silent-bot' to the PR will suppress Kebechet to post updates and you will not retrieve spam messages anymore.
+This is especially helpful for example if you have failing updates of your dependency and you would like to keep the pull request opened and check for fix later. Setting 'silent-bot' label to the PR will suppress Kebechet to post updates and you will not retrieve spam messages anymore.
 
 Notes
 =====
 
-To issue an update to Git repository, Kebechet creates branches in the provided repository. These branches are named based the on direct dependency that caused updates with its version. If the remote Git already has the given branch present, there will be performed a check for the base (master) against which the pull request is opened. If there were made changes in the master branch, Kebechet automatically updates commit so all updates issued with Kebechet are done on top of the current master. Note these updates are desctructive for older commits in the pull request - use ``git cherry-pick`` from Kebechet's update branch if you would like to do changes in the source code with dependency updates.
+To issue an update to Git repository, Kebechet creates branches in the provided repository.
 
 Deploying Kebechet
 =================
