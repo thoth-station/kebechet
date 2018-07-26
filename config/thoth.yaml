@@ -44,3 +44,12 @@ repositories:
     slug: thoth-station/jupyter-notebook
   - <<: *update_config
     slug: thoth-station/sesheta
+  - slug: user-cont/conu
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: 
+            - bot
+            - thoth-station
+            - kebechet
