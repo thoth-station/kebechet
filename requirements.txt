@@ -5,7 +5,7 @@ requests
 toml
 delegator.py
 pyyaml
-igitt
+git+https://gitlab.com/gitmate/open-source/IGitt.git
 # Pinned due to igitt pinning.
 gitpython==1.0.1
 semver
