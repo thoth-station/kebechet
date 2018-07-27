@@ -94,7 +94,7 @@ class VersionManager(ManagerBase):
         adjusted = []
         for root, _, files in os.walk('./'):
             for file_name in files:
-                if file_name in ('setup.py', '__init__.py'):
+                if file_name in ('setup.py', '__init__.py', 'version.py'):
                     file_path = os.path.join(root, file_name)
                     new_version = self._adjust_version_file(file_path, issue)
                     if new_version:
