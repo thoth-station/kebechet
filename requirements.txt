@@ -1,7 +1,6 @@
 click
 daiquiri
 pipenv
-requests
 toml
 delegator.py
 pyyaml
