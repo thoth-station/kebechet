@@ -5,7 +5,7 @@ requests
 toml
 delegator.py
 pyyaml
-IGitt
+IGitt==0.4.1.dev20180722120744
 # Pinned due to igitt pinning.
 gitpython==1.0.1
 semver

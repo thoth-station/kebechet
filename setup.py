@@ -32,8 +32,5 @@ setup(
     author_email='fridolin@redhat.com',
     license='GPLv3+',
     packages=find_packages(),
-    install_requires=get_install_requires(),
-    dependency_links=[
-        'git+https://gitlab.com/gitmate/open-source/IGitt.git#egg=IGitt',
-    ]
+    install_requires=get_install_requires()
 )
