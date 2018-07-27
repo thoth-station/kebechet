@@ -80,34 +80,41 @@ class _Config:
 
         # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
         # the IGitt's handling of these methods.
+        original_post = requests.Session.post
+        original_delete = requests.Session.delete
+        original_put = requests.Session.put
+        original_get = requests.Session.get
+        original_head = requests.Session.head
+        original_patch = requests.Session.patch
+
         def post(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.post(*args, **kwargs, verify=verify)
+            return original_post(*args, **kwargs, verify=verify)
         requests.Session.post = post
 
         def delete(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.delete(*args, **kwargs, verify=verify)
+            return original_delete(*args, **kwargs, verify=verify)
         requests.Session.delete = delete
 
         def put(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.put(*args, **kwargs, verify=verify)
+            return original_put(*args, **kwargs, verify=verify)
         requests.Session.put = put
 
         def get(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.get(*args, **kwargs, verify=verify)
+            return original_get(*args, **kwargs, verify=verify)
         requests.Session.get = get
 
         def head(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.head(*args, **kwargs, verify=verify)
+            return original_head(*args, **kwargs, verify=verify)
         requests.Session.head = head
 
         def patch(*args, **kwargs):
             kwargs.pop('verify', None)
-            return requests.Session.patch(*args, **kwargs, verify=verify)
+            return original_patch(*args, **kwargs, verify=verify)
         requests.Session.patch = patch
 
     @classmethod
