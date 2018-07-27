@@ -14,16 +14,12 @@ Available Package release commands
 To run this manager, open an issue with one of the following titles:
 
 * "2018.7.26 release" - changes version to "2018.7.26"
-* "New calendar release" (WIP) - creates release based on `calver <https://calver.org>`_
-* "New major release" (WIP) - bumps major release version respecting `semver <https://semver.org/>`_
-* "New minor release" (WIP) - bumps minor release version respecting `semver <https://semver.org/>`_
-* "New patch release" (WIP) - bumps patch release version respecting `semver <https://semver.org/>`_
-* "New major pre-release" (WIP) - creates a new major pre-release respecting `semver <https://semver.org/>`_
-* "New minor pre-release" (WIP) - creates a new minor pre-release respecting `semver <https://semver.org/>`_
-* "New patch pre-release" (WIP) - creates a new patch pre-release respecting `semver <https://semver.org/>`_
-* "New major build release" (WIP) - creates a new major prerelease respecting `semver <https://semver.org/>`_
-* "New minor build release" (WIP) - creates a new minor prerelease respecting `semver <https://semver.org/>`_
-* "New patch build release" (WIP) - creates a new patch prerelease respecting `semver <https://semver.org/>`_
+* "New calendar release" - creates release based on `calver <https://calver.org>`_
+* "New major release" - bumps major release version respecting `semver <https://semver.org/>`_
+* "New minor release" - bumps minor release version respecting `semver <https://semver.org/>`_
+* "New patch release" - bumps patch release version respecting `semver <https://semver.org/>`_
+* "New pre-release" - creates a pre-release respecting `semver <https://semver.org/>`_
+* "New build release" - creates a new build release respecting `semver <https://semver.org/>`_
 
 
 This manager will automatically bump version based on issue request, opens a pull request with tagged commit that states
