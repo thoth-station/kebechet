@@ -19,7 +19,7 @@
 
 import logging
 import os
-from functools import partialmethod
+from functools import wraps
 import yaml
 
 import urllib3
@@ -78,20 +78,31 @@ class _Config:
         if not verify:
             _LOGGER.warning(f"Turning off TLS certificate verification for {slug} hosted at {service_url}")
 
-        to_patch = {
-            'post': requests.Session.post,
-            'delete': requests.Session.delete,
-            'put': requests.Session.put,
-            'get': requests.Session.get,
-            'head': requests.Session.head,
-            'patch': requests.Session.patch
-        }
-        for name, method in to_patch.items():
-            # The last partial method will apply.
-            call = partialmethod(method, verify=verify)
-            # We need this as IGitt checks for __name__ in sources and partial method does not provide it.
-            call.__name__ = name
-            setattr(requests.Session, name, call)
+        # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
+        # the IGitt's handling of these methods.
+        def post(*args, **kwargs):
+            return requests.Session.post(*args, **kwargs, verify=verify)
+        requests.Session.post = post
+
+        def delete(*args, **kwargs):
+            return requests.Session.delete(*args, **kwargs, verify=verify)
+        requests.Session.delete = delete
+
+        def put(*args, **kwargs):
+            return requests.Session.put(*args, **kwargs, verify=verify)
+        requests.Session.put = put
+
+        def get(*args, **kwargs):
+            return requests.Session.get(*args, **kwargs, verify=verify)
+        requests.Session.get = get
+
+        def head(*args, **kwargs):
+            return requests.Session.head(*args, **kwargs, verify=verify)
+        requests.Session.head = head
+
+        def patch(*args, **kwargs):
+            return requests.Session.patch(*args, **kwargs, verify=verify)
+        requests.Session.patch = patch
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
