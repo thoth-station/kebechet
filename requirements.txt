@@ -7,5 +7,6 @@ delegator.py
 pyyaml
 IGitt==0.4.1.dev20180722120744
 # Pinned due to igitt pinning.
-gitpython==1.0.1
+gitpython==2.1.8
+requests==2.18.4
 semver

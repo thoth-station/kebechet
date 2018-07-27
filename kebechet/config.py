@@ -88,7 +88,10 @@ class _Config:
         }
         for name, method in to_patch.items():
             # The last partial method will apply.
-            setattr(requests.Session, name, partialmethod(method, verify=verify))
+            call = partialmethod(method, verify=verify)
+            # We need this as IGitt checks for __name__ in sources and partial method does not provide it.
+            call.__name__ = name
+            setattr(requests.Session, name, call)
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
