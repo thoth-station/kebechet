@@ -222,7 +222,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Fixes: #' + str(issue.number),
+                    body='Related: #' + str(issue.number),
                     labels=labels
                 )
 
