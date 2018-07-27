@@ -19,7 +19,6 @@
 
 import logging
 import os
-from functools import partialmethod
 import yaml
 
 import urllib3
@@ -78,17 +77,44 @@ class _Config:
         if not verify:
             _LOGGER.warning(f"Turning off TLS certificate verification for {slug} hosted at {service_url}")
 
-        to_patch = {
-            'post': requests.Session.post,
-            'delete': requests.Session.delete,
-            'put': requests.Session.put,
-            'get': requests.Session.get,
-            'head': requests.Session.head,
-            'patch': requests.Session.patch
-        }
-        for name, method in to_patch.items():
-            # The last partial method will apply.
-            setattr(requests.Session, name, partialmethod(method, verify=verify))
+        # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
+        # the IGitt's handling of these methods.
+        original_post = requests.Session.post
+        original_delete = requests.Session.delete
+        original_put = requests.Session.put
+        original_get = requests.Session.get
+        original_head = requests.Session.head
+        original_patch = requests.Session.patch
+
+        def post(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_post(*args, **kwargs, verify=verify)
+        requests.Session.post = post
+
+        def delete(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_delete(*args, **kwargs, verify=verify)
+        requests.Session.delete = delete
+
+        def put(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_put(*args, **kwargs, verify=verify)
+        requests.Session.put = put
+
+        def get(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_get(*args, **kwargs, verify=verify)
+        requests.Session.get = get
+
+        def head(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_head(*args, **kwargs, verify=verify)
+        requests.Session.head = head
+
+        def patch(*args, **kwargs):
+            kwargs.pop('verify', None)
+            return original_patch(*args, **kwargs, verify=verify)
+        requests.Session.patch = patch
 
     @classmethod
     def run(cls, configuration_file: str) -> None:

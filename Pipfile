@@ -12,7 +12,7 @@ toml = "*"
 "delegator.py" = "*"
 gitpython = "==1.0.1"
 pyyaml = "*"
-igitt = "*"
+igitt = {git = "https://gitlab.com/gitmate/open-source/IGitt.git"}
 semver = "*"
 
 [dev-packages]
