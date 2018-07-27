@@ -19,28 +19,42 @@
 
 import os
 import logging
+import typing
 
 from git import Repo
 from IGitt.Interfaces.Issue import Issue
 import yaml
+import semver
+from datetime import datetime
 
 from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
 
 
 _LOGGER = logging.getLogger(__name__)
-_VERSION_REQUEST_ISSUE = ' release'
 _VERSION_PULL_REQUEST_NAME = 'Release of version {}'
-_NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to release "
-_MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to release "
-_NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository",
+_NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to perform a release"
+_MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to perform a new release"
+_NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
+_DIRECT_VERSION_TITLE = ' release'
+_RELEASE_TITLES = {
+    "New calendar release": lambda _: datetime.utcnow().strftime("%y.%m.%d"),
+    "New major release": semver.bump_major,
+    "New minor release": semver.bump_minor,
+    "New patch release": semver.bump_patch,
+    "New pre-release": semver.bump_prerelease,
+    "New build release": semver.bump_build,
+}
+
+
+class VersionError(Exception):
+    """An exception raised on invalid version provided or found in the repo."""
 
 
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
 
-    @staticmethod
-    def _adjust_version_file(file_path: str, new_version: str):
+    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[str]:
         """Adjust version in the given file, return signalizes whether the return value indicates change in file."""
         with open(file_path, 'r') as input_file:
             content = input_file.read().splitlines()
@@ -55,14 +69,17 @@ class VersionManager(ManagerBase):
                     )
                     continue
 
-                old_version = parts[1]
+                old_version = parts[1][1:-1]  # Remove ' and " in string representation.
                 _LOGGER.info("Old version found in sources: %s", old_version)
+
+                new_version = self._get_new_version(issue.title.strip(), old_version)
+                _LOGGER.info("Computed new version: %s", new_version)
 
                 content[idx] = f'__version__ = "{new_version}"'
                 changed = True
 
         if not changed:
-            return False
+            return None
 
         # Apply changes.
         with open(file_path, 'w') as output_file:
@@ -70,22 +87,23 @@ class VersionManager(ManagerBase):
             # Add new line at the of file explicitly.
             output_file.write("\n")
 
-        return True
+        return None
 
-    def _adjust_version_in_sources(self, repo: Repo, new_version: str, labels: list, issue: Issue):
+    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[str]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted_count = 0
+        new_version = None
         for root, _, files in os.walk('./'):
             for file_name in files:
                 if file_name in ('setup.py', '__init__.py', 'version.py'):
                     file_path = os.path.join(root, file_name)
-                    adjusted = self._adjust_version_file(file_path, new_version)
-                    if adjusted:
+                    new_version = self._adjust_version_file(file_path, issue)
+                    if new_version:
                         repo.git.add(file_path)
                         adjusted_count += 1
 
         if adjusted_count == 0:
-            error_msg = _NO_VERSION_FOUND_ISSUE_NAME + new_version
+            error_msg = _NO_VERSION_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
@@ -94,7 +112,7 @@ class VersionManager(ManagerBase):
             )
 
         if adjusted_count > 1:
-            error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME + new_version
+            error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
@@ -102,7 +120,7 @@ class VersionManager(ManagerBase):
                 labels
             )
 
-        return adjusted_count == 1
+        return new_version
 
     def _get_maintainers(self, labels: list = None) -> list:
         """Get maintainers based on configuration.
@@ -126,6 +144,29 @@ class VersionManager(ManagerBase):
         self.sm.close_issue_if_exists(_NO_MAINTAINERS_ERROR, "No longer relevant for the current bot setup.")
         return maintainers
 
+    @staticmethod
+    def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
+        """Get next version based on user request."""
+        handler = _RELEASE_TITLES.get(issue_title)
+        if handler:
+            try:
+                return handler(current_version)
+            except ValueError as exc:  # Semver raises ValueError when version cannot be parsed.
+                raise VersionError(f"Wrong version specifier found in sources: {str(exc)}") from exc
+
+        if issue_title.endswith(_DIRECT_VERSION_TITLE):  # a specific release
+            parts = issue_title.split(' ')
+            if len(parts) == 2:
+                return parts[0]
+
+        return None
+
+    @staticmethod
+    def _is_release_request(issue_title):
+        """Check for possible candidate for a version bump."""
+        return _RELEASE_TITLES.get(issue_title) is not None \
+            or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
+
     def run(self, maintainers: list = None, labels: list = None) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         reported_issues = []
@@ -136,17 +177,14 @@ class VersionManager(ManagerBase):
                 # Reported issues that should be closed on success version change.
                 reported_issues.append(issue)
 
-            if not issue_title.endswith(_VERSION_REQUEST_ISSUE):
+            # This is an optimization not to clone repo each time.
+            if not self._is_release_request(issue_title):
                 continue
 
-            parts = issue_title.split(' ')
-            if len(parts) != 2:
-                continue
-
-            _LOGGER.info("Found an issue #%s which requests new version release: %s", issue.number, issue.title)
-            # The first part is our version, the second is the 'release' keyword.
-            version_identifier = parts[0]
-            branch_name = 'v' + version_identifier
+            _LOGGER.info(
+                "Found an issue #%s which is a candidate for request of new version release: %s",
+                issue.number, issue.title
+            )
 
             with cloned_repo(self.service_url, self.slug) as repo:
                 maintainers = maintainers or self._get_maintainers(labels)
@@ -160,10 +198,19 @@ class VersionManager(ManagerBase):
                     # Next issue.
                     continue
 
-                if not self._adjust_version_in_sources(repo, version_identifier, labels, issue):
+                try:
+                    version_identifier = self._adjust_version_in_sources(repo, labels, issue)
+                except VersionError as exc:
+                    _LOGGER.exception("Failed to adjust version information in sources")
+                    issue.add_comment(str(exc))
+                    issue.close()
+                    raise
+
+                if not version_identifier:
                     _LOGGER.error("Giving up with automated release")
                     return
 
+                branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
                 repo.git.tag(version_identifier)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
