@@ -212,9 +212,9 @@ class VersionManager(ManagerBase):
 
                 branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
-                repo.git.tag(version_identifier)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
                 repo.index.commit(message)
+                repo.git.tag(version_identifier)
                 # If this PR already exists, this will fail.
                 repo.remote().push(branch_name)
                 repo.remote().push(tags=True)
