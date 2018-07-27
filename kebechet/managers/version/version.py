@@ -87,12 +87,11 @@ class VersionManager(ManagerBase):
             # Add new line at the of file explicitly.
             output_file.write("\n")
 
-        return None
+        return new_version
 
     def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[str]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
-        adjusted_count = 0
-        new_version = None
+        adjusted = []
         for root, _, files in os.walk('./'):
             for file_name in files:
                 if file_name in ('setup.py', '__init__.py'):
@@ -100,9 +99,9 @@ class VersionManager(ManagerBase):
                     new_version = self._adjust_version_file(file_path, issue)
                     if new_version:
                         repo.git.add(file_path)
-                        adjusted_count += 1
+                        adjusted.append((file_path, new_version))
 
-        if adjusted_count == 0:
+        if len(adjusted) == 0:
             error_msg = _NO_VERSION_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
@@ -111,7 +110,7 @@ class VersionManager(ManagerBase):
                 labels
             )
 
-        if adjusted_count > 1:
+        if len(adjusted) > 1:
             error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
@@ -120,7 +119,8 @@ class VersionManager(ManagerBase):
                 labels
             )
 
-        return new_version
+        # Return version identifier.
+        return adjusted[0][1]
 
     def _get_maintainers(self, labels: list = None) -> list:
         """Get maintainers based on configuration.
