@@ -53,6 +53,7 @@ def cli(ctx=None, verbose=0):
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
         _LOGGER.debug("Debug mode turned on")
+        _LOGGER.debug("Kebechet version: %r", kebechet_version)
 
 
 @cli.command('run')
