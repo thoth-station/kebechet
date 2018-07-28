@@ -160,13 +160,13 @@ class SourceManagement:
     def assign(self, issue: Issue, assignees: typing.List[str]) -> None:
         """Assign users (by their accounts) to the given issue."""
         if self.service_type == ServiceType.GITHUB:
-            users = [GitHubUser(GitHubToken(self.token), username) for username in assignees]
+            users = (GitHubUser(GitHubToken(self.token), username) for username in assignees)
         elif self.service_type == ServiceType.GITLAB:
-            users = [GitLabUser(GitLabPrivateToken(self.token), username) for username in assignees]
+            users = (GitLabUser(GitLabPrivateToken(self.token), username) for username in assignees)
         else:
             raise NotImplementedError
 
-        issue.assign(users)
+        issue.assign(*users)
 
     def open_merge_request(self, commit_msg: str, branch_name: str, body: str, labels: list) -> MergeRequest:
         """Open a merge request for the given branch."""
