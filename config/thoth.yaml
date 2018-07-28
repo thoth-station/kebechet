@@ -46,3 +46,5 @@ repositories:
     slug: thoth-station/jupyter-notebook
   - <<: *update_config
     slug: thoth-station/sesheta
+  - <<: *update_config
+    slug: thoth-station/srcops-testing
