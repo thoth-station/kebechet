@@ -167,7 +167,7 @@ class VersionManager(ManagerBase):
         return _RELEASE_TITLES.get(issue_title) is not None \
             or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
 
-    def run(self, maintainers: list = None, labels: list = None) -> None:
+    def run(self, maintainers: list = None, assignees: list = None, labels: list = None) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         reported_issues = []
         for issue in self.sm.repository.issues:
@@ -187,6 +187,13 @@ class VersionManager(ManagerBase):
             )
 
             with cloned_repo(self.service_url, self.slug) as repo:
+                if assignees:
+                    try:
+                        self.sm.assign(issue, assignees)
+                    except Exception:
+                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.number}")
+                        issue.add_comment("Unable to assign provided assignees, please check bot configuration.")
+
                 maintainers = maintainers or self._get_maintainers(labels)
                 if issue.author.username not in maintainers:
                     issue.add_comment(

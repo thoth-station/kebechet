@@ -13,6 +13,8 @@ repositories:
           maintainers:
             - goern
             - fridex
+          assignees:
+            - sesheta
           labels: [bot]
   - <<: *update_config
     slug: thoth-station/analyzer
