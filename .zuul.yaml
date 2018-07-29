@@ -12,6 +12,12 @@
               linters:
                 - coala
 
+    post:
+      jobs:
+        - trigger-build:
+            vars:
+              webhook_url: "https://url.corp.redhat.com/aicoe-prod-bots-kebechet-job-build-trigger"
+
     release:
       jobs:
         - upload-pypi-sesheta
