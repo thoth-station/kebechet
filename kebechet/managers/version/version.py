@@ -38,7 +38,7 @@ _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in so
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
-    "New calendar release": lambda _: datetime.utcnow().strftime("%y.%m.%d"),
+    "New calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
     "New major release": semver.bump_major,
     "New minor release": semver.bump_minor,
     "New patch release": semver.bump_patch,
