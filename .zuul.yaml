@@ -1,17 +1,22 @@
 - project:
     check:
       jobs:
-        - linters
-
+        - linters:
+            vars:
+              linters:
+                - coala
     gate:
       jobs:
-        - linters
+        - linters:
+            vars:
+              linters:
+                - coala
 
     post:
       jobs:
-        - trigger-rebuild:
-          vars:
-            - webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job/webhooks/secret101/generic"
+        - trigger-build:
+            vars:
+              webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job/webhooks/secret101/generic"
 
     release:
       jobs:
@@ -19,4 +24,7 @@
 
     kebechet-auto-gate:
       jobs:
-        - linters
+        - linters:
+            vars:
+              linters:
+                - coala
