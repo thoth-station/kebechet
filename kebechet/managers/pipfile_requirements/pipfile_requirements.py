@@ -106,7 +106,7 @@ class PipfileRequirementsManager(ManagerBase):
 
             repo.git.checkout(b='pipfile-requirements-sync')
             repo.git.add('requirements.txt')
-            repo.git.commit('Update requirements.txt respecting requirements in {}'.format(
+            repo.git.commit(m='Update requirements.txt respecting requirements in {}'.format(
                 'Pipfile' if not lockfile else 'Pipfile.lock'
             ))
             repo.git.push()
