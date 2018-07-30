@@ -57,6 +57,12 @@ def cloned_repo(service_url: str, slug: str):
     with TemporaryDirectory() as repo_path, cwd(repo_path):
         _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
         repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)
+        repo.config_writer().set_value(
+            'user', 'name', os.getenv('KEBECHET_GIT_NAME', 'Kebechet')
+        ).release()
+        repo.config_writer().set_value(
+            'user', 'email', os.getenv('KEBECHET_GIT_EMAIL', 'noreply+kebechet@redhat.com')
+        ).release()
         yield repo
 
 
