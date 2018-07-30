@@ -106,7 +106,7 @@ class PipfileRequirementsManager(ManagerBase):
 
             branch_name = 'pipfile-requirements-sync'
             repo.git.checkout(b=branch_name)
-            repo.index.add('requirements.txt')
+            repo.index.add(['requirements.txt'])
             repo.index.commit('Update requirements.txt respecting requirements in {}'.format(
                 'Pipfile' if not lockfile else 'Pipfile.lock'
             ))
