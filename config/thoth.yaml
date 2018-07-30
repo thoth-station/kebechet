@@ -1,7 +1,40 @@
 ---
 repositories:
-  - &update_config
-    slug: thoth-station/adviser
+  - slug: thoth-station/adviser
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/analyzer
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/cleanup-job
     token: '{KEBECHET_TOKEN}'
     managers:
       - name: update
@@ -16,35 +49,234 @@ repositories:
           assignees:
             - sesheta
           labels: [bot]
-  - <<: *update_config
-    slug: thoth-station/analyzer
-  - <<: *update_config
-    slug: thoth-station/cleanup-job
-  - <<: *update_config
-    slug: thoth-station/common
-  - <<: *update_config
-    slug: thoth-station/graph-refresh-job
-  - <<: *update_config
-    slug: thoth-station/graph-sync-job
-  - <<: *update_config
-    slug: thoth-station/lab
-  - <<: *update_config
-    slug: thoth-station/package-extract
-  - <<: *update_config
-    slug: thoth-station/package-releases-job
-  - <<: *update_config
-    slug: thoth-station/result-api
-  - <<: *update_config
-    slug: thoth-station/solver
-  - <<: *update_config
-    slug: thoth-station/storages
-  - <<: *update_config
-    slug: thoth-station/user-api
-  - <<: *update_config
-    slug: thoth-station/kebechet
-  - <<: *update_config
-    slug: thoth-station/jupyter-notebook
-  - <<: *update_config
-    slug: thoth-station/sesheta
-  - <<: *update_config
-    slug: thoth-station/srcops-testing
+
+  - slug: thoth-station/common
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/graph-refresh-job
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/graph-sync-job
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/lab
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/package-extract
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/package-releases-job
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/result-api
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/solver
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/storages
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/user-api
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/kebechet
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/jupyter-notebook
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/sesheta
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: thoth-station/srcops-testing
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
