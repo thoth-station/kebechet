@@ -41,13 +41,14 @@ class PipfileRequirementsManager(ManagerBase):
 
         requirements = set()
         for package_name, entry in content['packages'].items():
-            if 'version' not in entry:
+            if not isinstance(entry, str):
                 # e.g. using git, ...
                 raise ValueError("Package {} does not use pinned version: {}".format(
                     package_name, entry
                 ))
 
-            requirements.add(f'{package_name}{entry["version"]}')
+            package_version = entry if entry != '*' else ''
+            requirements.add(f'{package_name}{package_version}')
 
         return requirements
 
