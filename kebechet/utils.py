@@ -66,7 +66,7 @@ def construct_raw_file_url(service_url: str, slug: str, file_name: str,
     branch = branch or 'master'
     if service_type == ServiceType.GITHUB:
         # TODO self hosted GitHub?
-        url = 'https://raw.githubusercontent.com/{slug}/{branch}/{file_name}'
+        url = f'https://raw.githubusercontent.com/{slug}/{branch}/{file_name}'
     elif service_type == ServiceType.GITLAB:
         url = urljoin(service_url, f'{slug}/raw/{branch}/{file_name}')
     else:
