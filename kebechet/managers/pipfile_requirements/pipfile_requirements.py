@@ -40,7 +40,7 @@ class PipfileRequirementsManager(ManagerBase):
         content = toml.loads(content)
 
         requirements = set()
-        for package_name, entry in content['default'].items():
+        for package_name, entry in content['packages'].items():
             if 'version' not in entry:
                 # e.g. using git, ...
                 raise ValueError("Package {} does not use pinned version: {}".format(
