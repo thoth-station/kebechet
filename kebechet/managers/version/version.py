@@ -54,12 +54,14 @@ class VersionError(Exception):
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
 
-    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[str]:
+    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[tuple]:
         """Adjust version in the given file, return signalizes whether the return value indicates change in file."""
         with open(file_path, 'r') as input_file:
             content = input_file.read().splitlines()
 
         changed = False
+        new_version = None
+        old_version = None
         for idx, line in enumerate(content):
             if line.startswith('__version__ = '):
                 parts = line.split(' = ', maxsplit=1)
@@ -87,19 +89,19 @@ class VersionManager(ManagerBase):
             # Add new line at the of file explicitly.
             output_file.write("\n")
 
-        return new_version
+        return new_version, old_version
 
-    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[str]:
+    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[tuple]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted = []
         for root, _, files in os.walk('./'):
             for file_name in files:
                 if file_name in ('setup.py', '__init__.py', 'version.py'):
                     file_path = os.path.join(root, file_name)
-                    new_version = self._adjust_version_file(file_path, issue)
-                    if new_version:
+                    adjusted_version = self._adjust_version_file(file_path, issue)
+                    if adjusted_version:
                         repo.git.add(file_path)
-                        adjusted.append((file_path, new_version))
+                        adjusted.append((file_path, adjusted_version[0], adjusted_version[1]))
 
         if len(adjusted) == 0:
             error_msg = _NO_VERSION_FOUND_ISSUE_NAME
@@ -119,8 +121,8 @@ class VersionManager(ManagerBase):
                 labels
             )
 
-        # Return version identifier.
-        return adjusted[0][1]
+        # Return old and new version identifier.
+        return adjusted[0][1], adjusted[0][2]
 
     def _get_maintainers(self, labels: list = None) -> list:
         """Get maintainers based on configuration.
@@ -167,7 +169,33 @@ class VersionManager(ManagerBase):
         return _RELEASE_TITLES.get(issue_title) is not None \
             or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
 
-    def run(self, maintainers: list = None, assignees: list = None, labels: list = None) -> None:
+    @staticmethod
+    def _compute_changelog(repo: Repo, old_version: str, new_version: str,
+                           version_file: bool = False) -> typing.List[str]:
+        """Compute changelog for the given repo.
+
+        If version file is used, add changelog to the version file and add changes to git.
+        """
+        if old_version not in repo.git.tag().splitlines():
+            # Use the initial commit if this the previous tag was not found - this
+            # can be in case of the very first release.
+            old_version = repo.git.rev_list('HEAD', max_parents=0)
+
+        changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
+        if version_file:
+            # TODO: We should prepend changes instead of appending them.
+            with open('CHANGELOG.md', 'a') as changelog_file:
+                changelog_file.write(
+                    f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                )
+                changelog_file.write('\n'.join(changelog))
+                changelog_file.write('\n')
+            repo.git.add('CHANGELOG.md')
+
+        return changelog
+
+    def run(self, maintainers: list = None, assignees: list = None,
+            labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         reported_issues = []
         for issue in self.sm.repository.issues:
@@ -206,7 +234,7 @@ class VersionManager(ManagerBase):
                     continue
 
                 try:
-                    version_identifier = self._adjust_version_in_sources(repo, labels, issue)
+                    version_identifier, old_version = self._adjust_version_in_sources(repo, labels, issue)
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
                     issue.add_comment(str(exc))
@@ -217,6 +245,9 @@ class VersionManager(ManagerBase):
                     _LOGGER.error("Giving up with automated release")
                     return
 
+                changelog = self._compute_changelog(
+                    repo, old_version, version_identifier, version_file=changelog_file
+                )
                 branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
@@ -227,7 +258,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Related: #' + str(issue.number),
+                    body='Changelog:\n' + '\n'.join(changelog) + '\n\nRelated: #' + str(issue.number),
                     labels=labels
                 )
 
