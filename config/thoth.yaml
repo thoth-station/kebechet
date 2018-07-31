@@ -280,3 +280,10 @@ repositories:
             - sesheta
           labels: [bot]
 
+  - slug: RedHatInsights/aicoe-insights-clustering
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
