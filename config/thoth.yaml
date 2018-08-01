@@ -287,3 +287,16 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: selinon/selinon
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+          assignees:
+            - fridex
+          labels: 
+            - bot
+            - release
