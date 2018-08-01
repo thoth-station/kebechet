@@ -40,14 +40,15 @@ class PipfileRequirementsManager(ManagerBase):
         content = toml.loads(content)
 
         requirements = set()
-        for package_name, entry in content['default'].items():
-            if 'version' not in entry:
+        for package_name, entry in content['packages'].items():
+            if not isinstance(entry, str):
                 # e.g. using git, ...
                 raise ValueError("Package {} does not use pinned version: {}".format(
                     package_name, entry
                 ))
 
-            requirements.add(f'{package_name}{entry["version"]}')
+            package_version = entry if entry != '*' else ''
+            requirements.add(f'{package_name}{package_version}')
 
         return requirements
 
@@ -103,9 +104,10 @@ class PipfileRequirementsManager(ManagerBase):
                 requirements_file.write('\n'.join(pipfile_content))
                 requirements_file.write('\n')
 
-            repo.git.checkout(b='pipfile-requirements-sync')
-            repo.git.add('requirements.txt')
-            repo.git.commit('Update requirements.txt respecting requirements in {}'.format(
+            branch_name = 'pipfile-requirements-sync'
+            repo.git.checkout(b=branch_name)
+            repo.index.add(['requirements.txt'])
+            repo.index.commit('Update requirements.txt respecting requirements in {}'.format(
                 'Pipfile' if not lockfile else 'Pipfile.lock'
             ))
-            repo.git.push()
+            repo.remote().push(branch_name)
