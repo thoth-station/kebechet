@@ -280,3 +280,10 @@ repositories:
             - sesheta
           labels: [bot]
 
+  - slug: thoth-station/cve-update-job
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
