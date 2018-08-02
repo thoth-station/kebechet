@@ -43,6 +43,7 @@ objects:
       type: Docker
       dockerStrategy:
         dockerfilePath: Dockerfile
+        noCache: true
     triggers:
     - imageChange: {}
       type: ImageChange

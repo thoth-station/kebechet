@@ -26,11 +26,13 @@ from urllib.parse import quote_plus
 from IGitt.Interfaces import Issue
 from IGitt.Interfaces import MergeRequest
 from IGitt.GitHub.GitHubRepository import GitHubRepository
+from IGitt.GitHub.GitHubUser import GitHubUser
 from IGitt.GitHub import GitHubToken
 from IGitt.GitHub.GitHubMergeRequest import GitHubMergeRequest
 from IGitt.GitLab.GitLabMergeRequest import GitLabMergeRequest
 from IGitt.GitLab.GitLabRepository import GitLabRepository
 from IGitt.GitLab import GitLabPrivateToken
+from IGitt.GitLab.GitLabUser import GitLabUser
 import IGitt.GitLab
 
 from .enums import ServiceType
@@ -154,6 +156,17 @@ class SourceManagement:
         return GitLabMergeRequest.from_data(
             response.json(), token=GitLabPrivateToken(self.token), repository=self.slug, number=mr_number
         )
+
+    def assign(self, issue: Issue, assignees: typing.List[str]) -> None:
+        """Assign users (by their accounts) to the given issue."""
+        if self.service_type == ServiceType.GITHUB:
+            users = (GitHubUser(GitHubToken(self.token), username) for username in assignees)
+        elif self.service_type == ServiceType.GITLAB:
+            users = (GitLabUser(GitLabPrivateToken(self.token), username) for username in assignees)
+        else:
+            raise NotImplementedError
+
+        issue.assign(*users)
 
     def open_merge_request(self, commit_msg: str, branch_name: str, body: str, labels: list) -> MergeRequest:
         """Open a merge request for the given branch."""

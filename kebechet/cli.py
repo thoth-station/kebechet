@@ -24,7 +24,6 @@ import click
 import daiquiri
 
 from kebechet import __version__ as kebechet_version
-from kebechet.managers import UpdateManager
 from kebechet.config import config
 
 daiquiri.setup(level=logging.INFO)
@@ -54,6 +53,7 @@ def cli(ctx=None, verbose=0):
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
         _LOGGER.debug("Debug mode turned on")
+        _LOGGER.debug("Kebechet version: %r", kebechet_version)
 
 
 @cli.command('run')
