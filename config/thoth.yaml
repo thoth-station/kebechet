@@ -287,3 +287,21 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/cve-update-job
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: user-cont/conu
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: 
+            - bot
+            - thoth-station
+            - kebechet

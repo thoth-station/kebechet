@@ -140,7 +140,7 @@ For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.loc
 
 ISSUE_NO_DEPENDENCY_MANAGEMENT = \
     """No dependency management found for this repository. If you want to keep your dependencies managed, \
-please submit `Pipfile` or `requirements.in` file.
+please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
 To generate a `Pipfile`, use:"
 ```
@@ -149,7 +149,7 @@ $ git add Pipfile
 $ git commit -m 'Add Pipfile for dependency management'
 ```
 
-Make sure your `Pipfile` or `requirements.in` is placed in the root of your Git repository.
+Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed in the root of your Git repository.
 """
 
 

@@ -115,9 +115,14 @@ class UpdateManager(ManagerBase):
         return default, develop
 
     @staticmethod
-    def _get_direct_dependencies_requirements() -> set:
-        """Get all direct dependencies based on requirements.in file and generated Pipfile.lock from it."""
-        with open('requirements.in') as requirements_in_file:
+    def _get_direct_dependencies_requirements(req_dev: bool) -> set:
+        """Gather all direct dependencies.
+
+        Get all direct dependencies based on either requirements.in or requirements-dev.in file
+        and generated Pipfile.lock from it.
+        """
+        input_file = 'requirements-dev.in' if req_dev else 'requirements.in'
+        with open(input_file, 'r') as requirements_in_file:
             content = requirements_in_file.read()
 
         direct_dependencies = set()
@@ -171,11 +176,15 @@ class UpdateManager(ManagerBase):
         return result
 
     @staticmethod
-    def _get_requirements_txt_dependencies() -> dict:
-        """Gather dependencies from requirements.txt file, our requirements.txt holds fully pinned down stack."""
-        result = {}
+    def _get_requirements_txt_dependencies(req_dev: bool) -> dict:
+        """Gather dependencies from fully pinned down stack.
 
-        with open('requirements.txt', 'r') as requirements_file:
+        Gather dependencies from either requirements.txt or requirements-dev.txt file,
+        our requirements.txt and requirements-dev.txt holds fully pinned down stack.
+        """
+        result = {}
+        input_file = 'requirements-dev.txt' if req_dev else 'requirements.txt'
+        with open(input_file, 'r') as requirements_file:
             content = requirements_file.read()
 
         for line in content.splitlines():
@@ -184,7 +193,7 @@ class UpdateManager(ManagerBase):
 
             package_and_version = line.split('==', maxsplit=1)
             if len(package_and_version) != 2:
-                raise DependencyManagementError(f"File requirements.txt does not state fully locked "
+                raise DependencyManagementError(f"File {input_file} does not state fully locked "
                                                 f"dependencies: {line!r} is not fully qualified dependency")
             package_name, package_version = package_and_version
             result[package_name] = {
@@ -282,15 +291,16 @@ class UpdateManager(ManagerBase):
         return result
 
     @classmethod
-    def _pipenv_lock_requirements(cls) -> None:
-        """Perform pipenv lock into requirements.txt file."""
+    def _pipenv_lock_requirements(cls, output_file: str) -> None:
+        """Perform pipenv lock into requirements.txt or requirements-dev.txt file."""
         result = cls.run_pipenv('pipenv lock -r ')
-        with open('requirements.txt', 'w') as requirements_file:
+        with open(output_file, 'w') as requirements_file:
             requirements_file.write(result)
 
     def _create_update(self, dependency: str, package_version: str, old_version: str,
                        is_dev: bool = False, labels: list = None, old_environment: dict = None,
-                       merge_request: MergeRequest = None, pipenv_used: bool = True) -> typing.Union[tuple, None]:
+                       merge_request: MergeRequest = None, pipenv_used: bool = True,
+                       req_dev: bool = False) -> typing.Union[tuple, None]:
         """Create an update for the given dependency when dependencies are managed by Pipenv.
 
         The old environment is set to a non None value only if we are operating on requirements.{in,txt}. It keeps
@@ -313,11 +323,12 @@ class UpdateManager(ManagerBase):
             )
             return old_version, package_version, merge_request.number
 
-        # For requirements.txt scenario we need to propagate all changes (updates of transitive dependencies)
-        # into requirements.txt file
-        self._pipenv_lock_requirements()
+        # For either requirements.txt  or requirements-dev.text scenario we need to propagate all changes
+        # (updates of transitive dependencies) into requirements.txt or requirements-dev file
+        output_file = 'requirements-dev.txt' if req_dev else 'requirements.txt'
+        self._pipenv_lock_requirements(output_file)
         merge_request = self._open_merge_request_update(
-            dependency, old_version, package_version, labels, ['requirements.txt'], merge_request
+            dependency, old_version, package_version, labels, [output_file], merge_request
         )
         return old_version, package_version, merge_request.number
 
@@ -328,22 +339,28 @@ class UpdateManager(ManagerBase):
         cls.run_pipenv('pipenv sync --dev')
 
     @classmethod
-    def _create_pipenv_environment(cls) -> None:
-        """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in file."""
-        if not os.path.isfile('requirements.in'):
+    def _create_pipenv_environment(cls, input_file: str) -> None:
+        """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in or requirements-dev.in file."""
+        if os.path.isfile(input_file) and input_file == 'requirements.in':
+            _LOGGER.info(f"Installing dependencies from {input_file}")
+            cls.run_pipenv(f'pipenv install -r {input_file}')
+        elif os.path.isfile(input_file) and input_file == 'requirements-dev.in':
+            _LOGGER.info(f"Installing dependencies from {input_file}")
+            cls.run_pipenv(f'pipenv install -r {input_file} --dev')
+        else:
             raise DependencyManagementError(
-                "No dependency management found in the repo - no Pipfile nor requirements.in"
+                "No dependency management found in the repo - no Pipfile nor requirements.in nor requirements-dev.in"
             )
 
-        _LOGGER.info("Installing dependencies from requirements.in")
-        cls.run_pipenv('pipenv install -r requirements.in')
-
-    def _create_initial_lock(self, labels: list, pipenv_used: bool) -> bool:
+    def _create_initial_lock(self, labels: list, pipenv_used: bool, req_dev: bool) -> bool:
         """Perform initial requirements lock into requirements.txt file."""
         # We use lock_func to optimize run - it will be called only if actual locking needs to be performed.
-        if not pipenv_used and not os.path.isfile('requirements.txt'):
+        if not pipenv_used and not os.path.isfile('requirements.txt') and not req_dev:
             _LOGGER.info("Initial lock based on requirements.in will be done")
-            lock_func = self._pipenv_lock_requirements
+            lock_func = partial(self._pipenv_lock_requirements, 'requirements.txt')
+        elif not pipenv_used and not os.path.isfile('requirements-dev.txt') and req_dev:
+            _LOGGER.info("Initial lock based on requirements-dev.in will be done")
+            lock_func = partial(self._pipenv_lock_requirements, 'requirements-dev.txt')
         elif pipenv_used and not os.path.isfile('Pipfile.lock'):
             _LOGGER.info("Initial lock based on Pipfile will be done")
             lock_func = partial(self.run_pipenv, 'pipenv lock')
@@ -353,7 +370,7 @@ class UpdateManager(ManagerBase):
         branch_name = "kebechet-initial-lock"
         request = {mr for mr in self.sm.repository.merge_requests
                    if mr.head_branch_name == branch_name and mr.state in ('opened', 'open')}
-        files = ['requirements.txt' if not pipenv_used else 'Pipfile.lock']
+        files = ['requirements.txt' if not req_dev else 'requirements-dev.txt' if not pipenv_used else 'Pipfile.lock']
 
         commit_msg = "Initial dependency lock"
         if len(request) == 0:
@@ -454,7 +471,7 @@ class UpdateManager(ManagerBase):
             except Exception:
                 _LOGGER.exception(f"Failed to delete inactive branch {branch_name}")
 
-    def _do_update(self, labels: list, pipenv_used: bool = False) -> dict:
+    def _do_update(self, labels: list, pipenv_used: bool = False, req_dev: bool = False) -> dict:
         """Update dependencies based on management used."""
         close_initial_lock_issue = partial(
             self.sm.close_issue_if_exists,
@@ -464,7 +481,7 @@ class UpdateManager(ManagerBase):
 
         # Check for first time (initial) locks first.
         try:
-            if self._create_initial_lock(labels, pipenv_used):
+            if self._create_initial_lock(labels, pipenv_used, req_dev):
                 close_initial_lock_issue()
                 return {}
         except PipenvError as exc:
@@ -474,7 +491,7 @@ class UpdateManager(ManagerBase):
                 body=lambda: ISSUE_INITIAL_LOCK.format(
                     sha=self.sha,
                     slug=self.slug,
-                    file='requirements.in' if not pipenv_used else 'Pipfile',
+                    file='requirements.in' if not req_dev else 'requirements-dev.in' if not pipenv_used else 'Pipfile',
                     environment_details=self.get_environment_details(),
                     **exc.__dict__
                 ),
@@ -508,9 +525,9 @@ class UpdateManager(ManagerBase):
             else:
                 # We were able to update all, close reported issue if any.
                 self.sm.close_issue_if_exists(_ISSUE_UPDATE_ALL_NAME, comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha))
-        else:  # requirements.txt
-            old_environment = self._get_requirements_txt_dependencies()
-            direct_dependencies = self._get_direct_dependencies_requirements()
+        else:  # either requirements.txt or requirements-dev.txt
+            old_environment = self._get_requirements_txt_dependencies(req_dev)
+            direct_dependencies = self._get_direct_dependencies_requirements(req_dev)
             old_direct_dependencies_version = {k: v for k, v in old_environment.items() if k in direct_dependencies}
 
         outdated = self._get_all_outdated(old_direct_dependencies_version)
@@ -554,7 +571,8 @@ class UpdateManager(ManagerBase):
                     labels=labels,
                     old_environment=old_environment if not pipenv_used else None,
                     merge_request=merge_request,
-                    pipenv_used=pipenv_used
+                    pipenv_used=pipenv_used,
+                    req_dev=req_dev
                 )
                 if versions:
                     result[package_name] = versions
@@ -592,12 +610,17 @@ class UpdateManager(ManagerBase):
             if os.path.isfile('Pipfile'):
                 _LOGGER.info("Using Pipfile for dependency management")
                 close_no_management_issue()
-                result = self._do_update(labels, pipenv_used=True)
+                result = self._do_update(labels, pipenv_used=True, req_dev=False)
             elif os.path.isfile('requirements.in'):
-                self._create_pipenv_environment()
+                self._create_pipenv_environment(input_file='requirements.in')
                 _LOGGER.info("Using requirements.in for dependency management")
                 close_no_management_issue()
-                result = self._do_update(labels, pipenv_used=False)
+                result = self._do_update(labels, pipenv_used=False, req_dev=False)
+                if os.path.isfile('requirements-dev.in'):
+                    self._create_pipenv_environment(input_file='requirements-dev.in')
+                    _LOGGER.info("Using requirements-dev.in for dependency management")
+                    close_no_management_issue()
+                    result = self._do_update(labels, pipenv_used=False, req_dev=True)
             else:
                 _LOGGER.warning("No dependency management found")
                 self.sm.open_issue_if_not_exist(
