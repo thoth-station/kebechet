@@ -258,7 +258,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Changelog:\n' + '\n'.join(changelog) + '\n\nRelated: #' + str(issue.number),
+                    body='Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog),
                     labels=labels
                 )
 
