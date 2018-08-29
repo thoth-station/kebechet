@@ -370,7 +370,13 @@ class UpdateManager(ManagerBase):
         branch_name = "kebechet-initial-lock"
         request = {mr for mr in self.sm.repository.merge_requests
                    if mr.head_branch_name == branch_name and mr.state in ('opened', 'open')}
-        files = ['requirements.txt' if not req_dev else 'requirements-dev.txt' if not pipenv_used else 'Pipfile.lock']
+
+        if req_dev and not pipenv_used:
+            files = ['requirements-dev.txt']
+        elif not req_dev and not pipenv_used:
+            files = ['requirements.txt']
+        else:
+            files = ['Pipfile.lock']
 
         commit_msg = "Initial dependency lock"
         if len(request) == 0:
