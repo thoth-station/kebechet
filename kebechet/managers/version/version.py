@@ -176,7 +176,9 @@ class VersionManager(ManagerBase):
 
         If version file is used, add changelog to the version file and add changes to git.
         """
+        _LOGGER.debug("Computing changelog for new release from version %r to version %r", old_version, new_version)
         if old_version not in repo.git.tag().splitlines():
+            _LOGGER.debug("Old version was not found in the git tag history, assuming initial release")
             # Use the initial commit if this the previous tag was not found - this
             # can be in case of the very first release.
             old_version = repo.git.rev_list('HEAD', max_parents=0)
@@ -184,6 +186,7 @@ class VersionManager(ManagerBase):
         changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
         if version_file:
             # TODO: We should prepend changes instead of appending them.
+            _LOGGER.info("Adding changelog to the CHANGELOG.md file")
             with open('CHANGELOG.md', 'a') as changelog_file:
                 changelog_file.write(
                     f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
@@ -192,6 +195,7 @@ class VersionManager(ManagerBase):
                 changelog_file.write('\n')
             repo.git.add('CHANGELOG.md')
 
+        _LOGGER.debug("Computed changelog has %d entries", len(changelog))
         return changelog
 
     def run(self, maintainers: list = None, assignees: list = None,
