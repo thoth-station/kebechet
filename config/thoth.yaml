@@ -141,22 +141,22 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/package-releases-job
-    token: '{KEBECHET_TOKEN}'
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
+  - slug: thoth-station/package-releathamosses-job
+    token: '{KEBECHET_TOKEN}'thamos
+    managers:thamos
+      - name: updatethamos
+        configuration:thamos
+          labels: [bot]thamos
+      - name: infothamos
+      - name: versionthamos
+        configuration:thamos
+          maintainers:thamos
+            - goernthamos
+            - fridexthamos
+          assignees:thamos
+            - seshetathamos
+          labels: [bot]thamos
+          changelog_file: truethamos
 
   - slug: thoth-station/result-api
     token: '{KEBECHET_TOKEN}'
@@ -302,6 +302,24 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/thamos
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
 
   - slug: user-cont/conu
     token: '{KEBECHET_TOKEN}'
