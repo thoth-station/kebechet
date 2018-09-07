@@ -25,16 +25,26 @@ objects:
   spec:
     schedule: "*/20 * * * *"
     suspend: false
-    successfulJobsHistoryLimit: 10
+    successfulJobsHistoryLimit: 2
     failedJobsHistoryLimit: 1
     concurrencyPolicy: Forbid
     jobTemplate:
+      metadata:
+        labels:
+          app: kebechet
       spec:
         template:
+          metadata:
+            labels:
+              app: kebechet
           spec:
             containers:
             - image: kebechet-job
               name: kebechet
+              metadata:
+                labels:
+                  app: kebechet
+                  operatingOn: github.com
               volumeMounts:
               - name: ssh-config
                 mountPath: /home/user/.ssh
