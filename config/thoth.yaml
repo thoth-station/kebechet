@@ -142,21 +142,21 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/package-releathamosses-job
-    token: '{KEBECHET_TOKEN}'thamos
-    managers:thamos
-      - name: updatethamos
-        configuration:thamos
-          labels: [bot]thamos
-      - name: infothamos
-      - name: versionthamos
-        configuration:thamos
-          maintainers:thamos
-            - goernthamos
-            - fridexthamos
-          assignees:thamos
-            - seshetathamos
-          labels: [bot]thamos
-          changelog_file: truethamos
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: updatet
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
 
   - slug: thoth-station/result-api
     token: '{KEBECHET_TOKEN}'
