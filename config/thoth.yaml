@@ -141,7 +141,7 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/package-releathamosses-job
+  - slug: thoth-station/package-releases-job
     token: '{KEBECHET_TOKEN}'
     managers:
       - name: updatet
