@@ -38,12 +38,12 @@ _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in so
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
-    "New calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
-    "New major release": semver.bump_major,
-    "New minor release": semver.bump_minor,
-    "New patch release": semver.bump_patch,
-    "New pre-release": semver.bump_prerelease,
-    "New build release": semver.bump_build,
+    "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
+    "new major release": semver.bump_major,
+    "new minor release": semver.bump_minor,
+    "new patch release": semver.bump_patch,
+    "new pre-release": semver.bump_prerelease,
+    "new build release": semver.bump_build,
 }
 
 
@@ -149,7 +149,7 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
         """Get next version based on user request."""
-        handler = _RELEASE_TITLES.get(issue_title)
+        handler = _RELEASE_TITLES.get(issue_title.lower())
         if handler:
             try:
                 return handler(current_version)
