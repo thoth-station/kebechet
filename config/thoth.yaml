@@ -321,6 +321,14 @@ repositories:
           labels: [bot]
           changelog_file: true
 
+  - slug: thoth-station/amun-api
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
   - slug: user-cont/conu
     token: '{KEBECHET_TOKEN}'
     managers:
@@ -338,3 +346,4 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
