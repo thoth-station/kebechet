@@ -2,6 +2,7 @@ FROM fedora:28
 
 # Env variable USER specific the kebechet as committer while git branch and git commit creation. 
 ENV USER=kebechet \
+    HOME=/home/user \
     PIPENV_CACHE_DIR=/home/user \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
