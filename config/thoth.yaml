@@ -144,7 +144,7 @@ repositories:
   - slug: thoth-station/package-releases-job
     token: '{KEBECHET_TOKEN}'
     managers:
-      - name: updatet
+      - name: update
         configuration:
           labels: [bot]
       - name: info
