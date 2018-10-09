@@ -53,6 +53,7 @@
     command: oc create secret --namespace "{{ KEBECHET_APPLICATION_NAMESPACE }}" generic kebechet-secret \
       --from-file=ssh-privatekey="{{ KEBECHET_SSH_PRIVATE_KEY_PATH }}" \
       --from-literal=github-oauth-token="{{ KEBECHET_TOKEN }}"
+      --from-literal=sentry-dsn="{{ SENTRY_DSN }}"
       --type=kubernetes.io/ssh-auth \
     when: secret_exists is failed
 

@@ -13,6 +13,7 @@
     
     KEBECHET_APPLICATION_NAMESPACE: "{{ lookup('env','KEBECHET_APPLICATION_NAMESPACE') }}"
     KEBECHET_INFRA_NAMESPACE: "{{ lookup('env','KEBECHET_INFRA_NAMESPACE') }}"
+    SENTRY_DSN: ""
 
   gather_facts: false
   connection: local
