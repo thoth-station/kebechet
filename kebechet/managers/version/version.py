@@ -199,6 +199,19 @@ class VersionManager(ManagerBase):
         _LOGGER.debug("Computed changelog has %d entries", len(changelog))
         return changelog
 
+    @staticmethod
+    def _construct_pr_body(issue: Issue, changelog: str) -> str:
+        """Construct body of the opened pull request with version update."""
+        # Copy body from the original issue, this is helpful in case of
+        # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
+        # merges are perfomed as desired.
+        body = ''
+        if issue.body:
+            body = issue.body + '\n\n'
+
+        body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        return body
+
     def run(self, maintainers: list = None, assignees: list = None,
             labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
@@ -263,7 +276,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog),
+                    body=self._construct_pr_body(issue, changelog),
                     labels=labels
                 )
 
