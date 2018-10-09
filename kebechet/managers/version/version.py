@@ -207,7 +207,7 @@ class VersionManager(ManagerBase):
         # merges are perfomed as desired.
         body = ''
         if issue.body:
-            body = issue.body + '\n\n'
+            body = issue.description + '\n\n'
 
         body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
         return body
