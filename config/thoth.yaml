@@ -329,6 +329,24 @@ repositories:
           labels: [bot]
       - name: info
 
+  - slug: thoth-station/amun-client
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+            - goern
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
   - slug: user-cont/conu
     token: '{KEBECHET_TOKEN}'
     managers:
