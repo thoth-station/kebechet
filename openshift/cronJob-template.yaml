@@ -64,6 +64,10 @@ objects:
                   configMapKeyRef:
                     key: kebechet-verbose
                     name: kebechet-configmap
+              - name: SENTRY_DSN
+                valueFrom:
+                    key: sentry-dsn
+                    name: kebechet-secret
               resources:
                 requests:
                   memory: "2Gi"
