@@ -206,7 +206,7 @@ class VersionManager(ManagerBase):
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
         body = ''
-        if issue.body:
+        if issue.description:
             body = issue.description + '\n\n'
 
         body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
