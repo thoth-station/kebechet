@@ -66,6 +66,7 @@ objects:
                     name: kebechet-configmap
               - name: SENTRY_DSN
                 valueFrom:
+                  secretKeyRef:
                     key: sentry-dsn
                     name: kebechet-secret
               resources:
