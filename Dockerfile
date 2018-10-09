@@ -12,7 +12,6 @@ ENV USER=kebechet \
 
 RUN \
     dnf install -y --setopt=tsflags=nodocs git python3-pip gcc redhat-rpm-config python3-devel which gcc-c++ &&\
-    pip3 install git+https://github.com/pypa/pipenv.git &&\
     pip3 install git+https://github.com/thoth-station/kebechet &&\
     mkdir -p /home/user/.ssh &&\
     chmod a+wrx -R /etc/passwd /home/user
