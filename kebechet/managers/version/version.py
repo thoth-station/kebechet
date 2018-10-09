@@ -166,6 +166,7 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _is_release_request(issue_title):
         """Check for possible candidate for a version bump."""
+        issue_title = issue_title.lower()
         return _RELEASE_TITLES.get(issue_title) is not None \
             or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
 
