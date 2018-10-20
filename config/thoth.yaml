@@ -372,3 +372,20 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/metrics-exporter
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+            - goern
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
