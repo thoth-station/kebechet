@@ -382,3 +382,10 @@ repositories:
           labels: [bot]
       - name: info
 
+  - slug: AICoE/prometheus-flatliner
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
