@@ -20,6 +20,7 @@ RUN \
 # ADD ./ /tmp/kebechet
 # RUN  pip3 install virtualenv && mkdir -p /usr/local/lib/python3.6/site-packages/ && cd /tmp/kebechet/ && python3 setup.py install
 
+RUN pip3 uninstall -y pipenv && pip3 install -y git+https://github.com/pypa/pipenv.git
 COPY docker-entrypoint.sh /
 
 # Arbitrary User
