@@ -49,6 +49,12 @@ objects:
               - name: ssh-config
                 mountPath: /home/user/.ssh
               env:
+              - name: PIPENV_NOSPIN
+                value: '1'
+              - name: PIPENV_COLORBLIND
+                value: '1'
+              - name: PIPENV_HIDE_EMOJIS
+                value: '1'
               - name: KEBECHET_TOKEN
                 valueFrom:
                   secretKeyRef:
