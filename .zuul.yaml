@@ -1,30 +1,18 @@
 - project:
     check:
       jobs:
-        - linters:
-            vars:
-              linters:
-                - coala
+        - "thoth-coala"
     gate:
       jobs:
-        - linters:
-            vars:
-              linters:
-                - coala
-
+        - "thoth-coala"
     post:
       jobs:
         - trigger-build:
             vars:
               webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job/webhooks/"
-
     release:
       jobs:
-        - upload-pypi-sesheta
-
+        - "upload-pypi-sesheta"
     kebechet-auto-gate:
       jobs:
-        - linters:
-            vars:
-              linters:
-                - coala
+        - "thoth-coala"
