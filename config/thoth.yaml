@@ -141,6 +141,24 @@ repositories:
           labels: [bot]
           changelog_file: true
 
+  - slug: thoth-station/python
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+            - goern
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
   - slug: thoth-station/package-releases-job
     token: '{KEBECHET_TOKEN}'
     managers:
@@ -223,6 +241,23 @@ repositories:
           maintainers:
             - goern
             - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/management-api
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+            - goern
           assignees:
             - sesheta
           labels: [bot]
