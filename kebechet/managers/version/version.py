@@ -38,12 +38,12 @@ _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in so
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
-    "New calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
-    "New major release": semver.bump_major,
-    "New minor release": semver.bump_minor,
-    "New patch release": semver.bump_patch,
-    "New pre-release": semver.bump_prerelease,
-    "New build release": semver.bump_build,
+    "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
+    "new major release": semver.bump_major,
+    "new minor release": semver.bump_minor,
+    "new patch release": semver.bump_patch,
+    "new pre-release": semver.bump_prerelease,
+    "new build release": semver.bump_build,
 }
 
 
@@ -149,7 +149,7 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
         """Get next version based on user request."""
-        handler = _RELEASE_TITLES.get(issue_title)
+        handler = _RELEASE_TITLES.get(issue_title.lower())
         if handler:
             try:
                 return handler(current_version)
@@ -166,6 +166,7 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _is_release_request(issue_title):
         """Check for possible candidate for a version bump."""
+        issue_title = issue_title.lower()
         return _RELEASE_TITLES.get(issue_title) is not None \
             or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
 
@@ -176,7 +177,9 @@ class VersionManager(ManagerBase):
 
         If version file is used, add changelog to the version file and add changes to git.
         """
+        _LOGGER.debug("Computing changelog for new release from version %r to version %r", old_version, new_version)
         if old_version not in repo.git.tag().splitlines():
+            _LOGGER.debug("Old version was not found in the git tag history, assuming initial release")
             # Use the initial commit if this the previous tag was not found - this
             # can be in case of the very first release.
             old_version = repo.git.rev_list('HEAD', max_parents=0)
@@ -184,6 +187,7 @@ class VersionManager(ManagerBase):
         changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
         if version_file:
             # TODO: We should prepend changes instead of appending them.
+            _LOGGER.info("Adding changelog to the CHANGELOG.md file")
             with open('CHANGELOG.md', 'a') as changelog_file:
                 changelog_file.write(
                     f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
@@ -192,7 +196,21 @@ class VersionManager(ManagerBase):
                 changelog_file.write('\n')
             repo.git.add('CHANGELOG.md')
 
+        _LOGGER.debug("Computed changelog has %d entries", len(changelog))
         return changelog
+
+    @staticmethod
+    def _construct_pr_body(issue: Issue, changelog: str) -> str:
+        """Construct body of the opened pull request with version update."""
+        # Copy body from the original issue, this is helpful in case of
+        # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
+        # merges are perfomed as desired.
+        body = ''
+        if issue.description:
+            body = issue.description + '\n\n'
+
+        body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        return body
 
     def run(self, maintainers: list = None, assignees: list = None,
             labels: list = None, changelog_file: bool = False) -> None:
@@ -258,7 +276,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog),
+                    body=self._construct_pr_body(issue, changelog),
                     labels=labels
                 )
 

@@ -295,7 +295,10 @@ class UpdateManager(ManagerBase):
         """Perform pipenv lock into requirements.txt or requirements-dev.txt file."""
         result = cls.run_pipenv('pipenv lock -r ')
         with open(output_file, 'w') as requirements_file:
-            requirements_file.write(result)
+            # Remove markers from requirements file.
+            for line in result.splitlines():
+                parts = line.split(' ; ', maxsplit=1)
+                requirements_file.write(parts[0])
 
     def _create_update(self, dependency: str, package_version: str, old_version: str,
                        is_dev: bool = False, labels: list = None, old_environment: dict = None,
@@ -603,7 +606,7 @@ class UpdateManager(ManagerBase):
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ['PIPENV_VENV_IN_PROJECT'] = '1'
 
-        with cloned_repo(self.service_url, self.slug) as repo:
+        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             # Make repo available in the instance.
             self.repo = repo
 

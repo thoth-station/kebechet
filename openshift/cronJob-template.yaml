@@ -25,20 +25,36 @@ objects:
   spec:
     schedule: "*/20 * * * *"
     suspend: false
-    successfulJobsHistoryLimit: 10
+    successfulJobsHistoryLimit: 2
     failedJobsHistoryLimit: 1
     concurrencyPolicy: Forbid
     jobTemplate:
+      metadata:
+        labels:
+          app: kebechet
       spec:
         template:
+          metadata:
+            labels:
+              app: kebechet
           spec:
             containers:
             - image: kebechet-job
               name: kebechet
+              metadata:
+                labels:
+                  app: kebechet
+                  operatingOn: github.com
               volumeMounts:
               - name: ssh-config
                 mountPath: /home/user/.ssh
               env:
+              - name: PIPENV_NOSPIN
+                value: '1'
+              - name: PIPENV_COLORBLIND
+                value: '1'
+              - name: PIPENV_HIDE_EMOJIS
+                value: '1'
               - name: KEBECHET_TOKEN
                 valueFrom:
                   secretKeyRef:
@@ -54,6 +70,11 @@ objects:
                   configMapKeyRef:
                     key: kebechet-verbose
                     name: kebechet-configmap
+              - name: SENTRY_DSN
+                valueFrom:
+                  secretKeyRef:
+                    key: sentry-dsn
+                    name: kebechet-secret
               resources:
                 requests:
                   memory: "2Gi"
