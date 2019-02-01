@@ -474,3 +474,11 @@ repositories:
             - sesheta
           labels: [bot]
           changelog_file: true
+
+  - slug: thoth-station/build-watcher
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
