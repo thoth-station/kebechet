@@ -105,6 +105,23 @@ repositories:
           labels: [bot]
           changelog_file: true
 
+  - slug: thoth-station/graph-sync-scheduler
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
   - slug: thoth-station/lab
     token: '{KEBECHET_TOKEN}'
     managers:
