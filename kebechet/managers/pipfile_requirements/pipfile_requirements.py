@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,14 +40,15 @@ class PipfileRequirementsManager(ManagerBase):
         content = toml.loads(content)
 
         requirements = set()
-        for package_name, entry in content['default'].items():
-            if 'version' not in entry:
+        for package_name, entry in content['packages'].items():
+            if not isinstance(entry, str):
                 # e.g. using git, ...
                 raise ValueError("Package {} does not use pinned version: {}".format(
                     package_name, entry
                 ))
 
-            requirements.add(f'{package_name}{entry["version"]}')
+            package_version = entry if entry != '*' else ''
+            requirements.add(f'{package_name}{package_version}')
 
         return requirements
 
@@ -98,14 +99,15 @@ class PipfileRequirementsManager(ManagerBase):
             # TODO: delete branch if already exists
             return
 
-        with cloned_repo(self.service_url, self.slug) as repo:
+        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             with open('requirements.txt', 'w') as requirements_file:
                 requirements_file.write('\n'.join(pipfile_content))
                 requirements_file.write('\n')
 
-            repo.git.checkout(b='pipfile-requirements-sync')
-            repo.git.add('requirements.txt')
-            repo.git.commit('Update requirements.txt respecting requirements in {}'.format(
+            branch_name = 'pipfile-requirements-sync'
+            repo.git.checkout(b=branch_name)
+            repo.index.add(['requirements.txt'])
+            repo.index.commit('Update requirements.txt respecting requirements in {}'.format(
                 'Pipfile' if not lockfile else 'Pipfile.lock'
             ))
-            repo.git.push()
+            repo.remote().push(branch_name)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class InfoManager(ManagerBase):
             return
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
-        with cloned_repo(self.service_url, self.slug) as repo:
+        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             # We could optimize this as the get_issue() does API calls as well. Keep it this simple now.
             self.sm.close_issue_if_exists(
                 _INFO_ISSUE_NAME,

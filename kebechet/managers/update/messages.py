@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.loc
 
 ISSUE_NO_DEPENDENCY_MANAGEMENT = \
     """No dependency management found for this repository. If you want to keep your dependencies managed, \
-please submit `Pipfile` or `requirements.in` file.
+please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
 To generate a `Pipfile`, use:"
 ```
@@ -149,7 +149,7 @@ $ git add Pipfile
 $ git commit -m 'Add Pipfile for dependency management'
 ```
 
-Make sure your `Pipfile` or `requirements.in` is placed in the root of your Git repository.
+Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed in the root of your Git repository.
 """
 
 

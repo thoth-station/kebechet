@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,12 +38,12 @@ _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in so
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
-    "New calendar release": lambda _: datetime.utcnow().strftime("%y.%m.%d"),
-    "New major release": semver.bump_major,
-    "New minor release": semver.bump_minor,
-    "New patch release": semver.bump_patch,
-    "New pre-release": semver.bump_prerelease,
-    "New build release": semver.bump_build,
+    "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
+    "new major release": semver.bump_major,
+    "new minor release": semver.bump_minor,
+    "new patch release": semver.bump_patch,
+    "new pre-release": semver.bump_prerelease,
+    "new build release": semver.bump_build,
 }
 
 
@@ -54,12 +54,14 @@ class VersionError(Exception):
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
 
-    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[str]:
+    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[tuple]:
         """Adjust version in the given file, return signalizes whether the return value indicates change in file."""
         with open(file_path, 'r') as input_file:
             content = input_file.read().splitlines()
 
         changed = False
+        new_version = None
+        old_version = None
         for idx, line in enumerate(content):
             if line.startswith('__version__ = '):
                 parts = line.split(' = ', maxsplit=1)
@@ -87,19 +89,19 @@ class VersionManager(ManagerBase):
             # Add new line at the of file explicitly.
             output_file.write("\n")
 
-        return new_version
+        return new_version, old_version
 
-    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[str]:
+    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[tuple]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted = []
         for root, _, files in os.walk('./'):
             for file_name in files:
                 if file_name in ('setup.py', '__init__.py', 'version.py'):
                     file_path = os.path.join(root, file_name)
-                    new_version = self._adjust_version_file(file_path, issue)
-                    if new_version:
+                    adjusted_version = self._adjust_version_file(file_path, issue)
+                    if adjusted_version:
                         repo.git.add(file_path)
-                        adjusted.append((file_path, new_version))
+                        adjusted.append((file_path, adjusted_version[0], adjusted_version[1]))
 
         if len(adjusted) == 0:
             error_msg = _NO_VERSION_FOUND_ISSUE_NAME
@@ -119,8 +121,8 @@ class VersionManager(ManagerBase):
                 labels
             )
 
-        # Return version identifier.
-        return adjusted[0][1]
+        # Return old and new version identifier.
+        return adjusted[0][1], adjusted[0][2]
 
     def _get_maintainers(self, labels: list = None) -> list:
         """Get maintainers based on configuration.
@@ -147,7 +149,7 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
         """Get next version based on user request."""
-        handler = _RELEASE_TITLES.get(issue_title)
+        handler = _RELEASE_TITLES.get(issue_title.lower())
         if handler:
             try:
                 return handler(current_version)
@@ -164,10 +166,54 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _is_release_request(issue_title):
         """Check for possible candidate for a version bump."""
+        issue_title = issue_title.lower()
         return _RELEASE_TITLES.get(issue_title) is not None \
             or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
 
-    def run(self, maintainers: list = None, assignees: list = None, labels: list = None) -> None:
+    @staticmethod
+    def _compute_changelog(repo: Repo, old_version: str, new_version: str,
+                           version_file: bool = False) -> typing.List[str]:
+        """Compute changelog for the given repo.
+
+        If version file is used, add changelog to the version file and add changes to git.
+        """
+        _LOGGER.debug("Computing changelog for new release from version %r to version %r", old_version, new_version)
+        if old_version not in repo.git.tag().splitlines():
+            _LOGGER.debug("Old version was not found in the git tag history, assuming initial release")
+            # Use the initial commit if this the previous tag was not found - this
+            # can be in case of the very first release.
+            old_version = repo.git.rev_list('HEAD', max_parents=0)
+
+        changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
+        if version_file:
+            # TODO: We should prepend changes instead of appending them.
+            _LOGGER.info("Adding changelog to the CHANGELOG.md file")
+            with open('CHANGELOG.md', 'a') as changelog_file:
+                changelog_file.write(
+                    f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                )
+                changelog_file.write('\n'.join(changelog))
+                changelog_file.write('\n')
+            repo.git.add('CHANGELOG.md')
+
+        _LOGGER.debug("Computed changelog has %d entries", len(changelog))
+        return changelog
+
+    @staticmethod
+    def _construct_pr_body(issue: Issue, changelog: str) -> str:
+        """Construct body of the opened pull request with version update."""
+        # Copy body from the original issue, this is helpful in case of
+        # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
+        # merges are perfomed as desired.
+        body = ''
+        if issue.description:
+            body = issue.description + '\n\n'
+
+        body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        return body
+
+    def run(self, maintainers: list = None, assignees: list = None,
+            labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         reported_issues = []
         for issue in self.sm.repository.issues:
@@ -206,7 +252,7 @@ class VersionManager(ManagerBase):
                     continue
 
                 try:
-                    version_identifier = self._adjust_version_in_sources(repo, labels, issue)
+                    version_identifier, old_version = self._adjust_version_in_sources(repo, labels, issue)
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
                     issue.add_comment(str(exc))
@@ -217,6 +263,9 @@ class VersionManager(ManagerBase):
                     _LOGGER.error("Giving up with automated release")
                     return
 
+                changelog = self._compute_changelog(
+                    repo, old_version, version_identifier, version_file=changelog_file
+                )
                 branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
@@ -227,7 +276,7 @@ class VersionManager(ManagerBase):
                 request = self.sm.open_merge_request(
                     message,
                     branch_name,
-                    body='Related: #' + str(issue.number),
+                    body=self._construct_pr_body(issue, changelog),
                     labels=labels
                 )
 

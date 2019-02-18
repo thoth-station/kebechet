@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +19,11 @@
 
 
 import logging
+import os
 
 import click
 import daiquiri
+import sentry_sdk
 
 from kebechet import __version__ as kebechet_version
 from kebechet.config import config
@@ -29,6 +31,14 @@ from kebechet.config import config
 daiquiri.setup(level=logging.INFO)
 
 _LOGGER = logging.getLogger('kebechet')
+_SENTRY_DSN = os.getenv('SENTRY_DSN')
+
+
+if _SENTRY_DSN:
+    _LOGGER.info("Setting up logging to a Sentry instance %r", _SENTRY_DSN.rsplit('@', maxsplit=1)[1])
+    sentry_sdk.init(_SENTRY_DSN)
+else:
+    _LOGGER.debug("Logging to a Sentry instance is turned off")
 
 
 def _print_version(ctx, _, value):

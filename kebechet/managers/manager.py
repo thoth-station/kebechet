@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ pipenv version: {pipenv_version}
         _LOGGER.debug(f"Running pipenv command {cmd!r}")
         result = delegator.run(cmd)
         if result.return_code != 0:
-            _LOGGER.error(result.err)
+            _LOGGER.warning(result.err)
             raise PipenvError(result)
 
         return result.out

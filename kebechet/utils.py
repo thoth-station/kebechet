@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(service_url: str, slug: str):
+def cloned_repo(service_url: str, slug: str, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     if service_url.startswith('https://'):
         service_url = service_url[len('https://'):]
@@ -56,7 +56,13 @@ def cloned_repo(service_url: str, slug: str):
     repo_url = f'git@{service_url}:{slug}.git'
     with TemporaryDirectory() as repo_path, cwd(repo_path):
         _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-        repo = git.Repo.clone_from(repo_url, repo_path, branch='master', depth=1)
+        repo = git.Repo.clone_from(repo_url, repo_path, branch='master', **clone_kwargs)
+        repo.config_writer().set_value(
+            'user', 'name', os.getenv('KEBECHET_GIT_NAME', 'Kebechet')
+        ).release()
+        repo.config_writer().set_value(
+            'user', 'email', os.getenv('KEBECHET_GIT_EMAIL', 'noreply+kebechet@redhat.com')
+        ).release()
         yield repo
 
 
@@ -66,7 +72,7 @@ def construct_raw_file_url(service_url: str, slug: str, file_name: str,
     branch = branch or 'master'
     if service_type == ServiceType.GITHUB:
         # TODO self hosted GitHub?
-        url = 'https://raw.githubusercontent.com/{slug}/{branch}/{file_name}'
+        url = f'https://raw.githubusercontent.com/{slug}/{branch}/{file_name}'
     elif service_type == ServiceType.GITLAB:
         url = urljoin(service_url, f'{slug}/raw/{branch}/{file_name}')
     else:
