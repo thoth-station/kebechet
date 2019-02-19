@@ -19,26 +19,16 @@
 
 
 import logging
-import os
 
 import click
-import daiquiri
-import sentry_sdk
+from thoth.common import init_logging
 
 from kebechet import __version__ as kebechet_version
 from kebechet.config import config
 
-daiquiri.setup(level=logging.INFO)
+init_logging(logging_env_var_start="KEBECHET_LOG_")
 
-_LOGGER = logging.getLogger('kebechet')
-_SENTRY_DSN = os.getenv('SENTRY_DSN')
-
-
-if _SENTRY_DSN:
-    _LOGGER.info("Setting up logging to a Sentry instance %r", _SENTRY_DSN.rsplit('@', maxsplit=1)[1])
-    sentry_sdk.init(_SENTRY_DSN)
-else:
-    _LOGGER.debug("Logging to a Sentry instance is turned off")
+_LOGGER = logging.getLogger("kebechet")
 
 
 def _print_version(ctx, _, value):
