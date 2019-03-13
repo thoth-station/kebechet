@@ -46,7 +46,7 @@ class _Config:
                 content = config_file.read()
 
         try:
-            self._repositories = yaml.load(content).pop('repositories') or []
+            self._repositories = yaml.safe_load(content).pop('repositories') or []
         except Exception as exc:
             raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
 
