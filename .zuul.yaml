@@ -9,7 +9,7 @@
       jobs:
         - trigger-build:
             vars:
-              webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job/webhooks/"
+              webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job/"
     release:
       jobs:
         - "upload-pypi-sesheta"
