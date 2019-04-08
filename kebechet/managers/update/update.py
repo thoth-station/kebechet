@@ -213,11 +213,11 @@ class UpdateManager(ManagerBase):
                                    labels: list, files: list, merge_request: MergeRequest) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
         branch_name = self._construct_branch_name(dependency, new_version)
-        commit_msg = f":pushpin: Automatic update of dependency {dependency} from {old_version} to {new_version}"
+        commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
 
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        self._git_push(commit_msg, branch_name, files, force_push=True)
+        self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
 
         if not merge_request:
             _LOGGER.info(f"Creating a pull request to update {dependency} from version {old_version} to {new_version}")
@@ -451,9 +451,9 @@ class UpdateManager(ManagerBase):
         )
 
         self._pipenv_update_all()
-        commit_msg = ":pushpin: Automatic dependency re-locking"
+        commit_msg = "Automatic dependency re-locking"
         branch_name = "kebechet-dependency-relock"
-        self._git_push(commit_msg, branch_name, ['Pipfile.lock'])
+        self._git_push(":pushpin: " + commit_msg, branch_name, ['Pipfile.lock'])
         pr_id = self.sm.open_merge_request(commit_msg, branch_name, f"Fixes: #{issue.number}", labels)
         _LOGGER.info(f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.number}")
 
