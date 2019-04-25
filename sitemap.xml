@@ -3,17 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://kebechet.thoth-station.ninja/categories/</loc>
+    <loc>http://kebechet.thoth-station.ninja/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://kebechet.thoth-station.ninja/</loc>
+    <loc>http://kebechet.thoth-station.ninja/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://kebechet.thoth-station.ninja/tags/</loc>
+    <loc>http://kebechet.thoth-station.ninja/tags/</loc>
     <priority>0</priority>
   </url>
   

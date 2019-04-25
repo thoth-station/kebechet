@@ -2,12 +2,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kebechet</title>
-    <link>https://kebechet.thoth-station.ninja/</link>
+    <link>http://kebechet.thoth-station.ninja/</link>
     <description>Recent content on Kebechet</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     
-	<atom:link href="https://kebechet.thoth-station.ninja/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://kebechet.thoth-station.ninja/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>
