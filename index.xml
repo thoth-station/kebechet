@@ -6,9 +6,31 @@
     <description>Recent content on Kebechet</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
+    <lastBuildDate>Thu, 25 Apr 2019 13:27:37 +0200</lastBuildDate>
     
 	<atom:link href="https://thoth-station.ninja/kebechet/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How to Integrate</title>
+      <link>https://thoth-station.ninja/kebechet/how-to-integrate/</link>
+      <pubDate>Thu, 25 Apr 2019 13:27:37 +0200</pubDate>
+      
+      <guid>https://thoth-station.ninja/kebechet/how-to-integrate/</guid>
+      <description>Three easy steps I will help you to create new releases of your own source code and I will also help you with keeping the depencencies of your source code up to date. Enabling me to work on your source code is easy. It requires hub, which I strongly recommend! As you are a developer yourself, you know the steps by heart:
+1 Clone the Source to make changes to my configuration, clone the repositoy: hub clone https://github.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://thoth-station.ninja/kebechet/about/</link>
+      <pubDate>Thu, 25 Apr 2019 13:18:30 +0200</pubDate>
+      
+      <guid>https://thoth-station.ninja/kebechet/about/</guid>
+      <description>Kebechet  I&amp;rsquo;m Kebechet, goddess of freshness. I will keep your sources and dependencies fresh and up-to-date.
+ Kebechet is a SourceOps bot that automates updating dependencies of your project. Currently, it supports managing and updating Python projects based on pipenv files (Pipfile and Pipfile.lock) or requirements.txt/requirements.in files (see pip-tools) - Kebechet is a replacement for it.
+Configuration of Kebechet Kebechet is configured using a simple YAML configuration file. Check the documentation of managers to get all the available options.</description>
+    </item>
     
   </channel>
 </rss>
