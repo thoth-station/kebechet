@@ -101,63 +101,53 @@ class ThothManager(ManagerBase):
     
     def _open_merge_request(self, branch_name: str, labels: list, files: list) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
-        commit_msg = f"Test"
-        body = "BODY"
+        commit_msg = "Auto generated update"
+        body = "Pipfile.lock updated by kebechet-thoth manager"
 
-        # If we have already an update for this package we simple issue git
+        # Delete branch if it didn't change Pipfile.lock
+        diff = self.repo.git.diff('master', files)
+        if diff == "":
+            return
+        
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
         self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
+        
+        for mr in self._cached_merge_requests:
+            if mr.head_branch_name == branch_name:
+                return
+        
         merge_request = self.sm.open_merge_request(commit_msg, branch_name, body, labels)
         return merge_request
 
-    def _advise_wrap(self):
-        with open("Pipfile", "r") as pipfile:            
-            res = lib.advise(pipfile.read(), "")
-            print(res)
-            pip_info = res[0]["report"][0][1]["requirements"]
-            lock_info = res[0]["report"][0][1]["requirements_locked"]
+    @staticmethod
+    def _advise_wrap():
+        with open("Pipfile", "r") as pipfile, open("Pipfile.lock", "a+") as piplock:
+            # TODO: take into account config values for recommendation type,
+            #       limit latest versions, no static analysis, no wait,
+            #       limit, count, debug
+            res = lib.advise(pipfile.read(), piplock.read())
         return res
-    
-    def _advise_and_write(self):
-        res = self._advise_wrap()
 
-        pip_info = res[0]["report"][0][1]["requirements"]
-        lock_info = res[0]["report"][0][1]["requirements_locked"]
-        with open("Pipfile", "w+") as f:
-            f.write("[dev-packages]\n")
-            for entry in pip_info["dev-packages"]:
-                f.write("{} = \"{}\"\n".format(entry, pip_info["dev-packages"][entry]))
-
-                f.write("\n[packages]\n")
-                for entry in pip_info["packages"]:
-                    f.write("{} = \"{}\"\n".format(entry, pip_info["packages"][entry]))
-            
-                f.write("\n[requires]\n")
-                for entry in pip_info["requires"]:
-                    f.write("{} = \"{}\"\n".format(entry, pip_info["requires"][entry]))
-                        
-                for index in pip_info["source"]:
-                    f.write("\n[[source]]\n")
-                    for entry in index:
-                        if entry == "verify_ssl":
-                            f.write("{} = {}\n".format(entry, str(index[entry]).lower()))
-                        else:
-                            f.write("{} = \"{}\"\n".format(entry, index[entry]))
-
+    @staticmethod
+    def _write_advise(adv_results: list):
+        lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
         with open("Pipfile.lock", "w+") as f:
             f.write(json.dumps(lock_info))
-
         return
 
 
-    def run(self, labels: list):
+    def run(self, labels: list, rectype: str):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
             branch_name = self._construct_branch_name()
-            branch = self.repo.git.checkout('-b', branch_name)
-            # TODO: _advise_and_write
-            # TODO: push _BRANCH_NAME
-            # TODO: generate pull request if diff master Pipfile.lock and _BRANCH_NAME Pipfile.lock (git diff master _BRANCH_NAME)
+            branch = self.repo.git.checkout('-B', branch_name)
+            self._cached_merge_requests = self.sm.repository.merge_requests
             if os.path.isfile('Pipfile'):
-                self._advise_and_write()
-                self._open_merge_request(branch_name, ['bot'], ["Pipfile.lock"])
+                res = self._advise_wrap()
+                print(res)
+                if res[1] == False:
+                    self._write_advise(res)
+                    self._open_merge_request(branch_name, ['bot'], ["Pipfile.lock"])
+                else:
+                    # TODO: analysis created error open issue with error message
+                    pass
