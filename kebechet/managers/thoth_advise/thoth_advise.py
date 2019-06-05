@@ -108,21 +108,11 @@ class ThothAdviseManager(ManagerBase):
         return merge_request
 
     @staticmethod
-    def _advise_wrap():
-        with open("Pipfile", "r") as pipfile, open("Pipfile.lock", "a+") as piplock:
-            # TODO: take into account config values for recommendation type,
-            #       limit latest versions, no static analysis, no wait,
-            #       limit, count, debug
-            res = lib.advise(pipfile.read(), piplock.read())
-        return res
-
-    @staticmethod
     def _write_advise(adv_results: list):
         lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
         with open("Pipfile.lock", "w+") as f:
             f.write(json.dumps(lock_info))
         return
-
 
     def run(self, labels: list, rectype: str):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
@@ -131,7 +121,7 @@ class ThothAdviseManager(ManagerBase):
             branch = self.repo.git.checkout('-B', branch_name)
             self._cached_merge_requests = self.sm.repository.merge_requests
             if os.path.isfile('Pipfile'):
-                res = self._advise_wrap()
+                res = lib.advise_here()
                 print(res)
                 if res[1] == False:
                     self._write_advise(res)
