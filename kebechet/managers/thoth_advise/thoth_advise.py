@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Fridolin Pokorny
+# Copyright(C) 2018, 2019 Kevin Postlethwait
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ _BRANCH_NAME = "kebechet_thoth"
 # updated on subsequent calls.
 
 
-class ThothManager(ManagerBase):
+class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies."""
 
     def __init__(self, *args, **kwargs):
