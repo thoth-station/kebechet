@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Dependency update management logic."""
+"""Consume Thoth Output for Kebechet auto-dependency management"""
 
 import os
 import logging
@@ -37,20 +37,8 @@ from kebechet.source_management import Issue
 from kebechet.source_management import MergeRequest
 from kebechet.utils import cloned_repo
 
-from .messages import ISSUE_CLOSE_COMMENT
-from .messages import ISSUE_COMMENT_UPDATE_ALL
-from .messages import ISSUE_INITIAL_LOCK
-from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
-from .messages import ISSUE_PIPENV_UPDATE_ALL
-from .messages import ISSUE_REPLICATE_ENV
 
 _LOGGER = logging.getLogger(__name__)
-_RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\\[)')
-
-_ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
-_ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
-_ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
-_ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 
 _BRANCH_NAME = "kebechet_thoth"
 
