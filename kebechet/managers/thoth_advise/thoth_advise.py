@@ -17,6 +17,7 @@
 
 """Consume Thoth Output for Kebechet auto-dependency management"""
 
+import hashlib
 import os
 import logging
 import toml
@@ -114,7 +115,18 @@ class ThothAdviseManager(ManagerBase):
             f.write(json.dumps(lock_info))
         return
 
-    def run(self, labels: list, rectype: str):
+    def _issue_advise_error(self, adv_results: list, labels: list):
+        error_info = adv_results[0]["report"][0][0][0]
+        justification = error_info["justification"]
+        type_ = error_info["type"]
+        checksum = hashlib.md5(justification.encode('utf-8')).hexdigest()[:10]
+        self.sm.open_issue_if_not_exist(
+            f"{checksum}-{type_}: Automated kebechet thoth-advise Issue",
+            lambda: justification,
+            labels
+        )
+
+    def run(self, labels: list):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
             branch_name = self._construct_branch_name()
@@ -127,5 +139,4 @@ class ThothAdviseManager(ManagerBase):
                     self._write_advise(res)
                     self._open_merge_request(branch_name, ['bot'], ["Pipfile.lock"])
                 else:
-                    # TODO: analysis created error open issue with error message
-                    pass
+                    self._issue_advise_error(res, labels)
