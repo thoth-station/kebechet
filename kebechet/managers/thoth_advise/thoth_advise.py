@@ -123,7 +123,7 @@ class ThothAdviseManager(ManagerBase):
         self.sm.open_issue_if_not_exist(
             f"{checksum}-{type_}: Automated kebechet thoth-advise Issue",
             lambda: justification,
-            labels
+            labels = labels
         )
 
     def run(self, labels: list):
