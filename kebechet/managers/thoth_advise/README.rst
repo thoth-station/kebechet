@@ -48,7 +48,7 @@ Options
 Example
 =======
 
-An example configuration:
+An example configuration for kebechet:
 
 .. code-block:: yaml
 
@@ -61,12 +61,36 @@ An example configuration:
       # service_url: <URL>
       # tls_verify: true/false
       managers:
-        - name: thoth
+        - name: thoth-advise
           configuration:
             labels:
               # Labels for opened issues and pull requests.
               - bot
-            rectype: LATEST
+
+An example configuration for thamos `.thoth.yaml`
+
+NOTE: This configuration file should be in the root directory of your repository
+
+.. code-block:: yaml
+
+  host: {THOTH_SERVICE_HOST}
+  tls_verify: true
+  requirements_format: pipenv
+                
+  runtime_environments:
+  - name: '{os_name}:{os_version}'
+    operating_system:
+      name: {os_name}
+      version: '{os_version}'
+    hardware:
+      cpu_family: {cpu_family}
+      cpu_model: {cpu_model}
+    python_version: '{python_version}'
+    cuda_version: {cuda_version}
+    recommendation_type: stable
+    limit_latest_versions: null
+
+A more detailed description of `thamos` can be found `here <https://github.com/thoth-station/thamos>`_
 
 You can see this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.
 
