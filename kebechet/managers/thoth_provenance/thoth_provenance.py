@@ -85,10 +85,6 @@ class ThothProvenanceManager(ManagerBase):
                 f"**Justification: {err['justification']}**\n" + \
                 f"#### source: \n {pprint.pformat(err['source'])}\n" + \
                 f"#### lock_info:\n {pprint.pformat(err['package_locked'])}"
-            
-        # Use markdown to make header(3) for each issue {id} - {package-name}:{version}
-        # Beneath write justifiction
-        # TODO: should lock json be written?
 
         checksum = hashlib.md5(text_block.encode('utf-8')).hexdigest()[:10]
 

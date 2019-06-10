@@ -74,7 +74,6 @@ class ThothAdviseManager(ManagerBase):
         """Get SHA of the current head commit."""
         return self.repo.head.commit.hexsha
 
-    # TODO: determine how branch name will be constructed
     def _construct_branch_name(self) -> str:
         """Construct branch name for the updated dependency."""
         return f"{_BRANCH_NAME}-{self.sha}"
