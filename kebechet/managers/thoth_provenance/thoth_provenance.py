@@ -68,7 +68,7 @@ class ThothProvenanceManager(ManagerBase):
     def repo(self, repo: git.Repo):
         """Set repository information and all derived information needed."""
         self._repo = repo
-        self.slug = repo.remote().url.split(':', maxsplit=1)[1][:-len('.git')]
+        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
 
     @property
     def sha(self):
@@ -80,25 +80,29 @@ class ThothProvenanceManager(ManagerBase):
         text_block = ""
         # XXX: Does not have any real values
         for err in error_info:
-            text_block = text_block + \
-                f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n" + \
-                f"**Justification: {err['justification']}**\n" + \
-                f"#### source: \n {pprint.pformat(err['source'])}\n" + \
-                f"#### lock_info:\n {pprint.pformat(err['package_locked'])}"
+            text_block = (
+                text_block
+                + f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n"
+                + f"**Justification: {err['justification']}**\n"
+                + f"#### source: \n {pprint.pformat(err['source'])}\n"
+                + f"#### lock_info:\n {pprint.pformat(err['package_locked'])}"
+            )
 
-        checksum = hashlib.md5(text_block.encode('utf-8')).hexdigest()[:10]
+        checksum = hashlib.md5(text_block.encode("utf-8")).hexdigest()[:10]
 
         self.sm.open_issue_if_not_exist(
             f"{checksum} - {len(error_info)}: Automated kebechet thoth-provenance Issue",
             lambda: text_block,
-            labels = labels
+            labels=labels,
         )
 
     def run(self, labels: list):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
-            if os.path.isfile('Pipfile') and os.path.isfile('Pipfile.lock'):
-                with open('Pipfile', 'r') as pipfile, open('Pipfile.lock', 'r') as piplock:
+            if os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock"):
+                with open("Pipfile", "r") as pipfile, open(
+                    "Pipfile.lock", "r"
+                ) as piplock:
                     res = lib.provenance_check(pipfile.read(), piplock.read())
                 print(res)
                 if res != None and res[1] == False:
