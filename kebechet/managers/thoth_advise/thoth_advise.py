@@ -45,21 +45,9 @@ class ThothAdviseManager(ManagerBase):
     def __init__(self, *args, **kwargs):
         """Initialize ThothAdvise manager."""
         # TODO: What needs to be changed for event driven Kebechet??
-        self._repo = None
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
         super().__init__(*args, **kwargs)
-
-    @property
-    def repo(self):
-        """Get repository on which we work on."""
-        return self._repo
-
-    @repo.setter
-    def repo(self, repo: git.Repo):
-        """Set repository information and all derived information needed."""
-        self._repo = repo
-        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
 
     @property
     def sha(self):

@@ -68,7 +68,19 @@ class ManagerBase:
         self.slug = slug
         self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
+        self._repo = None
 
+    @property
+    def repo(self):
+        """Get repository on which we work on."""
+        return self._repo
+
+    @repo.setter
+    def repo(self, repo: git.Repo):
+        """Set repository information and all derived information needed."""
+        self._repo = repo
+        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
+        
     @classmethod
     def get_environment_details(cls, as_dict=False) -> str:
         """Get details for environment in which Kebechet runs."""
