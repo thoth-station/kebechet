@@ -20,12 +20,8 @@
 import hashlib
 import os
 import logging
-import toml
-import re
 import json
 import typing
-from itertools import chain
-from functools import partial
 from thamos import lib
 
 import git
@@ -82,7 +78,6 @@ class ThothAdviseManager(ManagerBase):
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
         """Perform git push after adding files and giving a commit message."""
-        #  self.repo.git.checkout('HEAD', b=branch_name)
         self.repo.index.add(files)
         self.repo.index.commit(commit_msg)
         self.repo.remote().push(branch_name, force=force_push)
@@ -100,12 +95,16 @@ class ThothAdviseManager(ManagerBase):
             return
 
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
+        LOGGER_.info('Pushing changes')
         self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
 
+        # Check if the merge request already exists
         for mr in self._cached_merge_requests:
             if mr.head_branch_name == branch_name:
+                LOGGER_.info('Merge request already exists, updating...'
                 return
 
+        LOGGER_.info('Opening merge request')
         merge_request = self.sm.open_merge_request(
             commit_msg, branch_name, body, labels
         )
@@ -115,6 +114,8 @@ class ThothAdviseManager(ManagerBase):
     def _write_advise(adv_results: list):
         lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
         with open("Pipfile.lock", "w+") as f:
+            LOGGER_.info('Writing to Pipfile.lock')
+            LOGGER_.debug(f"{json.dumps(lock_info)}")
             f.write(json.dumps(lock_info))
         return
 
@@ -122,7 +123,9 @@ class ThothAdviseManager(ManagerBase):
         error_info = adv_results[0]["report"][0][0][0]
         justification = error_info["justification"]
         type_ = error_info["type"]
+        LOGGER_.warning('Error type: {type_}')
         checksum = hashlib.md5(justification.encode("utf-8")).hexdigest()[:10]
+        LOGGER_.info('Creating issue')
         self.sm.open_issue_if_not_exist(
             f"{checksum}-{type_}: Automated kebechet thoth-advise Issue",
             lambda: justification,
@@ -137,9 +140,21 @@ class ThothAdviseManager(ManagerBase):
             self._cached_merge_requests = self.sm.repository.merge_requests
             if os.path.isfile("Pipfile"):
                 res = lib.advise_here()
-                print(res)
+                for i in range(1, 11):
+                    if res is not None:
+                        break
+                    LOGGER_.info(f"Advising failed, retrying ({i}/10)")
+                    res = lib.advise_here(force = True)
+                
+                if res is None:
+                    LOGGER_.error("Advising failed")
+                    return False
+                LOGGER_.debug(f"{json.dumps(res)}")
+                
                 if res[1] == False:
+                    LOGGER_.info('Advise succeeded')
                     self._write_advise(res)
                     self._open_merge_request(branch_name, ["bot"], ["Pipfile.lock"])
                 else:
+                    LOGGER_.warning('Found error while running adviser... Creating issue')
                     self._issue_advise_error(res, labels)

@@ -20,12 +20,8 @@
 import hashlib
 import os
 import logging
-import toml
-import re
 import json
 import typing
-from itertools import chain
-from functools import partial
 import pprint
 
 from thamos import lib
@@ -78,8 +74,9 @@ class ThothProvenanceManager(ManagerBase):
     def _issue_provenance_error(self, prov_results: list, labels: list):
         error_info = prov_results[0]
         text_block = ""
-        # XXX: Does not have any real values
+
         for err in error_info:
+            LOGGER_.info(f"{err['id']: {err['package_name']{err['package_version']}")
             text_block = (
                 text_block
                 + f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n"
@@ -104,6 +101,19 @@ class ThothProvenanceManager(ManagerBase):
                     "Pipfile.lock", "r"
                 ) as piplock:
                     res = lib.provenance_check(pipfile.read(), piplock.read())
-                print(res)
-                if res != None and res[1] == False:
-                    self._issue_provenance_error(res, labels)
+                    for i in range(1,11):
+                        if res is not None:
+                            break
+                        LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)") 
+                        res = lib.provenance_check(pipfile.read(), piplock.read(), force=True)
+                    if res is None:
+                        LOGGER_.error("Provenance check failed: Exiting")
+                        return
+                    
+            if res[1] is False:
+                LOGGER_.info("Provenance check found problems, creating issue...")
+                self._issue_provenance_error(res, labels)
+                return False
+            else:
+                LOGGER_.info("Provenance check found no problems, carry on coding :)")
+                return True
