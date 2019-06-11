@@ -1,4 +1,4 @@
-Kebechet Update Manager
+Kebechet Thamos-Advise Manager
 -----------------------
 
 This manager is responsible for automatic updates of dependencies in a repository based on `Pipfile`
@@ -7,7 +7,7 @@ file, it uses `thamos.lib` to communicate with `thoth` user API
 A prerequisite for this manager is to have `Pipfile` and `.thoth.yaml`, present in the repo.
 `Pipfile` should state all direct dependencies (with possible required specifications).
 `.thoth.yaml` should contain a valid configuration for `thamos`
-.. TODO: Link valid config file
+
 
 * `Pipfile` - respecting `pipenv <https://github.com/pypa/pipenv>`_ tool
 * `Pipfile.lock` - automatically managed by this manager - states all pinned down versions of your application stack
@@ -18,7 +18,7 @@ If you do not have `Pipfile.lock` present in your repository, this manager will 
 
 Custom PyPI indexes are supported respecting `Pipfile` syntax.
 
-If there is any issue in your application stack, the Update manager will open an issue with all the info and will try to resolve issue for you if possible by opening a pull request for you.
+If there is any issue in your application stack, the Thamos-Advise manager will open an issue with all the info and will try to resolve issue for you if possible by opening a pull request for you.
 
 .. Manager will automatically rebase opened pull requests on top of the current master if master changes so changes are always tested in your CI with the recent master.
 
