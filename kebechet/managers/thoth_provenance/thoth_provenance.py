@@ -46,10 +46,11 @@ _BRANCH_NAME = "kebechet_thoth"
 
 
 class ThothProvenanceManager(ManagerBase):
-    """Manage updates of dependencies."""
+    """Manage source issues of dependencies."""
 
     def __init__(self, *args, **kwargs):
-        """Initialize update manager."""
+        """Initialize ThothProvenance manager."""
+        # TODO: What needs to be changed for event driven Kebechet??
         self._repo = None
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
@@ -97,18 +98,16 @@ class ThothProvenanceManager(ManagerBase):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
             if os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock"):
-                with open("Pipfile", "r") as pipfile, open(
-                    "Pipfile.lock", "r"
-                ) as piplock:
-                    res = lib.provenance_check(pipfile.read(), piplock.read())
-                    for i in range(1,11):
-                        if res is not None:
-                            break
-                        LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)") 
-                        res = lib.provenance_check(pipfile.read(), piplock.read(), force=True)
-                    if res is None:
-                        LOGGER_.error("Provenance check failed: Exiting")
-                        return
+                res = lib.provenance_check_here()
+                for i in range(1,11):
+                    if res is not None:
+                        break
+                    LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)") 
+                    res = lib.provenance_check_here(force=True)
+
+            if res is None:
+                LOGGER_.error("Provenance check failed: Exiting")
+                return
                     
             if res[1] is False:
                 LOGGER_.info("Provenance check found problems, creating issue...")

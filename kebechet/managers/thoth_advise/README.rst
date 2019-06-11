@@ -1,7 +1,7 @@
 Kebechet Thamos-Advise Manager
 -----------------------
 
-This manager is responsible for automatic updates of dependencies in a repository based on `Pipfile`
+This manager will manage your Python dependencies using Thoths recommendation system. Your repository will be automatically updated with the optimal Python packages for your project without you having to lift your finger.
 file, it uses `thamos.lib` to communicate with `thoth` user API
 
 A prerequisite for this manager is to have `Pipfile` and `.thoth.yaml`, present in the repo.
@@ -12,15 +12,12 @@ A prerequisite for this manager is to have `Pipfile` and `.thoth.yaml`, present 
 * `Pipfile` - respecting `pipenv <https://github.com/pypa/pipenv>`_ tool
 * `Pipfile.lock` - automatically managed by this manager - states all pinned down versions of your application stack
 
-.. `Pipfile` has higher precedence over `requirements.in` so if you have both files present in your Git repository, only Pipfile.lock will be managed.
-
 If you do not have `Pipfile.lock` present in your repository, this manager will automatically open a pull request with initial dependency lock.
 
 Custom PyPI indexes are supported respecting `Pipfile` syntax.
 
 If there is any issue in your application stack, the Thamos-Advise manager will open an issue with all the info and will try to resolve issue for you if possible by opening a pull request for you.
 
-.. Manager will automatically rebase opened pull requests on top of the current master if master changes so changes are always tested in your CI with the recent master.
 
 Why should I pin down dependencies in my application?
 =====================================================
@@ -36,8 +33,6 @@ Forkflow for pipenv - ``Pipfile`` and ``Pipfile.lock``
 ======================================================
 
 To use Kebechet with `pipenv <https://docs.pipenv.org>`_ you have to commit ``Pipfile`` and files into the root of your Git respository structure. Kebechet will automatically monitor these files and issue updates to ``Pipfile.lock`` whenver there is a change to either your `Pipfile` or updates to the knowledge base. 
-
-.. To use Kebechet with the old fashion ``requirements.in`` and ``requirements.txt`` files, commit ``requirements.in`` file into the root of your Git repository structure. Kebechet will automatically pin down packages for you and create an initial pull request with ``requirements.txt``. File ``requirements.in`` should state your direct dependencies and version specification you expect for dependency solver to be used during dependency resolution (you can also add restrictions for your indirect dependencies there to avoid updates of transitive dependencies introducing bugs). File ``requirements.txt`` is automatically managed by Kebechet and it will produce fully pinned down application stack for your application.
 
 Options
 =======

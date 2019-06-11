@@ -1,7 +1,7 @@
 Kebechet Thamos-Provenance_check Manager
 -----------------------
 
-This manager is responsible for automatically creating issues based on provenance checks
+The purpose of this manager is to use Thoth's ability to conduct provenance checks to ensure that your Python dependency sources are valid
 file, it uses `thamos.lib` to communicate with `thoth` user API
 
 A prerequisite for this manager is to have `Pipfile` and `Pipfile.lock`, and `.thoth.yaml`, present in the repo.
@@ -12,30 +12,19 @@ A prerequisite for this manager is to have `Pipfile` and `Pipfile.lock`, and `.t
 * `Pipfile` - respecting `pipenv <https://github.com/pypa/pipenv>`_ tool
 * `Pipfile.lock` - states all pinned down versions of your application stack
 
-.. `Pipfile` has higher precedence over `requirements.in` so if you have both files present in your Git repository, only Pipfile.lock will be managed.
-
 Custom PyPI indexes are supported respecting `Pipfile` syntax.
 
 If there is any issue in your application stack, this manager will create issues in your repository
 
-.. Manager will automatically rebase opened pull requests on top of the current master if master changes so changes are always tested in your CI with the recent master.
-
-Why should I pin down dependencies in my application?
-=====================================================
-
-Check `this StackOverflow thread <https://stackoverflow.com/questions/28509481>`_.
-
 Why should I use this manager instead of other solutions?
 =========================================================
 
-Provenance checks are make sure that your locked down dependencies are discoverable within the index that you stated with the correct values and shas
+Provenance checks are make sure that your locked down dependencies are discoverable within the index that you stated with the correct indexes and shas
 
 Forkflow for pipenv - ``Pipfile`` and ``Pipfile.lock``
 ======================================================
 
 To use Kebechet with `pipenv <https://docs.pipenv.org>`_ you have to commit ``Pipfile`` and ``Pipfile.lock`` files into the root of your Git respository structure. Kebechet will automatically monitor these files and create issues if any problems are found through `thoth` provenance checks
-
-.. To use Kebechet with the old fashion ``requirements.in`` and ``requirements.txt`` files, commit ``requirements.in`` file into the root of your Git repository structure. Kebechet will automatically pin down packages for you and create an initial pull request with ``requirements.txt``. File ``requirements.in`` should state your direct dependencies and version specification you expect for dependency solver to be used during dependency resolution (you can also add restrictions for your indirect dependencies there to avoid updates of transitive dependencies introducing bugs). File ``requirements.txt`` is automatically managed by Kebechet and it will produce fully pinned down application stack for your application.
 
 Options
 =======

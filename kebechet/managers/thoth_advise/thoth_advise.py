@@ -39,16 +39,12 @@ _LOGGER = logging.getLogger(__name__)
 
 _BRANCH_NAME = "kebechet_thoth"
 
-# Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
-# as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
-# updated on subsequent calls.
-
-
 class ThothAdviseManager(ManagerBase):
-    """Manage updates of dependencies."""
+    """Manage updates of dependencies using Thoth."""
 
     def __init__(self, *args, **kwargs):
-        """Initialize update manager."""
+        """Initialize ThothAdvise manager."""
+        # TODO: What needs to be changed for event driven Kebechet??
         self._repo = None
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
@@ -101,7 +97,7 @@ class ThothAdviseManager(ManagerBase):
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
             if mr.head_branch_name == branch_name:
-                LOGGER_.info('Merge request already exists, updating...'
+                LOGGER_.info('Merge request already exists, updating...')
                 return
 
         LOGGER_.info('Opening merge request')
@@ -155,6 +151,8 @@ class ThothAdviseManager(ManagerBase):
                     LOGGER_.info('Advise succeeded')
                     self._write_advise(res)
                     self._open_merge_request(branch_name, ["bot"], ["Pipfile.lock"])
+                    return True
                 else:
                     LOGGER_.warning('Found error while running adviser... Creating issue')
                     self._issue_advise_error(res, labels)
+                    return False
