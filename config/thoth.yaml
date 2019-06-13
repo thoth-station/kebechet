@@ -126,6 +126,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - CermakM
           assignees:
             - sesheta
           labels: [bot]
