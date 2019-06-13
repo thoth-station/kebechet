@@ -1,20 +1,20 @@
 - project:
-    check:
-      jobs:
-        - "thoth-coala"
-    gate:
-      jobs:
-        - "thoth-coala"
-    post:
-      jobs:
-        - "trigger-build":
+  check:
+    jobs:
+      - thoth-coala
+  gate:
+    jobs:
+      - thoth-coala
+  post:
+    jobs:
+      - "trigger-build":
           vars:
-            cluster: "paas.psi.redhat.com"
-            namespace: "aicoe-prod-bots"
-            buildConfigName: "kebechet-job"
-    release:
-      jobs:
-        - "upload-pypi-sesheta"
-    kebechet-auto-gate:
-      jobs:
-        - "thoth-coala"
+            cluster: paas.psi.redhat.com
+            namespace: aicoe-prod-bots
+            buildConfigName: kebechet-job
+  release:
+    jobs:
+      - upload-pypi-sesheta
+  kebechet-auto-gate:
+    jobs:
+      - thoth-coala
