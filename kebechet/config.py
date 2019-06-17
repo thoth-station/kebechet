@@ -69,7 +69,10 @@ class _Config:
             )
         elif service == "gitlab":
             token = os.environ["GITLAB_TOKEN"]
-            download_uri = f"""https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}/repository/files/.kebechet.yaml/raw?ref=master"""
+            download_uri = (
+                f'https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}' +
+                '/repository/files/.kebechet.yaml/raw?ref=master'
+            )
             _LOGGER.info(f"Downloading config from: {download_uri}")
             resp = requests.get(download_uri, headers={"Private-Token": token})
         elif service == "pagure":
