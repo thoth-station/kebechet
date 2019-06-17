@@ -41,14 +41,25 @@ def _print_version(ctx, _, value):
 
 @click.group()
 @click.pass_context
-@click.option('-v', '--verbose', is_flag=True, envvar='KEBECHET_VERBOSE',
-              help="Be verbose about what's going on.")
-@click.option('--version', is_flag=True, is_eager=True, callback=_print_version, expose_value=False,
-              help="Print version and exit.")
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    envvar="KEBECHET_VERBOSE",
+    help="Be verbose about what's going on.",
+)
+@click.option(
+    "--version",
+    is_flag=True,
+    is_eager=True,
+    callback=_print_version,
+    expose_value=False,
+    help="Print version and exit.",
+)
 def cli(ctx=None, verbose=0):
     """The CLI."""
     if ctx:
-        ctx.auto_envvar_prefix = 'KEBECHET'
+        ctx.auto_envvar_prefix = "KEBECHET"
 
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
@@ -56,17 +67,19 @@ def cli(ctx=None, verbose=0):
         _LOGGER.debug("Kebechet version: %r", kebechet_version)
 
 
-@cli.command('run')
-@click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION_PATH')
+@cli.command("run")
+@click.argument("configuration", metavar="config", envvar="KEBECHET_CONFIGURATION_PATH")
 def cli_run(configuration):
     """Run Kebechet using provided YAML configuration file."""
     config.run(configuration)
 
-@cli.command('run-url')
-@click.argument('url', envvar='KEBECHET_CONFIG_URL')
-@click.argument('service', envvar='KEBECHET_SERVICE')
+
+@cli.command("run-url")
+@click.argument("url", envvar="KEBECHET_CONFIG_URL")
+@click.argument("service", envvar="KEBECHET_SERVICE")
 def cli_run_url(url, service):
     config.run_url(url, service)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()

@@ -37,7 +37,7 @@ class _Config:
         self._repositories = None
 
     def from_file(self, config_path: str):
-        if config_path.startswith(('https://', 'https://')):
+        if config_path.startswith(("https://", "https://")):
             response = requests.get(config_path)
             response.raise_for_status()
             content = response.text
@@ -46,57 +46,67 @@ class _Config:
                 content = config_file.read()
 
         try:
-            self._repositories = yaml.safe_load(content).pop('repositories') or []
+            self._repositories = yaml.safe_load(content).pop("repositories") or []
         except Exception as exc:
-            raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
+            raise ConfigurationError(
+                "Failed to parse configuration file: {str(exc)}"
+            ) from exc
 
     def download_conf_from_url(self, url: str, service: str):
-        params = url.split('/')
-        slug = '/'.join(params[3:])
+        params = url.split("/")
+        slug = "/".join(params[3:])
         user = params[3]
         repo = params[4]
-        _LOGGER.info(f'{service} service detected')
-        if service == 'github':
-            token = os.environ['GITHUB_TOKEN']
-            download_uri = f'https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml'
-            _LOGGER.info(f'Downloading config from: {download_uri}')
-            resp = requests.get(download_uri, headers={'Authorization': f'token {token}'})
-        elif service == 'gitlab':
-            token = os.environ['GITLAB_TOKEN']
+        _LOGGER.info(f"{service} service detected")
+        if service == "github":
+            token = os.environ["GITHUB_TOKEN"]
             download_uri = (
-                f'''https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}/repository/files/.kebechet.yaml/raw?ref=master'''
+                f"https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml"
             )
-            _LOGGER.info(f'Downloading config from: {download_uri}')
-            resp = requests.get(download_uri, headers = {'Private-Token': token})
-        elif service == 'pagure':
-            pass # TODO
+            _LOGGER.info(f"Downloading config from: {download_uri}")
+            resp = requests.get(
+                download_uri, headers={"Authorization": f"token {token}"}
+            )
+        elif service == "gitlab":
+            token = os.environ["GITLAB_TOKEN"]
+            download_uri = f"""https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}/repository/files/.kebechet.yaml/raw?ref=master"""
+            _LOGGER.info(f"Downloading config from: {download_uri}")
+            resp = requests.get(download_uri, headers={"Private-Token": token})
+        elif service == "pagure":
+            pass  # TODO
         else:
-            _LOGGER.warning('Service not supported')
+            _LOGGER.warning("Service not supported")
 
-        open('temp.yaml', 'wb').write(resp.content)
+        open("temp.yaml", "wb").write(resp.content)
 
     def run_url(self, url: str, service: str):
         self.download_conf_from_url(url, service)
-        self.run('temp.yaml')
-        
+        self.run("temp.yaml")
+
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
         for entry in self._repositories or []:
             try:
                 items = dict(entry)
-                value = items.pop('managers'), \
-                    items.pop('slug'), \
-                    items.pop('service_type', None), \
-                    items.pop('service_url', None), \
-                    items.pop('token', None), \
-                    items.pop('tls_verify', True)
+                value = (
+                    items.pop("managers"),
+                    items.pop("slug"),
+                    items.pop("service_type", None),
+                    items.pop("service_url", None),
+                    items.pop("token", None),
+                    items.pop("tls_verify", True),
+                )
 
                 if items:
-                    _LOGGER.warning(f"Unknown configuration entry in configuration of {value[1]!r}: {items}")
+                    _LOGGER.warning(
+                        f"Unknown configuration entry in configuration of {value[1]!r}: {items}"
+                    )
 
                 yield value
             except KeyError:
-                _LOGGER.exception("An error in your configuration - ignoring the given configuration entry...")
+                _LOGGER.exception(
+                    "An error in your configuration - ignoring the given configuration entry..."
+                )
 
     @staticmethod
     def _tls_verification(service_url: str, slug: str, verify: bool) -> None:
@@ -104,7 +114,9 @@ class _Config:
         # We manage our own warnings, of course better ones!
         urllib3.disable_warnings()
         if not verify:
-            _LOGGER.warning(f"Turning off TLS certificate verification for {slug} hosted at {service_url}")
+            _LOGGER.warning(
+                f"Turning off TLS certificate verification for {slug} hosted at {service_url}"
+            )
 
         # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
         # the IGitt's handling of these methods.
@@ -116,33 +128,39 @@ class _Config:
         original_patch = requests.Session.patch
 
         def post(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_post(*args, **kwargs, verify=verify)
+
         requests.Session.post = post
 
         def delete(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_delete(*args, **kwargs, verify=verify)
+
         requests.Session.delete = delete
 
         def put(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_put(*args, **kwargs, verify=verify)
+
         requests.Session.put = put
 
         def get(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_get(*args, **kwargs, verify=verify)
+
         requests.Session.get = get
 
         def head(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_head(*args, **kwargs, verify=verify)
+
         requests.Session.head = head
 
         def patch(*args, **kwargs):
-            kwargs.pop('verify', None)
+            kwargs.pop("verify", None)
             return original_patch(*args, **kwargs, verify=verify)
+
         requests.Session.patch = patch
 
     @classmethod
@@ -153,10 +171,17 @@ class _Config:
 
         config.from_file(configuration_file)
 
-        for managers, slug, service_type, service_url, token, tls_verify in config.iter_entries():
+        for (
+            managers,
+            slug,
+            service_type,
+            service_url,
+            token,
+            tls_verify,
+        ) in config.iter_entries():
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
-            if service_url and not service_url.startswith(('https://', 'http://')):
+            if service_url and not service_url.startswith(("https://", "http://")):
                 # We need to have this explicitly set for IGitt and also for security reasons.
                 _LOGGER.error(
                     "You have to specify protocol ('https://' or 'http://') in service URL "
@@ -164,7 +189,7 @@ class _Config:
                 )
                 continue
 
-            if service_url and service_url.endswith('/'):
+            if service_url and service_url.endswith("/"):
                 service_url = service_url[:-1]
 
             if token:
@@ -177,23 +202,31 @@ class _Config:
                 # YAML references, we do not break.
                 manager = dict(manager)
                 try:
-                    manager_name = manager.pop('name')
+                    manager_name = manager.pop("name")
                 except Exception:
-                    _LOGGER.exception(f"No manager name provided in configuration entry for {slug}, ignoring entry")
+                    _LOGGER.exception(
+                        f"No manager name provided in configuration entry for {slug}, ignoring entry"
+                    )
                     continue
 
                 kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
                 if not kebechet_manager:
-                    _LOGGER.error("Unable to find requested manager %r, skipping", manager_name)
+                    _LOGGER.error(
+                        "Unable to find requested manager %r, skipping", manager_name
+                    )
                     continue
 
                 _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
-                manager_configuration = manager.pop('configuration', {})
+                manager_configuration = manager.pop("configuration", {})
                 if manager:
-                    _LOGGER.warning(f"Ignoring option {manager} in manager entry for {slug}")
+                    _LOGGER.warning(
+                        f"Ignoring option {manager} in manager entry for {slug}"
+                    )
 
                 try:
-                    instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
+                    instance = kebechet_manager(
+                        slug, ServiceType.by_name(service_type), service_url, token
+                    )
                     instance.run(**manager_configuration)
                 except Exception as exc:
                     _LOGGER.exception(
