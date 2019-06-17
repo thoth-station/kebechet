@@ -78,7 +78,7 @@ def cli_run(configuration):
 @click.argument("url", envvar="KEBECHET_CONFIG_URL")
 @click.argument("service", envvar="KEBECHET_SERVICE")
 def cli_run_url(url, service):
-    """Run Kebechet by providing url to a git repository service"""
+    """Run Kebechet by providing url to a git repository service."""
     config.run_url(url, service)
 
 
