@@ -62,6 +62,11 @@ def cli_run(configuration):
     """Run Kebechet using provided YAML configuration file."""
     config.run(configuration)
 
+@cli.command('run-url')
+@cli.argument('url', envvar='KEBECHET_CONFIG_URL')
+@cli.argument('service', envvar='KEBECHET_SERVICE')
+def cli_run_url(url, service):
+    config.run_url(url, service)
 
 if __name__ == '__main__':
     cli()

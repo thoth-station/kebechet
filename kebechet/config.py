@@ -50,6 +50,24 @@ class _Config:
         except Exception as exc:
             raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
 
+    def download_conf_from_url(url: str, service: str):
+        params = url.split('/')
+        slug = '/'.join(params[2:])
+        user = params[2]
+        repo = params[3]
+        if service = 'github':
+            token = os.environ['GITHUB_TOKEN']
+            download_uri = f'https://github.com/{slug}/some_directory/.kebechet.yaml'  
+            resp = requests.get(download_uri, headers={'Authorization': f'token {token}'})
+        elif service = 'gitlab':
+            token = os.environ['GITLAB_TOKEN']
+            download_uri = f'https://gitlab.com/api/v3/projects/{slug.replace("/", "%20f")}/files/.kebechet.yaml'
+            resp = requests.get(download_uri, headers = {'Private Token': token})
+        elif service = 'pagure':
+            pass
+
+        open('temp.yaml', 'wb').write(resp.content)
+        
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
         for entry in self._repositories or []:
