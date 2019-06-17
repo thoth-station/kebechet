@@ -63,8 +63,8 @@ def cli_run(configuration):
     config.run(configuration)
 
 @cli.command('run-url')
-@cli.argument('url', envvar='KEBECHET_CONFIG_URL')
-@cli.argument('service', envvar='KEBECHET_SERVICE')
+@click.argument('url', envvar='KEBECHET_CONFIG_URL')
+@click.argument('service', envvar='KEBECHET_SERVICE')
 def cli_run_url(url, service):
     config.run_url(url, service)
 

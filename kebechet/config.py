@@ -50,23 +50,30 @@ class _Config:
         except Exception as exc:
             raise ConfigurationError("Failed to parse configuration file: {str(exc)}") from exc
 
-    def download_conf_from_url(url: str, service: str):
+    def download_conf_from_url(self, url: str, service: str):
         params = url.split('/')
-        slug = '/'.join(params[2:])
-        user = params[2]
-        repo = params[3]
-        if service = 'github':
+        slug = '/'.join(params[3:])
+        user = params[3]
+        repo = params[4]
+        if service == 'github':
             token = os.environ['GITHUB_TOKEN']
-            download_uri = f'https://github.com/{slug}/some_directory/.kebechet.yaml'  
+            download_uri = f'https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml'
+            _LOGGER.info(download_uri)
             resp = requests.get(download_uri, headers={'Authorization': f'token {token}'})
-        elif service = 'gitlab':
+        elif service == 'gitlab':
             token = os.environ['GITLAB_TOKEN']
             download_uri = f'https://gitlab.com/api/v3/projects/{slug.replace("/", "%20f")}/files/.kebechet.yaml'
             resp = requests.get(download_uri, headers = {'Private Token': token})
-        elif service = 'pagure':
+        elif service == 'pagure':
             pass
+        else:
+            _LOGGER.warning('Service not supported')
 
         open('temp.yaml', 'wb').write(resp.content)
+
+    def run_url(self, url: str, service: str):
+        self.download_conf_from_url(url, service)
+        self.run('temp.yaml')
         
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
