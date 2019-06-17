@@ -55,17 +55,21 @@ class _Config:
         slug = '/'.join(params[3:])
         user = params[3]
         repo = params[4]
+        _LOGGER.info(f'{service} service detected')
         if service == 'github':
             token = os.environ['GITHUB_TOKEN']
             download_uri = f'https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml'
-            _LOGGER.info(download_uri)
+            _LOGGER.info(f'Downloading config from: {download_uri}')
             resp = requests.get(download_uri, headers={'Authorization': f'token {token}'})
         elif service == 'gitlab':
             token = os.environ['GITLAB_TOKEN']
-            download_uri = f'https://gitlab.com/api/v3/projects/{slug.replace("/", "%20f")}/files/.kebechet.yaml'
-            resp = requests.get(download_uri, headers = {'Private Token': token})
+            download_uri = (
+                f'''https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}/repository/files/.kebechet.yaml/raw?ref=master'''
+            )
+            _LOGGER.info(f'Downloading config from: {download_uri}')
+            resp = requests.get(download_uri, headers = {'Private-Token': token})
         elif service == 'pagure':
-            pass
+            pass # TODO
         else:
             _LOGGER.warning('Service not supported')
 
