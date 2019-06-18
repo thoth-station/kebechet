@@ -55,11 +55,9 @@ class _Config:
     def download_conf_from_url(self, url: str, service: str):
         params = url.split("/")
         slug = "/".join(params[3:])
-        user = params[3]
-        repo = params[4]
+        token = os.environ["GIT_ACCESS_TOKEN"]
         _LOGGER.info(f"{service} service detected")
         if service == "github":
-            token = os.environ["GITHUB_TOKEN"]
             download_uri = (
                 f"https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml"
             )
@@ -68,7 +66,6 @@ class _Config:
                 download_uri, headers={"Authorization": f"token {token}"}
             )
         elif service == "gitlab":
-            token = os.environ["GITLAB_TOKEN"]
             download_uri = (
                 f'https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}' +
                 '/repository/files/.kebechet.yaml/raw?ref=master'
