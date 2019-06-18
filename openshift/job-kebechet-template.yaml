@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: kebechet
+  annotations:
+    description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
+    openshift.io/display-name: Kebechet Job
+    version: 1.0.0
+    tags: poc,thoth,ai-stacks,kebechet
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+  labels:
+    template: kebechet
+    app: kebechet
+
+parameters:
+  - description: The git token for the specific service
+    displayName: git Service Access Token
+    required: true
+    name: GIT_ACCESS_TOKEN
+  - description: The repositories full URL 
+    displayName: Repository URL
+    required: true
+    name: REPO_URL
+  - description: The name of the git service the repository lives on
+    displayName: git Service Name
+    required: true
+    name: SERVICE_NAME
+  - description: The ID of the Kebechet job
+    displayName: Job ID
+    required: true
+    name: KEBECHET_JOB_ID
+  - description: Determines if kebechet is in verbose mode
+    displayName: Verbose mode
+    required: true
+    name: KEBECHET_VERBOSE
+
+objects:
+- apiVersion: v1
+  kind: Job
+  metadata:
+    name: ${KEBECHET_JOB_ID}
+    labels:
+      app: kebechet
+      mark: cleanup
+  spec:
+    successfulJobsHistoryLimit: 2
+    failedJobsHistoryLimit: 1
+    template:
+      metadata:
+        labels:
+          app: kebechet
+      spec:
+        template:
+          metadata:
+            labels:
+              app: kebechet
+          spec:
+            containers:
+            - image: kebechet-job
+              name: kebechet
+              metadata:
+                labels:
+                  app: kebechet
+                  operatingOn: ${SERVICE_NAME}
+              volumeMounts:
+              - name: ssh-config
+                mountPath: /home/user/.ssh
+              command:
+                - 'kebechet run-url'
+              args:
+                - '${REPO_URL}'
+                - '${SERVICE_NAME}'
+              env:
+              - name: PIPENV_NOSPIN
+                value: '1'
+              - name: PIPENV_COLORBLIND
+                value: '1'
+              - name: PIPENV_HIDE_EMOJIS
+                value: '1'
+              - name: GIT_ACCESS_TOKEN
+                value: ${GIT_ACCESS_TOKEN}
+              - name: KEBECHET_VERBOSE
+                value: ${KEBECHET_VERBOSE}
+              - name: SENTRY_DSN
+                valueFrom:
+                  secretKeyRef:
+                    key: sentry-dsn
+                    name: kebechet-secret
+              resources:
+                requests:
+                  memory: "2Gi"
+                  cpu: "2"
+                limits:
+                  memory: "2Gi"
+                  cpu: "2"
+              livenessProbe:
+                # Give kebechet 2 minutes to compute results, kill it if it was not able result anything.
+                tcpSocket:
+                  port: 80
+                initialDelaySeconds: 120
+                failureThreshold: 1
+            volumes:
+            - name: ssh-config
+              secret:
+                secretName: kebechet-secret
+                items:
+                - key: ssh-privatekey
+                  path: id_rsa
+                  mode: 0600
+            restartPolicy: Never
