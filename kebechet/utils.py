@@ -30,6 +30,18 @@ from .enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
+# NOTE: does not support other branches
+services = {
+    "github": {
+        "download_url": "https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml",
+        "auth": {"header": "Authorization", "value": "token {token}"}
+    },
+    "gitlab": {
+        "download_url": "https://gitlab.com/api/v4/projects/{slug}/repository/files/.kebechet.yaml/raw?ref=master",
+        "auth": {"header": "Private-Token", "value": "{token}"}
+    }
+}
+
 
 @contextmanager
 def cwd(path: str):

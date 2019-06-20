@@ -57,7 +57,7 @@ def _print_version(ctx, _, value):
     help="Print version and exit.",
 )
 def cli(ctx=None, verbose=0):
-    """The CLI."""
+    """CLI."""
     if ctx:
         ctx.auto_envvar_prefix = "KEBECHET"
 

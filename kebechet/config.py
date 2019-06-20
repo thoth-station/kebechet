@@ -20,12 +20,14 @@
 import logging
 import os
 import yaml
+import tempfile
 
 import urllib3
 import requests
 
 from .exception import ConfigurationError
 from .enums import ServiceType
+from .utils import services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,35 +55,31 @@ class _Config:
             ) from exc
 
     def download_conf_from_url(self, url: str, service: str):
+        if service not in services:
+            _LOGGER.warning("Service not supported")
+            raise ValueError(f"{service} is not supported at this time")
+
         params = url.split("/")
         slug = "/".join(params[3:])
+        if service == "gitlab":
+            slug = slug.replace("/", "%2F")
         token = os.environ["GIT_ACCESS_TOKEN"]
         _LOGGER.info(f"{service} service detected")
-        if service == "github":
-            download_uri = (
-                f"https://raw.githubusercontent.com/{slug}/master/.kebechet.yaml"
-            )
-            _LOGGER.info(f"Downloading config from: {download_uri}")
-            resp = requests.get(
-                download_uri, headers={"Authorization": f"token {token}"}
-            )
-        elif service == "gitlab":
-            download_uri = (
-                f'https://gitlab.com/api/v4/projects/{slug.replace("/", "%2F")}' +
-                '/repository/files/.kebechet.yaml/raw?ref=master'
-            )
-            _LOGGER.info(f"Downloading config from: {download_uri}")
-            resp = requests.get(download_uri, headers={"Private-Token": token})
-        elif service == "pagure":
-            pass  # TODO
-        else:
-            _LOGGER.warning("Service not supported")
-
-        open("temp.yaml", "wb").write(resp.content)
+        download_uri = services[service]["download_url"].format(slug=slug)
+        _LOGGER.info(f"Downloading from {download_uri}")
+        auth_value = services[service]["auth"]["value"].format(token=token)
+        auth_header = services[service]["auth"]["header"]
+        resp = requests.get(download_uri, headers={auth_header: auth_value})
+        _LOGGER.info(resp.content)
+        file_ = tempfile.NamedTemporaryFile()
+        file_.write(resp.content)
+        return file_
 
     def run_url(self, url: str, service: str):
-        self.download_conf_from_url(url, service)
-        self.run("temp.yaml")
+        temp_file = self.download_conf_from_url(url, service)
+        _LOGGER.info(f"Filename = {temp_file.name}")
+        _LOGGER.info(temp_file.read())
+        self.run(temp_file.name)
 
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
