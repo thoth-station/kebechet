@@ -70,7 +70,6 @@ class _Config:
         auth_value = services[service]["auth"]["value"].format(token=token)
         auth_header = services[service]["auth"]["header"]
         resp = requests.get(download_uri, headers={auth_header: auth_value})
-        _LOGGER.info(resp.content)
         file_ = tempfile.NamedTemporaryFile()
         file_.write(resp.content)
         return file_
