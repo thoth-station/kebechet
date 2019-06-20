@@ -1,18 +1,20 @@
 - project:
     check:
       jobs:
-        - "thoth-coala"
+        - thoth-coala
     gate:
       jobs:
-        - "thoth-coala"
+        - thoth-coala
     post:
       jobs:
-        - trigger-build:
+        - "trigger-build":
             vars:
-              webhook_url: "https://paas.upshift.redhat.com/oapi/v1/namespaces/aicoe-prod-bots/buildconfigs/kebechet-job"
+              cluster: paas.psi.redhat.com
+              namespace: aicoe-prod-bots
+              buildConfigName: kebechet-job
     release:
       jobs:
-        - "upload-pypi-sesheta"
+        - upload-pypi-sesheta
     kebechet-auto-gate:
       jobs:
-        - "thoth-coala"
+        - thoth-coala

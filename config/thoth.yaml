@@ -126,6 +126,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - CermakM
           assignees:
             - sesheta
           labels: [bot]
@@ -370,6 +371,24 @@ repositories:
           labels: [bot]
 
   - slug: thoth-station/thamos
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/invectio
     token: '{KEBECHET_TOKEN}'
     managers:
       - name: pipfile-requirements
