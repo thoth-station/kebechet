@@ -80,7 +80,7 @@ class ManagerBase:
         """Set repository information and all derived information needed."""
         self._repo = repo
         self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
-        
+
     @classmethod
     def get_environment_details(cls, as_dict=False) -> str:
         """Get details for environment in which Kebechet runs."""

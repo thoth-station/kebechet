@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Consume Thoth Output for Kebechet auto-dependency management"""
+"""Consume Thoth Output for Kebechet auto-dependency management."""
 
 import hashlib
 import os
@@ -65,7 +65,7 @@ class ThothProvenanceManager(ManagerBase):
         text_block = ""
 
         for err in error_info:
-            LOGGER_.info(f"{err['id']: {err['package_name']{err['package_version']}")
+            LOGGER_.info(f"{err['id']: {err['package_name']} {err['package_version']}")
             text_block = (
                 text_block
                 + f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n"
@@ -83,20 +83,21 @@ class ThothProvenanceManager(ManagerBase):
         )
 
     def run(self, labels: list):
+        """Run the provenance check bot."""
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
             if os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock"):
                 res = lib.provenance_check_here()
-                for i in range(1,11):
+                for i in range(1, 11):
                     if res is not None:
                         break
-                    LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)") 
+                    LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)")
                     res = lib.provenance_check_here(force=True)
 
             if res is None:
                 LOGGER_.error("Provenance check failed: Exiting")
                 return
-                    
+
             if res[1] is False:
                 LOGGER_.info("Provenance check found problems, creating issue...")
                 self._issue_provenance_error(res, labels)

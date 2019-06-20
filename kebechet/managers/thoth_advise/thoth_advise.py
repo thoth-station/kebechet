@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Consume Thoth Output for Kebechet auto-dependency management"""
+"""Consume Thoth Output for Kebechet auto-dependency management."""
 
 import hashlib
 import os
@@ -38,6 +38,7 @@ from kebechet.utils import cloned_repo
 _LOGGER = logging.getLogger(__name__)
 
 _BRANCH_NAME = "kebechet_thoth"
+
 
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
@@ -104,6 +105,7 @@ class ThothAdviseManager(ManagerBase):
         return
 
     def _issue_advise_error(self, adv_results: list, labels: list):
+        """Create an issue if advise fails."""
         error_info = adv_results[0]["report"][0][0][0]
         justification = error_info["justification"]
         type_ = error_info["type"]
@@ -117,6 +119,7 @@ class ThothAdviseManager(ManagerBase):
         )
 
     def run(self, labels: list):
+        """Run Thoth Advising Bot."""
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
             branch_name = self._construct_branch_name()
@@ -128,14 +131,14 @@ class ThothAdviseManager(ManagerBase):
                     if res is not None:
                         break
                     LOGGER_.info(f"Advising failed, retrying ({i}/10)")
-                    res = lib.advise_here(force = True)
-                
+                    res = lib.advise_here(force=True)
+
                 if res is None:
                     LOGGER_.error("Advising failed")
                     return False
                 LOGGER_.debug(f"{json.dumps(res)}")
-                
-                if res[1] == False:
+
+                if res[1] is False:
                     LOGGER_.info('Advise succeeded')
                     self._write_advise(res)
                     self._open_merge_request(branch_name, ["bot"], ["Pipfile.lock"])

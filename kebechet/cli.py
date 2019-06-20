@@ -46,7 +46,7 @@ def _print_version(ctx, _, value):
 @click.option('--version', is_flag=True, is_eager=True, callback=_print_version, expose_value=False,
               help="Print version and exit.")
 def cli(ctx=None, verbose=0):
-    """The CLI."""
+    """CLI."""
     if ctx:
         ctx.auto_envvar_prefix = 'KEBECHET'
 
