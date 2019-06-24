@@ -40,18 +40,11 @@ _LOGGER = logging.getLogger(__name__)
 
 _BRANCH_NAME = "kebechet_thoth"
 
-# Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
-# as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
-# updated on subsequent calls.
-
-
 class ThothProvenanceManager(ManagerBase):
     """Manage source issues of dependencies."""
 
     def __init__(self, *args, **kwargs):
         """Initialize ThothProvenance manager."""
-        # TODO: What needs to be changed for event driven Kebechet??
-        # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
         super().__init__(*args, **kwargs)
 
@@ -65,7 +58,7 @@ class ThothProvenanceManager(ManagerBase):
         text_block = ""
 
         for err in error_info:
-            LOGGER_.info(f"{err['id']: {err['package_name']} {err['package_version']}")
+            _LOGGER.info(f"{err['id']}: {err['package_name']} {err['package_version']}")
             text_block = (
                 text_block
                 + f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n"
@@ -91,17 +84,17 @@ class ThothProvenanceManager(ManagerBase):
                 for i in range(1, 11):
                     if res is not None:
                         break
-                    LOGGER_.warning(f"Provenance check failed, retrying ({i}/10)")
+                    _LOGGER.warning(f"Provenance check failed, retrying ({i}/10)")
                     res = lib.provenance_check_here(force=True)
 
             if res is None:
-                LOGGER_.error("Provenance check failed: Exiting")
+                _LOGGER.error("Provenance check failed on server side, contact the maintainer")
                 return
 
             if res[1] is False:
-                LOGGER_.info("Provenance check found problems, creating issue...")
+                _LOGGER.info("Provenance check found problems, creating issue...")
                 self._issue_provenance_error(res, labels)
                 return False
             else:
-                LOGGER_.info("Provenance check found no problems, carry on coding :)")
+                _LOGGER.info("Provenance check found no problems, carry on coding :)")
                 return True

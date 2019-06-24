@@ -77,19 +77,20 @@ class ThothAdviseManager(ManagerBase):
         # Delete branch if it didn't change Pipfile.lock
         diff = self.repo.git.diff("master", files)
         if diff == "":
+            _LOGGER.info("No changes necessary, exiting...")
             return
 
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        LOGGER_.info('Pushing changes')
+        _LOGGER.info('Pushing changes')
         self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
 
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
             if mr.head_branch_name == branch_name:
-                LOGGER_.info('Merge request already exists, updating...')
+                _LOGGER.info('Merge request already exists, updating...')
                 return
 
-        LOGGER_.info('Opening merge request')
+        _LOGGER.info('Opening merge request')
         merge_request = self.sm.open_merge_request(
             commit_msg, branch_name, body, labels
         )
@@ -99,19 +100,18 @@ class ThothAdviseManager(ManagerBase):
     def _write_advise(adv_results: list):
         lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
         with open("Pipfile.lock", "w+") as f:
-            LOGGER_.info('Writing to Pipfile.lock')
-            LOGGER_.debug(f"{json.dumps(lock_info)}")
+            _LOGGER.info('Writing to Pipfile.lock')
+            _LOGGER.debug(f"{json.dumps(lock_info)}")
             f.write(json.dumps(lock_info))
-        return
 
     def _issue_advise_error(self, adv_results: list, labels: list):
         """Create an issue if advise fails."""
         error_info = adv_results[0]["report"][0][0][0]
         justification = error_info["justification"]
         type_ = error_info["type"]
-        LOGGER_.warning('Error type: {type_}')
+        _LOGGER.warning('Error type: {type_}')
         checksum = hashlib.md5(justification.encode("utf-8")).hexdigest()[:10]
-        LOGGER_.info('Creating issue')
+        _LOGGER.info('Creating issue')
         self.sm.open_issue_if_not_exist(
             f"{checksum}-{type_}: Automated kebechet thoth-advise Issue",
             lambda: justification,
@@ -130,20 +130,20 @@ class ThothAdviseManager(ManagerBase):
                 for i in range(1, 11):
                     if res is not None:
                         break
-                    LOGGER_.info(f"Advising failed, retrying ({i}/10)")
+                    _LOGGER.info(f"Advising failed, retrying ({i}/10)")
                     res = lib.advise_here(force=True)
 
                 if res is None:
-                    LOGGER_.error("Advising failed")
+                    _LOGGER.error("Advise failed on server side, contact the maintainer")
                     return False
-                LOGGER_.debug(f"{json.dumps(res)}")
+                _LOGGER.debug(f"{json.dumps(res)}")
 
                 if res[1] is False:
-                    LOGGER_.info('Advise succeeded')
+                    _LOGGER.info('Advise succeeded')
                     self._write_advise(res)
                     self._open_merge_request(branch_name, ["bot"], ["Pipfile.lock"])
                     return True
                 else:
-                    LOGGER_.warning('Found error while running adviser... Creating issue')
+                    _LOGGER.warning('Found error while running adviser... Creating issue')
                     self._issue_advise_error(res, labels)
                     return False
