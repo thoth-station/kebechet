@@ -80,11 +80,6 @@ objects:
               volumeMounts:
               - name: ssh-config
                 mountPath: /home/user/.ssh
-              command:
-                - 'kebechet run-url'
-              args:
-                - '${REPO_URL}'
-                - '${SERVICE_NAME}'
               env:
               - name: PIPENV_NOSPIN
                 value: '1'
