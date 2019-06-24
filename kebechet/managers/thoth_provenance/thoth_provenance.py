@@ -40,6 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _BRANCH_NAME = "kebechet_thoth"
 
+
 class ThothProvenanceManager(ManagerBase):
     """Manage source issues of dependencies."""
 
