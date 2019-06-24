@@ -11,10 +11,26 @@ metadata:
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
   labels:
+    app: thoth
     template: kebechet
-    app: kebechet
+    component: kebechet
 
 parameters:
+  - description: Registry the ImageStream to be use lives in
+    displayName: ImageStream Registry
+    required: true
+    name: IMAGE_STREAM_REGISTRY
+    value: "docker-registry.default.svc:5000"
+  - description: Project the ImageStream to be use lives in
+    displayName: ImageStream Project
+    required: true
+    name: IMAGE_STREAM_NAMESPACE
+    value: "thoth-infra-stage"
+  - description: Tag of the ImageStream to be use
+    displayName: ImageStream Tag
+    required: true
+    name: IMAGE_STREAM_TAG
+    value: "latest"
   - description: The git token for the specific service
     displayName: git Service Access Token
     required: true
@@ -42,11 +58,12 @@ objects:
   metadata:
     name: ${KEBECHET_JOB_ID}
     labels:
-      app: kebechet
+      app: thoth
+      componenet: kebechet
+      task: kebechet
       mark: cleanup
   spec:
-    successfulJobsHistoryLimit: 2
-    failedJobsHistoryLimit: 1
+    backoffLimit: 0
     template:
       metadata:
         labels:
@@ -58,12 +75,8 @@ objects:
               app: kebechet
           spec:
             containers:
-            - image: kebechet-job
+            - image: ${IMAGE_STREAM_REGISTRY}/${IMAGE_STREAM_NAMESPACE}/kebechet:{IMAGE_STREAM_TAG}
               name: kebechet
-              metadata:
-                labels:
-                  app: kebechet
-                  operatingOn: ${SERVICE_NAME}
               volumeMounts:
               - name: ssh-config
                 mountPath: /home/user/.ssh
@@ -101,7 +114,7 @@ objects:
                   port: 80
                 initialDelaySeconds: 120
                 failureThreshold: 1
-            volumes:
+          volumes:
             - name: ssh-config
               secret:
                 secretName: kebechet-secret
@@ -109,4 +122,3 @@ objects:
                 - key: ssh-privatekey
                   path: id_rsa
                   mode: 0600
-            restartPolicy: Never
