@@ -27,7 +27,7 @@ import requests
 
 from .exception import ConfigurationError
 from .enums import ServiceType
-from .utils import services
+from .services import Service
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,24 +55,10 @@ class _Config:
             ) from exc
 
     def download_conf_from_url(self, url: str, service: str):
-        if service not in services:
-            _LOGGER.warning("Service not supported")
-            raise ValueError(f"{service} is not supported at this time")
-
-        params = url.split("/")
-        slug = "/".join(params[3:])
-        if service == "gitlab":
-            slug = slug.replace("/", "%2F")
-        token = os.environ["GIT_ACCESS_TOKEN"]
-        _LOGGER.info(f"{service} service detected")
-        download_uri = services[service]["download_url"].format(slug=slug)
-        _LOGGER.info(f"Downloading from {download_uri}")
-        auth_value = services[service]["auth"]["value"].format(token=token)
-        auth_header = services[service]["auth"]["header"]
-        resp = requests.get(download_uri, headers={auth_header: auth_value})
-        file_ = tempfile.NamedTemporaryFile()
-        file_.write(resp.content)
-        return file_
+        service = Service(service=service, url=url, token=os.environ["GIT_ACCESS_TOKEN"])
+        tempfile = service.download_kebechet_config()
+        _LOGGER.info(tempfile.read())
+        return service.download_kebechet_config()
 
     def run_url(self, url: str, service: str):
         temp_file = self.download_conf_from_url(url, service)
