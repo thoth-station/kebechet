@@ -31,10 +31,6 @@ parameters:
     required: true
     name: IMAGE_STREAM_TAG
     value: "latest"
-  - description: The git token for the specific service
-    displayName: git Service Access Token
-    required: true
-    name: GIT_ACCESS_TOKEN
   - description: The repositories full URL 
     displayName: Repository URL
     required: true
@@ -48,9 +44,17 @@ parameters:
     required: true
     name: KEBECHET_JOB_ID
   - description: Determines if kebechet is in verbose mode
-    displayName: Verbose mode
+    displayName: Verbose Mode
     required: true
     name: KEBECHET_VERBOSE
+  - description: The kebechet subcommand which should be run
+    displayName: Kebechet Subcommand
+    required: true
+    name: KEBECHET_SUBCOMMAND
+  - description: The analysis that should be used to generate issues and pull requests
+    displayName: Analysis ID
+    required: false
+    name: ANALYSIS_ID
 
 objects:
 - apiVersion: v1
@@ -87,10 +91,21 @@ objects:
                 value: '1'
               - name: PIPENV_HIDE_EMOJIS
                 value: '1'
-              - name: GIT_ACCESS_TOKEN
-                value: ${GIT_ACCESS_TOKEN}
               - name: KEBECHET_VERBOSE
                 value: ${KEBECHET_VERBOSE}
+              - name: GITHUB_KEBECHET_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    key: github-oauth-token
+                    name: kebechet-secret
+              - name: GITLAB_KEBECHET_TOKEN
+                value:
+                  key: gitlab-oauth-token
+                  name: kebechet-secret
+              - name: PAGURE_KEBECHET_TOKEN
+                value:
+                  key: pagure-oauth-token
+                  name: kebechet-secret
               - name: SENTRY_DSN
                 valueFrom:
                   secretKeyRef:
