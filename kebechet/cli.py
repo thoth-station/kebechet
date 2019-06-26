@@ -63,5 +63,14 @@ def cli_run(configuration):
     config.run(configuration)
 
 
+@cli.command('run-results')
+@click.argument('origin', metavar='org', envvar='GIT_ORIGIN')
+@click.argument('service', envvar='KEBECHET_SERVICE')
+@click.argument('analysis_id', metavar='id', envvar='ANALYSIS_ID')
+def cli_run_results(origin, service, analysis_id):
+    """Run Kebechet after results are received (meant to be triggered automatically)."""
+    config.run_analysis(analysis_id=analysis_id, origin=origin, service=service)
+
+
 if __name__ == '__main__':
     cli()

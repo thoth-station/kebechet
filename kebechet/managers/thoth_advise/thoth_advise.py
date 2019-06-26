@@ -37,113 +37,28 @@ from kebechet.utils import cloned_repo
 
 _LOGGER = logging.getLogger(__name__)
 
-_BRANCH_NAME = "kebechet_thoth"
-
 
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
 
     def __init__(self, *args, **kwargs):
         """Initialize ThothAdvise manager."""
-        # TODO: What needs to be changed for event driven Kebechet??
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
         super().__init__(*args, **kwargs)
-
-    @property
-    def sha(self):
-        """Get SHA of the current head commit."""
-        return self.repo.head.commit.hexsha
-
-    def _construct_branch_name(self) -> str:
-        """Construct branch name for the updated dependency."""
-        return f"{_BRANCH_NAME}-{self.sha}"
-
-    def _git_push(
-        self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
-    ) -> None:
-        """Perform git push after adding files and giving a commit message."""
-        self.repo.index.add(files)
-        self.repo.index.commit(commit_msg)
-        self.repo.remote().push(branch_name, force=force_push)
-
-    def _open_merge_request(
-        self, branch_name: str, labels: list, files: list
-    ) -> typing.Optional[int]:
-        """Open a pull/merge request for dependency update."""
-        commit_msg = "Auto generated update"
-        body = "Pipfile.lock updated by kebechet-thoth manager"
-
-        # Delete branch if it didn't change Pipfile.lock
-        diff = self.repo.git.diff("master", files)
-        if diff == "":
-            _LOGGER.info("No changes necessary, exiting...")
-            return
-
-        # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        _LOGGER.info('Pushing changes')
-        self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
-
-        # Check if the merge request already exists
-        for mr in self._cached_merge_requests:
-            if mr.head_branch_name == branch_name:
-                _LOGGER.info('Merge request already exists, updating...')
-                return
-
-        _LOGGER.info('Opening merge request')
-        merge_request = self.sm.open_merge_request(
-            commit_msg, branch_name, body, labels
-        )
-        return merge_request
-
-    @staticmethod
-    def _write_advise(adv_results: list):
-        lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
-        with open("Pipfile.lock", "w+") as f:
-            _LOGGER.info('Writing to Pipfile.lock')
-            _LOGGER.debug(f"{json.dumps(lock_info)}")
-            f.write(json.dumps(lock_info))
-
-    def _issue_advise_error(self, adv_results: list, labels: list):
-        """Create an issue if advise fails."""
-        error_info = adv_results[0]["report"][0][0][0]
-        justification = error_info["justification"]
-        type_ = error_info["type"]
-        _LOGGER.warning('Error type: {type_}')
-        checksum = hashlib.md5(justification.encode("utf-8")).hexdigest()[:10]
-        _LOGGER.info('Creating issue')
-        self.sm.open_issue_if_not_exist(
-            f"{checksum}-{type_}: Automated kebechet thoth-advise Issue",
-            lambda: justification,
-            labels=labels,
-        )
 
     def run(self, labels: list):
         """Run Thoth Advising Bot."""
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
             self.repo = repo
-            branch_name = self._construct_branch_name()
-            branch = self.repo.git.checkout("-B", branch_name)
-            self._cached_merge_requests = self.sm.repository.merge_requests
-            if os.path.isfile("Pipfile"):
-                res = lib.advise_here()
-                for i in range(1, 11):
-                    if res is not None:
-                        break
-                    _LOGGER.info(f"Advising failed, retrying ({i}/10)")
-                    res = lib.advise_here(force=True)
+            if not os.path.isfile("Pipfile"):
+                _LOGGER.warning("Pipfile not found in repo... Creating issue")
+                self.sm.open_issue_if_not_exist(
+                    "Missing Pipfile",
+                    lambda: "Check your repository to make sure Pipfile exists",
+                    labels=labels
+                )
+                return False
 
-                if res is None:
-                    _LOGGER.error("Advise failed on server side, contact the maintainer")
-                    return False
-                _LOGGER.debug(f"{json.dumps(res)}")
-
-                if res[1] is False:
-                    _LOGGER.info('Advise succeeded')
-                    self._write_advise(res)
-                    self._open_merge_request(branch_name, ["bot"], ["Pipfile.lock"])
-                    return True
-                else:
-                    _LOGGER.warning('Found error while running adviser... Creating issue')
-                    self._issue_advise_error(res, labels)
-                    return False
+            lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}))
+            return True

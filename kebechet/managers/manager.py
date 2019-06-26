@@ -20,6 +20,7 @@
 import logging
 import platform
 import typing
+import git
 
 import delegator
 import kebechet

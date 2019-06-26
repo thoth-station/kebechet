@@ -117,6 +117,38 @@ class _Config:
         requests.Session.patch = patch
 
     @classmethod
+    def run_analysis(cls, analysis_id: str, origin: str, service: str) -> None:
+        """Run result managers (meant to be triggered automatically)."""
+        global config
+        from kebechet.managers import AdviseResultsManager, ProvenanceResultsManager
+        # Gets kebechet configuration from the original repository
+        tempfile = config.download_conf_from_url(origin, service)
+        config.from_file(tempfile.name)
+        for _, slug, service_type, service_url, token, tls_verify in config.iter_entries():
+            cls._tls_verification(service_url, slug, verify=tls_verify)
+
+            # Skip checks for valid service_url because to trigger it needs to be ran and therefore valid
+
+            if (service_url and service_url.endswith('/')):
+                service_url = service_url[:-1]
+
+            if token:
+                # Allow token expansion based on env variables.
+                token = token.format(**os.environ)
+                _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
+
+            manager_config = {"analysis_id": analysis_id, "labels": ["kebechet", "bot"]}
+            if analysis_id.startswith("adviser"):
+                kebechet_manager = AdviseResultsManager
+            elif analysis_id.startswith("provenance"):
+                kebechet_manager = ProvenanceResultsManager
+
+            instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
+            instance.run(**manager_config)
+            break   # Ensures only one manager per analysis result
+            # NOTE: users should have only one entry in their .kebechet.yaml this should probably be enforced
+
+    @classmethod
     def run(cls, configuration_file: str) -> None:
         """Run Kebechet using provided YAML configuration file."""
         global config

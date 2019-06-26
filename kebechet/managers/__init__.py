@@ -6,6 +6,8 @@ from .version import VersionManager
 from .pipfile_requirements import PipfileRequirementsManager
 from .thoth_advise import ThothAdviseManager
 from .thoth_provenance import ThothProvenanceManager
+from .advise_results import AdviseResultsManager
+from .provenance_results import ProvenanceResultsManager
 
 REGISTERED_MANAGERS = {
     'update': UpdateManager,
