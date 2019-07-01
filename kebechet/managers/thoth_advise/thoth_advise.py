@@ -60,5 +60,5 @@ class ThothAdviseManager(ManagerBase):
                 )
                 return False
 
-            lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}))
+            lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}"))
             return True

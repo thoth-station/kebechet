@@ -60,7 +60,6 @@ class Service():
     def __init__(self, service, url, branch="master"):
         """Initialize a Service object, calls constructor functions `slug_method` and `_generate_slug`."""
         if service not in self._SERVICES.keys():
-            _LOGGER.warning("Service not supported")
             raise ValueError(f"{service} is not supported at this time")
         self.service = self._SERVICES[service]["service_type"]
         _LOGGER.info("%s service detected", service)
