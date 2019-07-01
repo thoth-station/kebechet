@@ -55,14 +55,13 @@ class _Config:
             ) from exc
 
     def download_conf_from_url(self, url: str, service: str):
-        service = Service(service=service, url=url, token=os.environ["GIT_ACCESS_TOKEN"])
+        service = Service(service=service, url=url)
         tempfile = service.download_kebechet_config()
-        _LOGGER.info(tempfile.read())
-        return service.download_kebechet_config()
+        return tempfile
 
     def run_url(self, url: str, service: str):
         temp_file = self.download_conf_from_url(url, service)
-        _LOGGER.info(f"Filename = {temp_file.name}")
+        _LOGGER.info("Filename = %s", temp_file.name)
         _LOGGER.info(temp_file.read())
         self.run(temp_file.name)
 
