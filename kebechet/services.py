@@ -21,53 +21,55 @@
 import requests
 import tempfile
 import logging
+import os
 
 from .enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _keep_slug(slug: str):
-    return slug
-
-
-def _encode_fslash(slug: str):
-    return slug.replace("/", "%2F")
-
-
-# NOTE: config_url could be generated using construct_raw_file_url but I feel this makes the code easier to follow
-services = {
-    "github": {
-        "service_type": ServiceType.GITHUB,
-        "config_url": "https://raw.githubusercontent.com/{slug}/{branch}/.kebechet.yaml",
-        "auth": {"header": "Authorization", "value": "token {token}"},
-        "slug_method": _keep_slug,
-    },
-    "gitlab": {
-        "service_type": ServiceType.GITLAB,
-        "config_url": "https://gitlab.com/api/v4/projects/{slug}/repository/files/.kebechet.yaml/raw?ref={branch}",
-        "auth": {"header": "Private-Token", "value": "{token}"},
-        "slug_method": _encode_fslash,
-    },
-}
-
-
 class Service():
     """Allows for abstraction of multiple different service with easy support of my by changing `services`."""
 
-    def __init__(self, service, url, token, branch="master"):
+    @staticmethod
+    def _keep_slug(slug: str):
+        return slug
+
+    @staticmethod
+    def _encode_fslash(slug: str):
+        return slug.replace("/", "%2F")
+
+    # NOTE: config_url could be generated using construct_raw_file_url but I feel this makes the code easier to follow
+    _SERVICES = {
+        "github": {
+            "token": "GITHUB_KEBECHET_TOKEN",
+            "service_type": ServiceType.GITHUB,
+            "config_url": "https://raw.githubusercontent.com/{slug}/{branch}/.kebechet.yaml",
+            "auth": {"header": "Authorization", "value": "token {token}"},
+            "slug_method": _keep_slug.__func__,
+        },
+        "gitlab": {
+            "token": "GITLAB_KEBECHET_TOKEN",
+            "service_type": ServiceType.GITLAB,
+            "config_url": "https://gitlab.com/api/v4/projects/{slug}/repository/files/.kebechet.yaml/raw?ref={branch}",
+            "auth": {"header": "Private-Token", "value": "{token}"},
+            "slug_method": _encode_fslash.__func__,
+        },
+    }
+
+    def __init__(self, service, url, branch="master"):
         """Initialize a Service object, calls constructor functions `slug_method` and `_generate_slug`."""
-        if service not in services.keys():
+        if service not in self._SERVICES.keys():
             _LOGGER.warning("Service not supported")
             raise ValueError(f"{service} is not supported at this time")
-        self.service = services[service]["service_type"]
-        _LOGGER.info(f"{service} service detected")
+        self.service = self._SERVICES[service]["service_type"]
+        _LOGGER.info("%s service detected", service)
+        self.token = os.environ[self._SERVICES[service]["token"]]
         self.branch = branch
         self.url = url
-        self.token = token
-        self.service_info = services[service]
+        self.service_info = self._SERVICES[service]
         slug = Service._generate_slug(url)
-        self.slug = services[service]["slug_method"](slug)
+        self.slug = self._SERVICES[service]["slug_method"](slug)
 
     @staticmethod
     def _generate_slug(url: str):
@@ -92,7 +94,7 @@ class Service():
         """Return a temporary file containing this repos' .kebechet.yaml contents."""
         down_url = self.get_kebechet_download_url()
         auth = self.get_auth_header()
-        _LOGGER.info(f"Downloading from {down_url}")
+        _LOGGER.info("Downloading from %s", down_url)
         resp = requests.get(down_url, headers=auth)
         file_ = tempfile.NamedTemporaryFile()
         file_.write(resp.content)
