@@ -6,10 +6,10 @@
 
 case $KEBECHET_SUBCOMMAND in
     'run-url') 
-        exec /opt/app-root/bin/python3 kebechet run-url $REPO_URL $SERVICE_NAME
+        exec /opt/app-root/bin/python3 kebechet-cli run-url $REPO_URL $SERVICE_NAME
         ;;
     'run-results') 
-        exec /opt/app-root/bin/python3 kebechet run-results $REPO_URL $SERVICE_NAME $ANALYSIS_ID
+        exec /opt/app-root/bin/python3 kebechet-cli run-results $REPO_URL $SERVICE_NAME $ANALYSIS_ID
         ;;
     *)
         echo "Application configuration error - invalid or no subcommand supplied"
