@@ -97,5 +97,6 @@ class Service():
         resp = requests.get(down_url, headers=auth)
         file_ = tempfile.NamedTemporaryFile()
         file_.write(resp.content)
+        file_.seek(0)
         _LOGGER.info(resp.content)
         return file_

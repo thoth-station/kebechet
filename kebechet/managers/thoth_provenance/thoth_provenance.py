@@ -48,18 +48,53 @@ class ThothProvenanceManager(ManagerBase):
         """Initialize ThothProvenance manager."""
         self._cached_merge_requests = None
         super().__init__(*args, **kwargs)
+ 
+    def _issue_provenance_error(self, prov_results: list, labels: list):
+        error_info = prov_results[0]
+        text_block = ""
 
-    def run(self, labels: list):
+        for err in error_info:
+            _LOGGER.info(f"{err['id']}: {err['package_name']} {err['package_version']}")
+            text_block = (
+                text_block
+                + f"## {err['type']}: {err['id']} - {err['package_name']}:{err['package_version']}\n"
+                + f"**Justification: {err['justification']}**\n"
+                + f"#### source: \n {pprint.pformat(err['source'])}\n"
+                + f"#### lock_info:\n {pprint.pformat(err['package_locked'])}"
+            )
+
+        checksum = hashlib.md5(text_block.encode("utf-8")).hexdigest()[:10]
+
+        self.sm.open_issue_if_not_exist(
+            f"{checksum} - {len(error_info)}: Automated kebechet thoth-provenance Issue",
+            lambda: text_block,
+            labels=labels,
+        )
+
+    def run(self, labels: list, analysis_id=None):
         """Run the provenance check bot."""
-        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
-            self.repo = repo
-            if not (os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock")):
-                _LOGGER.warning("Pipfile or Pipfile.lock is missing from repo, opening issue")
-                self.sm.open_issue_if_not_exist(
-                    "Missing pipenv files",
-                    lambda: "Check your repository to make sure Pipfile and Pipfile.lock exist.",
-                    labels=labels
-                )
+        if not analysis_id:
+            with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+                self.repo = repo
+                if not (os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock")):
+                    _LOGGER.warning("Pipfile or Pipfile.lock is missing from repo, opening issue")
+                    self.sm.open_issue_if_not_exist(
+                        "Missing pipenv files",
+                        lambda: "Check your repository to make sure Pipfile and Pipfile.lock exist.",
+                        labels=labels
+                    )
+                    return False
+                lib.provenance_check_here(nowait=True, )#origin=(self.service_url + self.slug))
+            return True
+        else:
+            res = lib.get_analysis_results(analysis_id)
+            if res is None:
+                _LOGGER.error("Provenance check failed on server side, contact the maintainer")
                 return False
-        lib.provenance_check_here(nowait=True, origin=(self.service_url + self.slug))
-        return True
+            if res[1] is False:
+                _LOGGER.info("Provenance check found problems, creating issue...")
+                self._issue_provenance_error(res, labels)
+                return False
+            else:
+                _LOGGER.info("Provenance check found no problems, carry on coding :)")
+                return True

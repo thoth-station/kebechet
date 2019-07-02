@@ -149,14 +149,20 @@ class _Config:
     def run_analysis(cls, analysis_id: str, origin: str, service: str) -> None:
         """Run result managers (meant to be triggered automatically)."""
         global config
-        from kebechet.managers import AdviseResultsManager, ProvenanceResultsManager
+        from kebechet.managers import ThothAdviseManager, ThothProvenanceManager
         # Gets kebechet configuration from the original repository
         tempfile = config.download_conf_from_url(origin, service)
         config.from_file(tempfile.name)
-        for _, slug, service_type, service_url, token, tls_verify in config.iter_entries():
+        for managers, slug, service_type, service_url, token, tls_verify in config.iter_entries():
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
-            # Skip checks for valid service_url because to trigger it needs to be ran and therefore valid
+            if service_url and not service_url.startswith(("https://", "http://")):
+                # We need to have this explicitly set for IGitt and also for security reasons.
+                _LOGGER.error(
+                    "You have to specify protocol ('https://' or 'http://') in service URL "
+                    "configuration entry - invalid configuration {service_url!}"
+                )
+                continue
 
             if (service_url and service_url.endswith('/')):
                 service_url = service_url[:-1]
@@ -166,16 +172,22 @@ class _Config:
                 token = token.format(**os.environ)
                 _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
 
-            manager_config = {"analysis_id": analysis_id, "labels": ["kebechet", "bot"]}
-            if analysis_id.startswith("adviser"):
-                kebechet_manager = AdviseResultsManager
-            elif analysis_id.startswith("provenance"):
-                kebechet_manager = ProvenanceResultsManager
+            for manager in managers:
+                manager_name = manager.pop("name")
+                if analysis_id.startswith("adviser") and manager_name == "thoth-advise":
+                    kebechet_manager = ThothAdviseManager
+                elif analysis_id.startswith("provenance") and manager_name == "thoth-provenance":
+                    kebechet_manager = ThothProvenanceManager
+                else:
+                    continue
 
-            instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
-            instance.run(**manager_config)
-            break   # Ensures only one manager per analysis result
-            # NOTE: users should have only one entry in their .kebechet.yaml this should probably be enforced
+                manager_config = manager.pop("configuration", {})
+                manager_config["analysis_id"] = analysis_id
+
+                instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
+                instance.run(**manager_config)
+                return   # Ensures only one manager per analysis result
+                # NOTE: users should have only one entry in their .kebechet.yaml this should probably be enforced
 
     @classmethod
     def run(cls, configuration_file: str) -> None:
