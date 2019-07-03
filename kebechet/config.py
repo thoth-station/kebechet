@@ -21,6 +21,7 @@ import logging
 import os
 import yaml
 import tempfile
+from contextlib import contextmanager
 
 import urllib3
 import requests
@@ -54,16 +55,19 @@ class _Config:
                 "Failed to parse configuration file: {str(exc)}"
             ) from exc
 
+    @contextmanager
     def download_conf_from_url(self, url: str, service: str):
         service = Service(service=service, url=url)
         tempfile = service.download_kebechet_config()
-        return tempfile
+        try:
+            yield tempfile
+        finally:
+            tempfile.close()
 
     def run_url(self, url: str, service: str):
-        temp_file = self.download_conf_from_url(url, service)
-        _LOGGER.info("Filename = %s", temp_file.name)
-        _LOGGER.info(temp_file.read())
-        self.run(temp_file.name)
+        with self.download_conf_from_url(url, service) as temp_file:
+            _LOGGER.info("Filename = %s", temp_file.name)
+            self.run(temp_file.name)
 
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""

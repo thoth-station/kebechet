@@ -28,7 +28,7 @@ from .enums import ServiceType
 _LOGGER = logging.getLogger(__name__)
 
 
-class Service():
+class Service:
     """Allows for abstraction of multiple different service with easy support of my by changing `services`."""
 
     @staticmethod
@@ -97,5 +97,6 @@ class Service():
         resp = requests.get(down_url, headers=auth)
         file_ = tempfile.NamedTemporaryFile()
         file_.write(resp.content)
+        file_.seek(0)
         _LOGGER.info(resp.content)
         return file_
