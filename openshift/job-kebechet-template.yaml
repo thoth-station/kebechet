@@ -25,7 +25,7 @@ parameters:
     displayName: ImageStream Project
     required: true
     name: IMAGE_STREAM_NAMESPACE
-    value: "thoth-infra-stage"
+    value: "thoth-test-core"
   - description: Tag of the ImageStream to be use
     displayName: ImageStream Tag
     required: true
@@ -43,74 +43,86 @@ parameters:
     displayName: Job ID
     required: true
     name: KEBECHET_JOB_ID
+    value: "kebechet-test-job"
   - description: Determines if kebechet is in verbose mode
     displayName: Verbose Mode
     required: true
     name: KEBECHET_VERBOSE
+    value: "1"
   - description: The kebechet subcommand which should be run
     displayName: Kebechet Subcommand
     required: true
     name: KEBECHET_SUBCOMMAND
+    value: "run-results"
   - description: The analysis that should be used to generate issues and pull requests
     displayName: Analysis ID
     required: false
     name: ANALYSIS_ID
+    value: "adviser-3ff6cb49e1aed38d"
 
 objects:
-- apiVersion: v1
-  kind: Job
-  metadata:
-    name: ${KEBECHET_JOB_ID}
-    labels:
-      app: thoth
-      componenet: kebechet
-      task: kebechet
-      mark: cleanup
-  spec:
-    backoffLimit: 0
-    template:
-      metadata:
-        labels:
-          app: kebechet
-      spec:
-        template:
-          metadata:
-            labels:
-              app: kebechet
-          spec:
-            containers:
-            - image: ${IMAGE_STREAM_REGISTRY}/${IMAGE_STREAM_NAMESPACE}/kebechet:{IMAGE_STREAM_TAG}
+  - apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: "${KEBECHET_JOB_ID}"
+      labels:
+        app: thoth
+        componenet: kebechet
+        task: kebechet
+        mark: cleanup
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: kebechet
+        spec:
+          restartPolicy: "Never"
+          automountServiceAccountToken: false
+          containers:
+            - image: ${IMAGE_STREAM_REGISTRY}/${IMAGE_STREAM_NAMESPACE}/kebechet-job:${IMAGE_STREAM_TAG}
               name: kebechet
               volumeMounts:
               - name: ssh-config
                 mountPath: /home/user/.ssh
+                readOnly: true
               env:
-              - name: PIPENV_NOSPIN
-                value: '1'
-              - name: PIPENV_COLORBLIND
-                value: '1'
-              - name: PIPENV_HIDE_EMOJIS
-                value: '1'
-              - name: KEBECHET_VERBOSE
-                value: ${KEBECHET_VERBOSE}
-              - name: GITHUB_KEBECHET_TOKEN
-                valueFrom:
-                  secretKeyRef:
-                    key: github-oauth-token
-                    name: kebechet-secret
-              - name: GITLAB_KEBECHET_TOKEN
-                value:
-                  key: gitlab-oauth-token
-                  name: kebechet-secret
-              - name: PAGURE_KEBECHET_TOKEN
-                value:
-                  key: pagure-oauth-token
-                  name: kebechet-secret
-              - name: SENTRY_DSN
-                valueFrom:
-                  secretKeyRef:
-                    key: sentry-dsn
-                    name: kebechet-secret
+                - name: PIPENV_NOSPIN
+                  value: '1'
+                - name: PIPENV_COLORBLIND
+                  value: '1'
+                - name: PIPENV_HIDE_EMOJIS
+                  value: '1'
+                - name: KEBECHET_VERBOSE
+                  value: "${KEBECHET_VERBOSE}"
+                - name: KEBECHET_SUBCOMMAND
+                  value: "${KEBECHET_SUBCOMMAND}"
+                - name: REPO_URL
+                  value: "${REPO_URL}"
+                - name: SERVICE_NAME
+                  value: "${SERVICE_NAME}"
+                - name: ANALYSIS_ID
+                  value: "${ANALYSIS_ID}"
+                - name: GITHUB_KEBECHET_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: github-oauth-token
+                      name: kebechet-secret
+                - name: GITLAB_KEBECHET_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: gitlab-oauth-token
+                      name: kebechet-secret
+                - name: PAGURE_KEBECHET_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: pagure-oauth-token
+                      name: kebechet-secret
+                - name: SENTRY_DSN
+                  valueFrom:
+                    secretKeyRef:
+                      key: sentry-dsn
+                      name: kebechet-secret
               resources:
                 requests:
                   memory: "2Gi"
@@ -129,6 +141,7 @@ objects:
               secret:
                 secretName: kebechet-secret
                 items:
-                - key: ssh-privatekey
-                  path: id_rsa
-                  mode: 0600
+                  - key: ssh-privatekey
+                    path: id_rsa
+                    mode: 0600
+  
