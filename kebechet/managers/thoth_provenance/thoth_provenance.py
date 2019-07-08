@@ -84,17 +84,18 @@ class ThothProvenanceManager(ManagerBase):
                         labels=labels
                     )
                     return False
-                lib.provenance_check_here(nowait=True, )#origin=(self.service_url + self.slug))
+                lib.provenance_check_here(nowait=True, origin=(self.service_url + self.slug))
             return True
         else:
-            res = lib.get_analysis_results(analysis_id)
-            if res is None:
-                _LOGGER.error("Provenance check failed on server side, contact the maintainer")
-                return False
-            if res[1] is False:
-                _LOGGER.info("Provenance check found problems, creating issue...")
-                self._issue_provenance_error(res, labels)
-                return False
-            else:
-                _LOGGER.info("Provenance check found no problems, carry on coding :)")
-                return True
+            with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+                res = lib.get_analysis_results(analysis_id)
+                if res is None:
+                    _LOGGER.error("Provenance check failed on server side, contact the maintainer")
+                    return False
+                if res[1] is False:
+                    _LOGGER.info("Provenance check found problems, creating issue...")
+                    self._issue_provenance_error(res, labels)
+                    return False
+                else:
+                    _LOGGER.info("Provenance check found no problems, carry on coding :)")
+                    return True
