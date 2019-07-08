@@ -43,7 +43,6 @@ parameters:
     displayName: Job ID
     required: true
     name: KEBECHET_JOB_ID
-    value: "kebechet-test-job"
   - description: Determines if kebechet is in verbose mode
     displayName: Verbose Mode
     required: true
@@ -53,7 +52,6 @@ parameters:
     displayName: Kebechet Subcommand
     required: true
     name: KEBECHET_SUBCOMMAND
-    value: "run-results"
   - description: The analysis that should be used to generate issues and pull requests
     displayName: Analysis ID
     required: false
