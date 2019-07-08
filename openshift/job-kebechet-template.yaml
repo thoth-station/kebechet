@@ -56,7 +56,6 @@ parameters:
     displayName: Analysis ID
     required: false
     name: ANALYSIS_ID
-    value: "adviser-3ff6cb49e1aed38d"
 
 objects:
   - apiVersion: batch/v1
