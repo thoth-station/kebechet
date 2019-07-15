@@ -48,7 +48,7 @@ class ThothProvenanceManager(ManagerBase):
         """Initialize ThothProvenance manager."""
         self._cached_merge_requests = None
         super().__init__(*args, **kwargs)
- 
+
     def _issue_provenance_error(self, prov_results: list, labels: list):
         error_info = prov_results[0]
         text_block = ""
