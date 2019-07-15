@@ -84,7 +84,8 @@ class ThothProvenanceManager(ManagerBase):
                         labels=labels
                     )
                     return False
-                lib.provenance_check_here(nowait=True, origin=(self.service_url + self.slug))
+                _LOGGER.info((self.service_url + self.slug))
+                lib.provenance_check_here(nowait=True, origin=f"{self.service_url}/{self.slug}")
             return True
         else:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
