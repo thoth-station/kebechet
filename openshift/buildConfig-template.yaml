@@ -59,7 +59,7 @@ parameters:
   name: GITHUB_URL
   value: 'https://github.com/KPostOffice/kebechet'
 
-- description: Git repository for Thoth's Graph Sync Job
+- description: Git reference to be used for Thoth's Kebechet
   displayName: Thoth Kebechet git reference
   required: true
   name: GITHUB_REF
