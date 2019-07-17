@@ -28,7 +28,7 @@ case $KEBECHET_SUBCOMMAND in
         exec pipenv run python3 kebechet-cli run-results
         ;;
     'run')
-        exec pipenv run python3 kebechet-cli run # TODO: Keep original functionality?
+        exec pipenv run python3 kebechet-cli run
         ;;
     *)
         echo "Application configuration error - invalid or no subcommand supplied"
