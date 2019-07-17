@@ -22,13 +22,13 @@ export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChec
 
 case $KEBECHET_SUBCOMMAND in
     'run-url') 
-        exec pipenv run python3 kebechet-cli run-url $REPO_URL $SERVICE_NAME
+        exec pipenv run python3 kebechet-cli run-url
         ;;
     'run-results') 
-        exec pipenv run python3 kebechet-cli run-results $REPO_URL $SERVICE_NAME $ANALYSIS_ID
+        exec pipenv run python3 kebechet-cli run-results
         ;;
     'run')
-        exec pipenv run python3 kebechet-cli run # TODO
+        exec pipenv run python3 kebechet-cli run # TODO: Keep original functionality?
         ;;
     *)
         echo "Application configuration error - invalid or no subcommand supplied"

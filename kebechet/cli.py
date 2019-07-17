@@ -75,17 +75,17 @@ def cli_run(configuration):
 
 
 @cli.command('run-results')
-@click.argument('origin', metavar='org', envvar='GITORIGIN')
-@click.argument('service', envvar='KEBECHET_SERVICE')
-@click.argument('analysis_id', metavar='id', envvar='ANALYSIS_ID')
+@click.option('-o', '--origin', required=True, envvar='KEBECHET_GITORIGIN')
+@click.option('-s', '--service', required=True, envvar='KEBECHET_SERVICE')
+@click.option('-i', '--analysis_id', required=True, metavar='id', envvar='KEBECHET_ANALYSIS_ID')
 def cli_run_results(origin, service, analysis_id):
     """Run Kebechet after results are received (meant to be triggered automatically)."""
     config.run_analysis(analysis_id=analysis_id, origin=origin, service=service)
 
 
 @cli.command("run-url")
-@click.argument("url", envvar="KEBECHET_CONFIG_URL")
-@click.argument("service", envvar="KEBECHET_SERVICE")
+@click.option("-u", "--url", required=True, envvar="KEBECHET_CONFIG_URL")
+@click.option("-s", "--service", required=True, envvar="KEBECHET_SERVICE")
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
     config.run_url(url, service)

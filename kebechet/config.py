@@ -160,7 +160,8 @@ class _Config:
                 # We need to have this explicitly set for IGitt and also for security reasons.
                 _LOGGER.error(
                     "You have to specify protocol ('https://' or 'http://') in service URL "
-                    "configuration entry - invalid configuration {service_url!}"
+                    "configuration entry - invalid configuration %r",
+                    service_url,
                 )
                 continue
 
@@ -170,7 +171,7 @@ class _Config:
             if token:
                 # Allow token expansion based on env variables.
                 token = token.format(**os.environ)
-                _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
+                _LOGGER.debug("Using token %r%r", token[:3], '*'*len(token[3:]))
 
             for manager in managers:
                 manager_name = manager.pop("name")
