@@ -34,11 +34,11 @@ parameters:
   - description: The repositories full URL 
     displayName: Repository URL
     required: true
-    name: REPO_URL
+    name: KEBECHET_REPO_URL
   - description: The name of the git service the repository lives on
     displayName: git Service Name
     required: true
-    name: SERVICE_NAME
+    name: KEBECHET_SERVICE_NAME
   - description: The ID of the Kebechet job
     displayName: Job ID
     required: true
@@ -55,7 +55,7 @@ parameters:
   - description: The analysis that should be used to generate issues and pull requests
     displayName: Analysis ID
     required: false
-    name: ANALYSIS_ID
+    name: KEBECHET_ANALYSIS_ID
 
 objects:
   - apiVersion: batch/v1
