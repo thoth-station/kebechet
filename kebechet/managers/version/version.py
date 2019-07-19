@@ -241,7 +241,7 @@ class VersionManager(ManagerBase):
                         issue.add_comment("Unable to assign provided assignees, please check bot configuration.")
 
                 maintainers = maintainers or self._get_maintainers(labels)
-                if issue.author.username not in maintainers:
+                if issue.author.username.lower() not in (m.lower() for m in maintainers):
                     issue.add_comment(
                         f"Sorry, @{issue.author.username} but you are not stated in maintainers section for "
                         f"this project. Maintainers are @" + ', @'.join(maintainers)
