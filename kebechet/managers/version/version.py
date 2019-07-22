@@ -44,6 +44,7 @@ _RELEASE_TITLES = {
     "new patch release": semver.bump_patch,
     "new pre-release": semver.bump_prerelease,
     "new build release": semver.bump_build,
+    "finalize version": semver.finalize_version,
 }
 
 
