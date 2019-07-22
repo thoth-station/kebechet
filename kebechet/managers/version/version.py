@@ -44,6 +44,7 @@ _RELEASE_TITLES = {
     "new patch release": semver.bump_patch,
     "new pre-release": semver.bump_prerelease,
     "new build release": semver.bump_build,
+    "finalize version": semver.finalize_version,
 }
 
 
@@ -149,7 +150,9 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
         """Get next version based on user request."""
-        handler = _RELEASE_TITLES.get(issue_title.lower())
+        issue_title = issue_title.lower()
+
+        handler = _RELEASE_TITLES.get(issue_title)
         if handler:
             try:
                 return handler(current_version)
