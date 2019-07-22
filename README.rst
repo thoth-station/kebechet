@@ -1,4 +1,4 @@
-Kebechet 
+Kebechet
 --------
 
   I'm Kebechet, goddess of freshness. I will keep your sources and dependencies fresh and up-to-date.
