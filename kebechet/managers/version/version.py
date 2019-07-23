@@ -44,6 +44,7 @@ _RELEASE_TITLES = {
     "new patch release": semver.bump_patch,
     "new pre-release": semver.bump_prerelease,
     "new build release": semver.bump_build,
+    "finalize version": semver.finalize_version,
 }
 
 
@@ -149,7 +150,9 @@ class VersionManager(ManagerBase):
     @staticmethod
     def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
         """Get next version based on user request."""
-        handler = _RELEASE_TITLES.get(issue_title.lower())
+        issue_title = issue_title.lower()
+
+        handler = _RELEASE_TITLES.get(issue_title)
         if handler:
             try:
                 return handler(current_version)
@@ -241,7 +244,7 @@ class VersionManager(ManagerBase):
                         issue.add_comment("Unable to assign provided assignees, please check bot configuration.")
 
                 maintainers = maintainers or self._get_maintainers(labels)
-                if issue.author.username not in maintainers:
+                if issue.author.username.lower() not in (m.lower() for m in maintainers):
                     issue.add_comment(
                         f"Sorry, @{issue.author.username} but you are not stated in maintainers section for "
                         f"this project. Maintainers are @" + ', @'.join(maintainers)
