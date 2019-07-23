@@ -258,7 +258,7 @@ class _Config:
                     instance.run(**manager_configuration)
                 except Exception as exc:
                     _LOGGER.exception(
-                        "An error occurred during run of manager %r %r for %r, skipping", 
+                        "An error occurred during run of manager %r %r for %r, skipping",
                         manager, kebechet_manager, slug,
                     )
 
