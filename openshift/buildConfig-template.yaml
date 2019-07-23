@@ -57,7 +57,7 @@ parameters:
   displayName: Thoth Kebechet git repository
   required: true
   name: GITHUB_URL
-  value: 'https://github.com/KPostOffice/kebechet'
+  value: 'https://github.com/thoth-station/kebechet'
 
 - description: Git reference to be used for Thoth's Kebechet
   displayName: Thoth Kebechet git reference

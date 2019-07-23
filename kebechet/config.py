@@ -61,8 +61,8 @@ class _Config:
 
     def run_url(self, url: str, service: str):
         temp_file = self.download_conf_from_url(url, service)
-        _LOGGER.info("Filename = %s", temp_file.name)
-        _LOGGER.info(temp_file.read())
+        _LOGGER.debug("Filename = %s", temp_file.name)
+        _LOGGER.debug(temp_file.read())
         self.run(temp_file.name)
 
     def iter_entries(self) -> tuple:
@@ -81,7 +81,7 @@ class _Config:
 
                 if items:
                     _LOGGER.warning(
-                        f"Unknown configuration entry in configuration of {value[1]!r}: {items}"
+                        "Unknown configuration entry in configuration of %r: %r", value[1], items,
                     )
 
                 yield value
@@ -97,7 +97,7 @@ class _Config:
         urllib3.disable_warnings()
         if not verify:
             _LOGGER.warning(
-                f"Turning off TLS certificate verification for {slug} hosted at {service_url}"
+                "Turning off TLS certificate verification for %r hosted at %r", slug, service_url,
             )
 
         # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
@@ -180,6 +180,7 @@ class _Config:
                 elif analysis_id.startswith("provenance") and manager_name == "thoth-provenance":
                     kebechet_manager = ThothProvenanceManager
                 else:
+                    _LOGGER.debug("Manager %r does not correspond with id:%r, skipping", manager_name, analysis_id)
                     continue
 
                 manager_config = manager.pop("configuration", {})
@@ -222,7 +223,7 @@ class _Config:
             if token:
                 # Allow token expansion based on env variables.
                 token = token.format(**os.environ)
-                _LOGGER.debug(f"Using token '{token[:3]}{'*'*len(token[3:])}'")
+                _LOGGER.debug("Using token '%r%r'", token[:3], '*'*len(token[3:]))
 
             for manager in managers:
                 # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -232,7 +233,7 @@ class _Config:
                     manager_name = manager.pop("name")
                 except Exception:
                     _LOGGER.exception(
-                        f"No manager name provided in configuration entry for {slug}, ignoring entry"
+                        "No manager name provided in configuration entry for %r, ignoring entry", slug,
                     )
                     continue
 
@@ -247,7 +248,7 @@ class _Config:
                 manager_configuration = manager.pop("configuration", {})
                 if manager:
                     _LOGGER.warning(
-                        f"Ignoring option {manager} in manager entry for {slug}"
+                        "Ignoring option %r in manager entry for %r", manager, slug,
                     )
 
                 try:
@@ -257,10 +258,10 @@ class _Config:
                     instance.run(**manager_configuration)
                 except Exception as exc:
                     _LOGGER.exception(
-                        f"An error occurred during run of manager {manager!r} {kebechet_manager} for {slug}, skipping"
+                        "An error occurred during run of manager %r %r for %r, skipping", manager, kebechet_manager, slug,
                     )
 
-            _LOGGER.info(f"Finished management for {slug!r}")
+            _LOGGER.info("Finished management for %r", slug)
 
 
 config = _Config()

@@ -25,8 +25,7 @@ RUN \
 # RUN  pip3 install virtualenv && mkdir -p /usr/local/lib/python3.6/site-packages/ && cd /tmp/kebechet/ && python3 setup.py install
 
 COPY . /home/user
-RUN \
-    pipenv install
+RUN pipenv install
 
 # Arbitrary User
 USER 1042 

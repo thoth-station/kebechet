@@ -1,6 +1,21 @@
 Kebechet Advise-Results Manager
 -----------------------
-This manager is automatically triggered after the `ThothAdviseManager` finishes.  It will take the results and create pull requests and issues based on the info gathered
+This manager will manage your Python dependencies using Thoths recommendation system. Your repository will be automatically updated with the optimal Python packages for your project without you having to lift your finger.
+
+A prerequisite for this manager is to have Pipfile and .thoth.yaml, present in the repo. Pipfile should state all direct dependencies (with possible required specifications). .thoth.yaml should contain a valid configuration for thamos
+
+    Pipfile - respecting _`pipenv <https://github.com/pypa/pipenv>`_ tool
+    Pipfile.lock - automatically managed by this manager - states all pinned down versions of your application stack
+
+If you do not have Pipfile.lock present in your repository, this manager will automatically open a pull request with initial dependency lock.
+
+Custom PyPI indexes are supported respecting Pipfile syntax.
+
+If there is any issue in your application stack, the Thamos-Advise manager will open an issue with all the info and will try to resolve issue for you if possible by opening a pull request for you.
+
+Why should I pin down dependencies in my application?
+=====================================================
+Check _`this StackOverflow thread <https://stackoverflow.com/questions/28509481>`_.
 
 Options
 =======
