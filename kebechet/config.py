@@ -54,17 +54,106 @@ class _Config:
                 "Failed to parse configuration file: {str(exc)}"
             ) from exc
 
-    def download_conf_from_url(self, url: str, service: str):
+    @staticmethod
+    def _managers_from_file(config_path: str):
+        with open(config_path) as config_file:
+            content = config_file.read()
+        
+        try:
+            return yaml.safe_load(content).pop("managers") or []
+        except Exception as exc:
+            raise ConfigurationError(
+                "Failed to parse configuration file: {str(exc)}"
+            ) from exc
+
+    @staticmethod
+    def _tls_verify_from_file(config_path: str):
+        with open(config_path) as config_file:
+            content = config_file.read()
+
+        try:
+            return yaml.safe_load(content).pop("tls_verify") or False
+        except Exception as exc:
+            raise ConfigurationError(
+                "Failed to parse configuration file: {str(exc)}"
+            ) from exc
+
+    @staticmethod
+    def download_conf_from_url(url: str, service: str):
         service = Service(service=service, url=url)
         tempfile = service.download_kebechet_config()
         return tempfile
 
-    def run_url(self, url: str, service: str):
-        temp_file = self.download_conf_from_url(url, service)
+    @classmethod
+    def run_url(cls, url: str, service: str):
+        temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
-        _LOGGER.debug(temp_file.read())
-        self.run(temp_file.name)
-        close(temp_file)
+        
+        global config
+        from kebechet.managers import REGISTERED_MANAGERS
+        tempfile = config.download_conf_from_url(url, service)
+        managers = cls._managers_from_file(tempfile.name)
+        tls_verify = cls._tls_verify_from_file(tempfile.name)
+        
+        scheme,_,host,_,slug,_,_ = urllib3.util.parse_url(url)
+        slug = slug[1:]
+        service_url = f"{scheme}://{host}"
+        
+        cls._tls_verification(service_url, slug, verify=tls_verify)
+
+        if service_url and not service_url.startswith(("https://", "http://")):
+                # We need to have this explicitly set for IGitt and also for security reasons.
+                _LOGGER.error(
+                    "You have to specify protocol ('https://' or 'http://') in service URL "
+                    "configuration entry - invalid configuration %r",
+                    service_url,
+                )
+
+        if (service_url and service_url.endswith('/')):
+                service_url = service_url[:-1]
+
+        service = Service(service, url)
+        token = service.token
+        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+
+        for manager in managers:
+                # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
+                # YAML references, we do not break.
+                manager = dict(manager)
+                try:
+                    manager_name = manager.pop("name")
+                except Exception:
+                    _LOGGER.exception(
+                        "No manager name provided in configuration entry for %r, ignoring entry", slug,
+                    )
+                    continue
+
+                kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
+                if not kebechet_manager:
+                    _LOGGER.error(
+                        "Unable to find requested manager %r, skipping", manager_name
+                    )
+                    continue
+
+                _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
+                manager_configuration = manager.pop("configuration", {})
+                if manager:
+                    _LOGGER.warning(
+                        "Ignoring option %r in manager entry for %r", manager, slug,
+                    )
+
+                try:
+                    instance = kebechet_manager(
+                        slug, service.service, service_url, token
+                    )
+                    instance.run(**manager_configuration)
+                except Exception as exc:
+                    _LOGGER.exception(
+                        "An error occurred during run of manager %r %r for %r, skipping",
+                        manager, kebechet_manager, slug,
+                    )
+
+        temp_file.close()
 
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
@@ -151,46 +240,50 @@ class _Config:
         """Run result managers (meant to be triggered automatically)."""
         global config
         from kebechet.managers import ThothAdviseManager, ThothProvenanceManager
-        # Gets kebechet configuration from the original repository
         tempfile = config.download_conf_from_url(origin, service)
-        config.from_file(tempfile.name)
-        for managers, slug, service_type, service_url, token, tls_verify in config.iter_entries():
-            cls._tls_verification(service_url, slug, verify=tls_verify)
+        managers = _Config._managers_from_file(tempfile.name)
+        tls_verify = _Config._tls_verify_from_file(tempfile.name)
+        
+        scheme,_,host,_,slug,_,_ = urllib3.util.parse_url(origin)
+        slug = slug[1:]
+        service_url = f"{scheme}://{host}"
+        
+        cls._tls_verification(service_url, slug, verify=tls_verify)
 
-            if service_url and not service_url.startswith(("https://", "http://")):
+        if service_url and not service_url.startswith(("https://", "http://")):
                 # We need to have this explicitly set for IGitt and also for security reasons.
                 _LOGGER.error(
                     "You have to specify protocol ('https://' or 'http://') in service URL "
                     "configuration entry - invalid configuration %r",
                     service_url,
                 )
-                continue
 
-            if (service_url and service_url.endswith('/')):
+        if (service_url and service_url.endswith('/')):
                 service_url = service_url[:-1]
 
-            if token:
-                # Allow token expansion based on env variables.
-                token = token.format(**os.environ)
-                _LOGGER.debug("Using token %r%r", token[:3], '*'*len(token[3:]))
+        service = Service(service, origin)
+        token = service.token
+        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
 
-            for manager in managers:
-                manager_name = manager.pop("name")
-                if analysis_id.startswith("adviser") and manager_name == "thoth-advise":
-                    kebechet_manager = ThothAdviseManager
-                elif analysis_id.startswith("provenance") and manager_name == "thoth-provenance":
-                    kebechet_manager = ThothProvenanceManager
-                else:
-                    _LOGGER.debug("Manager %r does not correspond with id:%r, skipping", manager_name, analysis_id)
-                    continue
-
-                manager_config = manager.pop("configuration", {})
-                manager_config["analysis_id"] = analysis_id
-
-                # TODO: Fail if users add config entries not relative to given manager (open an issue)
-                instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
-                instance.run(**manager_config)
-                return   # Ensures only one manager per analysis result
+        for manager in managers:
+            manager_name = manager.pop("name")
+            if analysis_id.startswith("adviser") and manager_name == "thoth-advise":
+                kebechet_manager = ThothAdviseManager
+                break
+            elif analysis_id.startswith("provenance") and manager_name == "thoth-provenance":
+                kebechet_manager = ThothProvenanceManager
+                break
+            else:
+                _LOGGER.debug("Manager %r does not correspond with id:%r, skipping", manager_name, analysis_id)
+        else:
+            _LOGGER.error("No manager configuration found for id: %r", analysis_id)
+            return
+        
+        manager_config = manager.pop("configuration", {})
+        manager_config["analysis_id"] = analysis_id
+        # TODO: Fail if users add config entries not relative to given manager (open an issue)
+        instance = kebechet_manager(slug, service.service, service_url, token)
+        instance.run(**manager_config)
 
     @classmethod
     def run(cls, configuration_file: str) -> None:

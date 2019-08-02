@@ -44,14 +44,14 @@ class Service():
         "github": {
             "token": "GITHUB_KEBECHET_TOKEN",
             "service_type": ServiceType.GITHUB,
-            "config_url": "https://raw.githubusercontent.com/{slug}/{branch}/.kebechet.yaml",
+            "config_url": "https://raw.githubusercontent.com/{slug}/{branch}/.thoth.yaml",
             "auth": {"header": "Authorization", "value": "token {token}"},
             "slug_method": _keep_slug.__func__,
         },
         "gitlab": {
             "token": "GITLAB_KEBECHET_TOKEN",
             "service_type": ServiceType.GITLAB,
-            "config_url": "https://gitlab.com/api/v4/projects/{slug}/repository/files/.kebechet.yaml/raw?ref={branch}",
+            "config_url": "https://gitlab.com/api/v4/projects/{slug}/repository/files/.thoth.yaml/raw?ref={branch}",
             "auth": {"header": "Private-Token", "value": "{token}"},
             "slug_method": _encode_fslash.__func__,
         },
