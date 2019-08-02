@@ -58,7 +58,6 @@ class _Config:
     def _managers_from_file(config_path: str):
         with open(config_path) as config_file:
             content = config_file.read()
-        
         try:
             return yaml.safe_load(content).pop("managers") or []
         except Exception as exc:
@@ -88,70 +87,67 @@ class _Config:
     def run_url(cls, url: str, service: str):
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
-        
+
         global config
         from kebechet.managers import REGISTERED_MANAGERS
         tempfile = config.download_conf_from_url(url, service)
         managers = cls._managers_from_file(tempfile.name)
         tls_verify = cls._tls_verify_from_file(tempfile.name)
-        
-        scheme,_,host,_,slug,_,_ = urllib3.util.parse_url(url)
+
+        scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)
         slug = slug[1:]
         service_url = f"{scheme}://{host}"
-        
+
         cls._tls_verification(service_url, slug, verify=tls_verify)
 
         if service_url and not service_url.startswith(("https://", "http://")):
-                # We need to have this explicitly set for IGitt and also for security reasons.
-                _LOGGER.error(
-                    "You have to specify protocol ('https://' or 'http://') in service URL "
-                    "configuration entry - invalid configuration %r",
-                    service_url,
-                )
+            # We need to have this explicitly set for IGitt and also for security reasons.
+            _LOGGER.error(
+                "You have to specify protocol ('https://' or 'http://') in service URL "
+                "configuration entry - invalid configuration %r",
+                service_url,
+            )
 
         if (service_url and service_url.endswith('/')):
-                service_url = service_url[:-1]
+            service_url = service_url[:-1]
 
         service = Service(service, url)
         token = service.token
         _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
 
         for manager in managers:
-                # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
-                # YAML references, we do not break.
-                manager = dict(manager)
-                try:
-                    manager_name = manager.pop("name")
-                except Exception:
-                    _LOGGER.exception(
-                        "No manager name provided in configuration entry for %r, ignoring entry", slug,
-                    )
-                    continue
-
-                kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
-                if not kebechet_manager:
-                    _LOGGER.error(
-                        "Unable to find requested manager %r, skipping", manager_name
-                    )
-                    continue
-
-                _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
-                manager_configuration = manager.pop("configuration", {})
-                if manager:
-                    _LOGGER.warning(
-                        "Ignoring option %r in manager entry for %r", manager, slug,
-                    )
-
-                try:
-                    instance = kebechet_manager(
-                        slug, service.service, service_url, token
-                    )
-                    instance.run(**manager_configuration)
-                except Exception as exc:
-                    _LOGGER.exception(
-                        "An error occurred during run of manager %r %r for %r, skipping",
-                        manager, kebechet_manager, slug,
-                    )
+            # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
+            # YAML references, we do not break.
+            manager = dict(manager)
+            try:
+                manager_name = manager.pop("name")
+            except Exception:
+                _LOGGER.exception(
+                    "No manager name provided in configuration entry for %r, ignoring entry", slug,
+                )
+                continue
+            kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
+            if not kebechet_manager:
+                _LOGGER.error(
+                    "Unable to find requested manager %r, skipping", manager_name
+                )
+                continue
+            _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
+            manager_configuration = manager.pop("configuration", {})
+            if manager:
+                _LOGGER.warning(
+                    "Ignoring option %r in manager entry for %r", manager, slug,
+                )
+            try:
+                instance = kebechet_manager(
+                    slug, service.service, service_url, token
+                )
+                instance.run(**manager_configuration)
+            except Exception as exc:
+                _LOGGER.exception(
+                    "An error occurred during run of manager %r %r for %r, skipping",
+                    manager, kebechet_manager, slug,
+                )
 
         temp_file.close()
 
@@ -243,23 +239,23 @@ class _Config:
         tempfile = config.download_conf_from_url(origin, service)
         managers = _Config._managers_from_file(tempfile.name)
         tls_verify = _Config._tls_verify_from_file(tempfile.name)
-        
-        scheme,_,host,_,slug,_,_ = urllib3.util.parse_url(origin)
+
+        scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(origin)
         slug = slug[1:]
         service_url = f"{scheme}://{host}"
-        
+
         cls._tls_verification(service_url, slug, verify=tls_verify)
 
         if service_url and not service_url.startswith(("https://", "http://")):
-                # We need to have this explicitly set for IGitt and also for security reasons.
-                _LOGGER.error(
-                    "You have to specify protocol ('https://' or 'http://') in service URL "
-                    "configuration entry - invalid configuration %r",
-                    service_url,
-                )
+            # We need to have this explicitly set for IGitt and also for security reasons.
+            _LOGGER.error(
+                "You have to specify protocol ('https://' or 'http://') in service URL "
+                "configuration entry - invalid configuration %r",
+                service_url,
+            )
 
         if (service_url and service_url.endswith('/')):
-                service_url = service_url[:-1]
+            service_url = service_url[:-1]
 
         service = Service(service, origin)
         token = service.token
@@ -278,7 +274,7 @@ class _Config:
         else:
             _LOGGER.error("No manager configuration found for id: %r", analysis_id)
             return
-        
+
         manager_config = manager.pop("configuration", {})
         manager_config["analysis_id"] = analysis_id
         # TODO: Fail if users add config entries not relative to given manager (open an issue)
