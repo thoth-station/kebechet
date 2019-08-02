@@ -9,7 +9,7 @@ A prerequisite for this manager is to have `Pipfile` and `Pipfile.lock`, and `.t
 `Pipfile.lock` should hold all the lock data associated with the Python software stack generated either by `thamos.lib.advise()` or `pipenv sync`
 `.thoth.yaml` should contain a valid configuration for `thamos`
 
-* `Pipfile` - respecting `pipenv <https://github.com/pypa/pipenv>`_ tool
+* `Pipfile` - respecting `pipenv <https://pipenv.readthedocs.io/en/latest/advanced/#specifying-package-indexes>`_ tool
 * `Pipfile.lock` - states all pinned down versions of your application stack
 
 Custom PyPI indexes are supported respecting `Pipfile` syntax.

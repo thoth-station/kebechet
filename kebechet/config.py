@@ -64,6 +64,7 @@ class _Config:
         _LOGGER.debug("Filename = %s", temp_file.name)
         _LOGGER.debug(temp_file.read())
         self.run(temp_file.name)
+        close(temp_file)
 
     def iter_entries(self) -> tuple:
         """Iterate over repositories listed."""
@@ -186,10 +187,10 @@ class _Config:
                 manager_config = manager.pop("configuration", {})
                 manager_config["analysis_id"] = analysis_id
 
+                # TODO: Fail if users add config entries not relative to given manager (open an issue)
                 instance = kebechet_manager(slug, ServiceType.by_name(service_type), service_url, token)
                 instance.run(**manager_config)
                 return   # Ensures only one manager per analysis result
-                # NOTE: users should have only one entry in their .kebechet.yaml this should probably be enforced
 
     @classmethod
     def run(cls, configuration_file: str) -> None:

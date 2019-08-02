@@ -4,7 +4,7 @@ This manager will manage your Python dependencies using Thoths recommendation sy
 
 A prerequisite for this manager is to have Pipfile and .thoth.yaml, present in the repo. Pipfile should state all direct dependencies (with possible required specifications). .thoth.yaml should contain a valid configuration for thamos
 
-    Pipfile - respecting _`pipenv <https://github.com/pypa/pipenv>`_ tool
+    Pipfile - respecting _`pipenv <https://pipenv.readthedocs.io/en/latest/advanced/#specifying-package-indexes>`_ tool
     Pipfile.lock - automatically managed by this manager - states all pinned down versions of your application stack
 
 If you do not have Pipfile.lock present in your repository, this manager will automatically open a pull request with initial dependency lock.
@@ -20,8 +20,6 @@ Check _`this StackOverflow thread <https://stackoverflow.com/questions/28509481>
 Options
 =======
 `labels`: specify the labels associated with pull requests and issues
-`analysis_id`: id of the advise results 
-`origin`: specify the repository that the results are for 
 
 Example
 =======
