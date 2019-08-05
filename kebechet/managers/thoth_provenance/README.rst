@@ -33,26 +33,7 @@ Options
 Example
 =======
 
-An example configuration for kebechet:
-
-.. code-block:: yaml
-
-  repositories:
-    - slug: thoth-station/kebechet
-      # State token explicitly or let it expand from env vars:
-      token: '{SECRET_TOKEN_IN_ENV}'
-      service_type: github  # or gitlab
-      # Optionally for self-hosted services:
-      # service_url: <URL>
-      # tls_verify: true/false
-      managers:
-        - name: thoth-provenance
-          configuration:
-            labels:
-              # Labels for opened issues and pull requests.
-              - bot
-
-An example configuration for thamos `.thoth.yaml`
+An example configuration for thoth `.thoth.yaml`
 
 NOTE: This configuration file should be in the root directory of your repository
 

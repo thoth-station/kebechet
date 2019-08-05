@@ -24,7 +24,7 @@ Options
 Example
 =======
 
-An example configuration for thamos `.thoth.yaml`
+An example configuration for thoth `.thoth.yaml`
 
 NOTE: This configuration file should be in the root directory of your repository
 
