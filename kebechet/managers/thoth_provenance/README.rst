@@ -75,6 +75,13 @@ NOTE: This configuration file should be in the root directory of your repository
     recommendation_type: stable
     limit_latest_versions: null
 
+  managers:
+    - name: thoth-provenance
+      configuration:
+        labels:
+          # Labels for opened issues and pull requests.
+          - [bot]
+
 A more detailed description of `thamos` can be found `here <https://github.com/thoth-station/thamos>`_
 
 You can see this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.

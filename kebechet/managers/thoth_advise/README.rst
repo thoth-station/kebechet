@@ -9,7 +9,7 @@ A prerequisite for this manager is to have Pipfile and .thoth.yaml, present in t
 
 If you do not have Pipfile.lock present in your repository, this manager will automatically open a pull request with initial dependency lock.
 
-Custom PyPI indexes are supported respecting Pipfile syntax.
+Custom PyPI indexes are supported respecting _`Pipfile <https://pipenv.readthedocs.io/en/latest/advanced/#specifying-package-indexes>`_ syntax.
 
 If there is any issue in your application stack, the Thamos-Advise manager will open an issue with all the info and will try to resolve issue for you if possible by opening a pull request for you.
 
@@ -46,6 +46,11 @@ NOTE: This configuration file should be in the root directory of your repository
     cuda_version: {cuda_version}
     recommendation_type: stable
     limit_latest_versions: null
+
+  managers:
+    - name: thoth-advise
+      configuration:
+        labels: [bot, kebechet]
 
 A more detailed description of `thamos` can be found `here <https://github.com/thoth-station/thamos>`_
 
