@@ -41,14 +41,25 @@ def _print_version(ctx, _, value):
 
 @click.group()
 @click.pass_context
-@click.option('-v', '--verbose', is_flag=True, envvar='KEBECHET_VERBOSE',
-              help="Be verbose about what's going on.")
-@click.option('--version', is_flag=True, is_eager=True, callback=_print_version, expose_value=False,
-              help="Print version and exit.")
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    envvar="KEBECHET_VERBOSE",
+    help="Be verbose about what's going on.",
+)
+@click.option(
+    "--version",
+    is_flag=True,
+    is_eager=True,
+    callback=_print_version,
+    expose_value=False,
+    help="Print version and exit.",
+)
 def cli(ctx=None, verbose=0):
-    """The CLI."""
+    """CLI."""
     if ctx:
-        ctx.auto_envvar_prefix = 'KEBECHET'
+        ctx.auto_envvar_prefix = "KEBECHET"
 
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
@@ -56,12 +67,29 @@ def cli(ctx=None, verbose=0):
         _LOGGER.debug("Kebechet version: %r", kebechet_version)
 
 
-@cli.command('run')
-@click.argument('configuration', metavar='config', envvar='KEBECHET_CONFIGURATION_PATH')
+@cli.command("run")
+@click.argument("configuration", metavar="config", envvar="KEBECHET_CONFIGURATION_PATH")
 def cli_run(configuration):
     """Run Kebechet using provided YAML configuration file."""
     config.run(configuration)
 
 
-if __name__ == '__main__':
+@cli.command('run-results')
+@click.option('-o', '--origin', required=True, envvar='KEBECHET_REPO_URL')
+@click.option('-s', '--service', required=True, envvar='KEBECHET_SERVICE')
+@click.option('-i', '--analysis_id', required=True, metavar='id', envvar='KEBECHET_ANALYSIS_ID')
+def cli_run_results(origin, service, analysis_id):
+    """Run Kebechet after results are received (meant to be triggered automatically)."""
+    config.run_analysis(analysis_id=analysis_id, origin=origin, service=service)
+
+
+@cli.command("run-url")
+@click.option("-u", "--url", required=True, envvar="KEBECHET_REPO_URL")
+@click.option("-s", "--service", required=True, envvar="KEBECHET_SERVICE")
+def cli_run_url(url, service):
+    """Run Kebechet by providing url to a git repository service."""
+    config.run_url(url, service)
+
+
+if __name__ == "__main__":
     cli()
