@@ -59,9 +59,8 @@ NOTE: This configuration file should be in the root directory of your repository
   managers:
     - name: thoth-provenance
       configuration:
-        labels:
-          # Labels for opened issues and pull requests.
-          - [bot]
+        # Labels for opened issues and pull requests.
+        labels: [bot]
 
 A more detailed description of `thamos` can be found `here <https://github.com/thoth-station/thamos>`_
 
