@@ -94,12 +94,12 @@ objects:
                   value: "${KEBECHET_VERBOSE}"
                 - name: KEBECHET_SUBCOMMAND
                   value: "${KEBECHET_SUBCOMMAND}"
-                - name: REPO_URL
-                  value: "${REPO_URL}"
-                - name: SERVICE_NAME
-                  value: "${SERVICE_NAME}"
-                - name: ANALYSIS_ID
-                  value: "${ANALYSIS_ID}"
+                - name: KEBECHET_REPO_URL
+                  value: "${KEBECHET_REPO_URL}"
+                - name: KEBECHET_SERVICE_NAME
+                  value: "${KEBECHET_SERVICE_NAME}"
+                - name: KEBECHET_ANALYSIS_ID
+                  value: "${KEBECHET_ANALYSIS_ID}"
                 - name: GITHUB_KEBECHET_TOKEN
                   valueFrom:
                     secretKeyRef:
