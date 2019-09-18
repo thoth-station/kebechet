@@ -18,6 +18,23 @@ repositories:
           labels: [bot]
           changelog_file: true
 
+  - slug: thoth-station/build-analyzers
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - cermakM
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
   - slug: thoth-station/analyzer
     token: '{KEBECHET_TOKEN}'
     managers:
@@ -471,42 +488,6 @@ repositories:
           maintainers:
             - fridex
             - goern
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/osiris
-    token: '{KEBECHET_TOKEN}'
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - fridex
-            - goern
-            - CermakM
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/osiris-build-observer
-    token: '{KEBECHET_TOKEN}'
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - fridex
-            - goern
-            - CermakM
           assignees:
             - sesheta
           labels: [bot]

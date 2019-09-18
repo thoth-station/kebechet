@@ -1,11 +1,11 @@
-FROM fedora:28
+FROM registry.access.redhat.com/ubi8
 
 # Env variable USER specific the kebechet as committer while git branch and git commit creation. 
 ENV USER=kebechet \
     PIPENV_CACHE_DIR=/home/user/.cache/pipenv \
     HOME=/home/user/ \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8 \
     PYTHONPATH=.
 
 WORKDIR /home/user
