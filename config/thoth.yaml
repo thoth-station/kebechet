@@ -450,16 +450,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: user-cont/conu
-    token: '{KEBECHET_TOKEN}'
-    managers:
-      - name: update
-        configuration:
-          labels: 
-            - bot
-            - thoth-station
-            - kebechet
-
   - slug: AICoE/log-anomaly-detector
     token: '{KEBECHET_TOKEN}'
     managers:
