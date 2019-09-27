@@ -353,7 +353,7 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: thoth-station/sesheta
+  - slug: AICoE/sesheta
     token: '{KEBECHET_TOKEN}'
     managers:
       - name: update
