@@ -43,7 +43,7 @@ An example configuration:
       # service_url: <URL>
       # tls_verify: true/false
       managers:
-        - name: update
+        - name: version
           configuration:
             labels:
               # Labels for opened issues and pull requests.
