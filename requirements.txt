@@ -1,13 +1,12 @@
+-e git+https://gitlab.com/gitmate/open-source/IGitt.git@master#egg=igitt
+
 click
 daiquiri
-pipenv
-toml
 delegator.py
+pipenv
 pyyaml
-IGitt==0.4.1.dev20180722120744
-# Pinned due to igitt pinning.
-gitpython==2.1.8
-requests==2.18.4
+requests>=2.22.0  # through urllib3>=1.24.2 due to CVE-2019-11324
 semver
 sentry-sdk
 thoth-common
+toml
