@@ -8,5 +8,6 @@ pyyaml
 requests>=2.22.0  # through urllib3>=1.24.2 due to CVE-2019-11324
 semver
 sentry-sdk
+thamos
 thoth-common
 toml
