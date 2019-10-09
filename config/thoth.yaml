@@ -1,7 +1,7 @@
 ---
 repositories:
   - slug: thoth-station/adviser
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -19,7 +19,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/build-analyzers
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -36,7 +36,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/analyzer
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -54,7 +54,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/cleanup-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -71,7 +71,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/common
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -89,7 +89,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/graph-refresh-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -106,7 +106,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/graph-sync-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -123,7 +123,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/graph-sync-scheduler
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -131,7 +131,7 @@ repositories:
       - name: info
 
   - slug: thoth-station/lab
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -151,7 +151,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/package-analyzer
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -170,7 +170,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/package-extract
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -188,7 +188,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/python
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -206,7 +206,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/package-releases-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -223,7 +223,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/result-api
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -240,7 +240,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/solver
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -258,7 +258,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/storages
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -277,7 +277,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/user-api
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -294,7 +294,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/management-api
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -311,7 +311,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/messaging
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -328,7 +328,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/kebechet
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -346,7 +346,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/jupyter-notebook
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -363,7 +363,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/init-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -371,7 +371,7 @@ repositories:
       - name: info
 
   - slug: AICoE/sesheta
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -387,7 +387,7 @@ repositories:
           labels: [bot]
 
   - slug: thoth-station/srcops-testing
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -403,7 +403,7 @@ repositories:
           labels: [bot]
 
   - slug: thoth-station/cve-update-job
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -411,21 +411,21 @@ repositories:
       - name: info
 
   - slug: thoth-station/graph-sync-operator
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
           labels: [bot]
 
   - slug: thoth-station/workload-operator
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
           labels: [bot]
 
   - slug: thoth-station/thamos
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -443,7 +443,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/invectio
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -461,7 +461,7 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/amun-api
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -469,7 +469,7 @@ repositories:
       - name: info
 
   - slug: thoth-station/amun-client
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: pipfile-requirements
       - name: update
@@ -487,7 +487,7 @@ repositories:
           changelog_file: true
 
   - slug: AICoE/log-anomaly-detector
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -495,7 +495,7 @@ repositories:
       - name: info
 
   - slug: AICoE/prometheus-flatliner
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -503,7 +503,7 @@ repositories:
       - name: info
 
   - slug: thoth-station/metrics-exporter
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
@@ -520,7 +520,39 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/build-watcher
-    token: '{KEBECHET_TOKEN}'
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-anomaly-detector
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-api-client-python
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-scraper
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/workshop-coding-best-practices
+    token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
