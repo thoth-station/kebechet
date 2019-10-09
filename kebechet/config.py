@@ -383,8 +383,7 @@ class _Config:
              "token": token,
              "service_type": service_type,
              "managers": [
-                 {"name": "info"},
-                 {"name": "update", "configuration": "ronan"}
+                 {"name": "init"}
              ]
              }
         ]
