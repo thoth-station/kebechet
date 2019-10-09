@@ -20,7 +20,7 @@
 import logging
 import os
 import yaml
-import tempfile
+import git
 
 import urllib3
 import requests
@@ -113,7 +113,7 @@ class _Config:
 
         service = Service(service, url)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -259,7 +259,7 @@ class _Config:
 
         service = Service(service, origin)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             manager_name = manager.pop("name")
@@ -290,12 +290,12 @@ class _Config:
         config.from_file(configuration_file)
 
         for (
-            managers,
-            slug,
-            service_type,
-            service_url,
-            token,
-            tls_verify,
+                managers,
+                slug,
+                service_type,
+                service_url,
+                token,
+                tls_verify,
         ) in config.iter_entries():
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
@@ -313,7 +313,7 @@ class _Config:
             if token:
                 # Allow token expansion based on env variables.
                 token = token.format(**os.environ)
-                _LOGGER.debug("Using token '%r%r'", token[:3], '*'*len(token[3:]))
+                _LOGGER.debug("Using token '%r%r'", token[:3], '*' * len(token[3:]))
 
             for manager in managers:
                 # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -340,7 +340,6 @@ class _Config:
                     _LOGGER.warning(
                         "Ignoring option %r in manager entry for %r", manager, slug,
                     )
-
                 try:
                     instance = kebechet_manager(
                         slug, ServiceType.by_name(service_type), service_url, token
@@ -353,6 +352,56 @@ class _Config:
                     )
 
             _LOGGER.info("Finished management for %r", slug)
+
+    @classmethod
+    def init(cls, service_type, token: str):
+        """Initializes Kebechet YAML configuration file."""
+
+        cls.create_config_file(service_type, token)
+
+        cls.run("kebechet.yml")
+
+    @classmethod
+    def create_config_file(cls, service_type, token: str):
+        slug = cls.get_slug(os.getcwd())
+        if slug == "":
+            _LOGGER.error("Initialization failed due to an error extracting repository slug")
+            return
+
+        config = {
+            "repositories": [{
+                "slug": slug,
+                "token": token,
+                "service_type": service_type,
+                "managers": [{
+                    "name": "init",
+                }]
+            }]
+        }
+
+
+        with open("kebechet.yml", "w") as config_file:
+            config_file.write(yaml.dump(config, sort_keys=False))
+
+    @staticmethod
+    def get_slug(path):
+        repo = git.Repo(path)
+        reader = repo.config_reader()
+        reader.read()
+        url = reader.get_value("remote \"origin\"", "url")
+        slug = ""
+        if url.startswith("git@"):
+            for i in range(len(url)):
+                if url[i] == ":":
+                    slug = url[i + 1:]
+        elif url.startswith("http"):
+            for i in range(len(url) - 3):
+                if url[i:i + len(".com/")] == ".com/":
+                    slug = url[i + len(".com/"):]
+
+        if slug.endswith(".git"):
+            return slug[:-len(".git")]
+        return slug
 
 
 config = _Config()

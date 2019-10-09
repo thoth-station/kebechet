@@ -17,7 +17,6 @@
 
 """The Command Line Interface."""
 
-
 import logging
 
 import click
@@ -89,6 +88,14 @@ def cli_run_results(origin, service, analysis_id):
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
     config.run_url(url, service)
+
+
+@cli.command("init")
+@click.option("-t", "--token")
+@click.option("-s", "--service-type", default="github")
+def cli_init(token, service_type):
+    """Initializes Kebechet by creating YAML configuration file."""
+    config.init(token=token, service_type=service_type)
 
 
 if __name__ == "__main__":
