@@ -17,10 +17,10 @@
 
 """The Command Line Interface."""
 
-
 import logging
 
 import click
+import os
 from thoth.common import init_logging
 
 from kebechet import __version__ as kebechet_version
@@ -89,6 +89,13 @@ def cli_run_results(origin, service, analysis_id):
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
     config.run_url(url, service)
+
+
+@cli.command("init")
+@click.option("-t", "--token")
+def cli_init(token):
+    """Initializes Kebechet by creating YAML configuration file."""
+    config.create_yaml_file(token, os.getcwd(), "github")
 
 
 if __name__ == "__main__":

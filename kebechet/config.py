@@ -20,7 +20,7 @@
 import logging
 import os
 import yaml
-import tempfile
+import git
 
 import urllib3
 import requests
@@ -113,7 +113,7 @@ class _Config:
 
         service = Service(service, url)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -259,7 +259,7 @@ class _Config:
 
         service = Service(service, origin)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             manager_name = manager.pop("name")
@@ -290,12 +290,12 @@ class _Config:
         config.from_file(configuration_file)
 
         for (
-            managers,
-            slug,
-            service_type,
-            service_url,
-            token,
-            tls_verify,
+                managers,
+                slug,
+                service_type,
+                service_url,
+                token,
+                tls_verify,
         ) in config.iter_entries():
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
@@ -313,7 +313,7 @@ class _Config:
             if token:
                 # Allow token expansion based on env variables.
                 token = token.format(**os.environ)
-                _LOGGER.debug("Using token '%r%r'", token[:3], '*'*len(token[3:]))
+                _LOGGER.debug("Using token '%r%r'", token[:3], '*' * len(token[3:]))
 
             for manager in managers:
                 # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -353,6 +353,39 @@ class _Config:
                     )
 
             _LOGGER.info("Finished management for %r", slug)
+
+    @staticmethod
+    def get_github_slug(path):
+        repo = git.Repo(path)
+        reader = repo.config_reader()
+        reader.read()
+        url = reader.get_value("remote \"origin\"", "url")
+        if url.startswith("git@"):
+            for i in range(len(url)):
+                if url[i] == ":":
+                    return url[i + 1:-len(".git")]
+        else:
+            for i in range(len(url) - 3):
+                if url[i:i + len(".com/")] == ".com/":
+                    return url[i + len(".com/"):-len(".git")]
+
+    @classmethod
+    def create_yaml_file(cls, token: str, path: str, service_type: str):
+        slug = cls.get_github_slug(path)
+        config = {}
+        config["repositories"] = [
+            {"slug": slug,
+             "token": token,
+             "service_type": service_type,
+             "managers": [
+                 {"name": "info"},
+                 {"name": "update", "configuration": "ronan"}
+             ]
+             }
+        ]
+
+        with open("kebechet.yml", "w") as config_file:
+            config_file.write(yaml.dump(config))
 
 
 config = _Config()
