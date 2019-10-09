@@ -371,6 +371,11 @@ class _Config:
 
     @classmethod
     def create_yaml_file(cls, token: str, path: str, service_type: str):
+        if not os.path.exists(path+"/.git"):
+            _LOGGER.exception("An Error occurred retrieving git configurations from this repository")
+            return
+
+
         slug = cls.get_github_slug(path)
         config = {}
         config["repositories"] = [
