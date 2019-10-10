@@ -110,7 +110,7 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(f"Failed to load Pipfile: {str(exc)}") from exc
 
         default = list(package_name.lower() for package_name in pipfile_content['packages'].keys())
-        develop = list(package_name.lower() for package_name in pipfile_content['dev-packages'].keys())
+        develop = list(package_name.lower() for package_name in pipfile_content.get('dev-packages', {}).keys())
 
         return default, develop
 
