@@ -1,3 +1,5 @@
+"""Tests for version manager."""
+
 import unittest
 import typing
 
@@ -9,12 +11,16 @@ from kebechet.managers import VersionManager
 
 
 class FakeRepo(object):
+    """Repo class for testing purposes."""
+
     def __init__(self, *args, **kwargs):
         """Initialize FakeRepo instance."""
         self.git = FakeGit
 
 
 class FakeGit(object):
+    """Git class for testing purposes."""
+
     @staticmethod
     def log(*args, **kwargs) -> str:
         """Return fake logs."""
@@ -64,7 +70,7 @@ class TestVersionManager(unittest.TestCase):
             patch_log.assert_called_with(
                 f"v0.2.0..HEAD", no_merges=True, format="* %s"
             )
-            
+
             # mismatch
             _ = self.manager._compute_changelog(
                 repo=fake_repo,
