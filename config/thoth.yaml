@@ -558,3 +558,11 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: AICoE/ludus
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
