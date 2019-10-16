@@ -1,6 +1,6 @@
 """Tests for version manager."""
 
-import unittest
+import pytest
 import typing
 
 from unittest.mock import patch
@@ -37,47 +37,33 @@ class FakeGit(object):
         return "\n".join(["0.1.0", "v0.2.0", "v1.0.0"])
 
 
-class TestVersionManager(unittest.TestCase):
-    """Test VersionManager."""
+class TestVersionManager():
+    """Test version manager."""
 
     manager = VersionManager(
         slug="fake-user/fake-repo", service_type=ServiceType.GITHUB
     )
 
-    def test__compute_changelog(self):
+    @pytest.mark.parametrize(
+        "old_version,new_version,tag",
+        [
+            ("0.1.0", "0.2.0", "0.1.0"),
+            ("0.2.0", "0.3.0", "v0.2.0"),
+            ("1.1.0", "1.2.0", "rev1")
+        ]
+    )
+    def test__compute_changelog(self, old_version, new_version, tag):
         """Test VersionManager._compute_changelog static method."""
         # check that tag and version are matched correctly
         fake_repo = FakeRepo()
+
         with patch.object(FakeGit, "log") as patch_log:
-            # exact match
             _ = self.manager._compute_changelog(
                 repo=fake_repo,
-                old_version="0.1.0",
-                new_version="0.2.0",
+                old_version=old_version,
+                new_version=new_version,
                 version_file=False,
             )
             patch_log.assert_called_with(
-                f"0.1.0..HEAD", no_merges=True, format="* %s"
-            )
-
-            # tag starting with 'v'
-            _ = self.manager._compute_changelog(
-                repo=fake_repo,
-                old_version="0.2.0",
-                new_version="0.3.0",
-                version_file=False,
-            )
-            patch_log.assert_called_with(
-                f"v0.2.0..HEAD", no_merges=True, format="* %s"
-            )
-
-            # mismatch
-            _ = self.manager._compute_changelog(
-                repo=fake_repo,
-                old_version="1.1.0",
-                new_version="1.2.0",
-                version_file=False,
-            )
-            patch_log.assert_called_with(
-                f"rev1..HEAD", no_merges=True, format="* %s"
+                f"{tag}..HEAD", no_merges=True, format="* %s"
             )
