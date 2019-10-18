@@ -5,8 +5,8 @@ metadata:
   annotations:
     description: This is Kebechet CronJob ConfigMap, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet ConfigMap
-    version: 1.0.0
-    tags: poc,thoth,ai-stacks,kebechet
+    version: 1.0.1
+    tags: thoth,ai-stacks,kebechet,cyborg,srcops
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
@@ -15,22 +15,24 @@ metadata:
     app: kebechet
 
 objects:
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: kebechet-configmap
-    labels:
-      app: kebechet
-  data:
-    kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
-    kebechet-verbose: ${KEBECHET_VERBOSE}
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: kebechet-configmap
+      labels:
+        app: kebechet
+      annotations:
+        thoth-station.ninja/template-version: 1.0.1
+    data:
+      kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
+      kebechet-verbose: ${KEBECHET_VERBOSE}
 
 parameters:
   - description: Path of Kebechet configuration file.
     displayName: Kebechet configuration
     required: true
     name: KEBECHET_CONFIGURATION_PATH
-    
+
   - description: Kebechet verbose mode.
     displayName: Kebechet Verbose
     required: true
