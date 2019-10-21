@@ -20,8 +20,6 @@ fi
 # The git_ssh_command helps the server by pass the Host key checking while connecting to github.
 export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 
-# Adjust cache location due to permissions when run in the cluster.
-export PIPENV_CACHE_DIR=${PIPENV_CACHE_DIR:-/tmp/kebechet-cache}
 case $KEBECHET_SUBCOMMAND in
     'run-url') 
         exec pipenv run python3 kebechet-cli run-url
