@@ -576,3 +576,21 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/stub-api
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - harshad16
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
