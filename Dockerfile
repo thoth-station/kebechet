@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/ubi8
 # Env variable USER specific the kebechet as committer while git branch and git commit creation. 
 # Adjust cache location due to permissions when run in the cluster.
 ENV USER=kebechet \
-    PIPENV_CACHE_DIR=/tmp/pipenv-kebechet \
+    PIPENV_CACHE_DIR=/tmp/.cache \
     HOME=/home/user/ \
     LC_ALL=C.UTF-8 \
     LANG=C.UTF-8 \
@@ -30,4 +30,7 @@ RUN pipenv install
 
 # Arbitrary User
 USER 1042 
+
+RUN mkdir /tmp/.cache
+
 CMD ["./app.sh"]
