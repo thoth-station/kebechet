@@ -5,12 +5,12 @@ metadata:
   annotations:
     description: This is Kebechet CronJob BuildConfig, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet BuildConfig
-    version: 1.0.1
+    version: 1.0.2
     tags: thoth,ai-stacks,kebechet,cyborg,srcops
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
-    thoth-station.ninja/template-version: 1.0.1
+    thoth-station.ninja/template-version: 1.0.2
   labels:
     template: kebechet-buildconfig
     app: kebechet
@@ -22,7 +22,7 @@ objects:
       labels:
         app: kebechet
       annotations:
-        thoth-station.ninja/template-version: 1.0.1
+        thoth-station.ninja/template-version: 1.0.2
       name: kebechet-job
     spec:
       resources:
@@ -52,8 +52,8 @@ objects:
           type: ImageChange
         - type: Generic
           generic:
-            secret: secret101
-            allowEnv: false
+            secretReference:
+              name: generic-webhook-secret
 
 parameters:
   - description: Git repository for Thoth's Kebechet
