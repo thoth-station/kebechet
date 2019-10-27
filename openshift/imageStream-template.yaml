@@ -10,6 +10,7 @@ metadata:
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
+    thoth-station.ninja/template-version: 1.0.1
   labels:
     template: kebechet-imagestream
     app: kebechet
