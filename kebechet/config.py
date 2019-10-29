@@ -19,8 +19,9 @@
 
 import logging
 import os
-import yaml
+
 import git
+import yaml
 
 import urllib3
 import requests
@@ -356,32 +357,20 @@ class _Config:
     @classmethod
     def init(cls, service_type, token: str):
         """Initializes Kebechet YAML configuration file."""
-
-        cls.create_config_file(service_type, token)
-
-        cls.run("kebechet.yml")
-
-    @classmethod
-    def create_config_file(cls, service_type, token: str):
-        slug = cls.get_slug(os.getcwd())
-        if slug == "":
-            _LOGGER.error("Initialization failed due to an error extracting repository slug")
+        from kebechet.managers import REGISTERED_MANAGERS
+        repo_path = os.getcwd()
+        try:
+            slug = cls.get_slug(repo_path)
+        except git.InvalidGitRepositoryError:
+            _LOGGER.error("This is not a valid repo to initialize Kebechet, canceling operation!")
             return
 
-        config = {
-            "repositories": [{
-                "slug": slug,
-                "token": token,
-                "service_type": service_type,
-                "managers": [{
-                    "name": "init",
-                }]
-            }]
-        }
+        kebechet_manager = REGISTERED_MANAGERS.get("init")
+        instance = kebechet_manager(
+            slug, ServiceType.by_name(service_type), None, token
+        )
 
-
-        with open("kebechet.yml", "w") as config_file:
-            config_file.write(yaml.dump(config, sort_keys=False))
+        instance.run(repo_path=repo_path, token=token, service_type=service_type)
 
     @staticmethod
     def get_slug(path):

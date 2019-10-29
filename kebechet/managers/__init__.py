@@ -1,5 +1,6 @@
 """Managers implemented in Kebechet."""
 
+from .initialization import InitManager
 from .info import InfoManager
 from .update import UpdateManager
 from .version import VersionManager
@@ -13,5 +14,6 @@ REGISTERED_MANAGERS = {
     'version': VersionManager,
     'pipfile-requirements': PipfileRequirementsManager,
     'thoth-advise': ThothAdviseManager,
-    'thoth-provenance': ThothProvenanceManager
+    'thoth-provenance': ThothProvenanceManager,
+    'init': InitManager
 }
