@@ -340,7 +340,6 @@ class _Config:
                     _LOGGER.warning(
                         "Ignoring option %r in manager entry for %r", manager, slug,
                     )
-
                 try:
                     instance = kebechet_manager(
                         slug, ServiceType.by_name(service_type), service_url, token
@@ -354,42 +353,55 @@ class _Config:
 
             _LOGGER.info("Finished management for %r", slug)
 
+    @classmethod
+    def init(cls, service_type, token: str):
+        """Initializes Kebechet YAML configuration file."""
+
+        cls.create_config_file(service_type, token)
+
+        cls.run("kebechet.yml")
+
+    @classmethod
+    def create_config_file(cls, service_type, token: str):
+        slug = cls.get_slug(os.getcwd())
+        if slug == "":
+            _LOGGER.error("Initialization failed due to an error extracting repository slug")
+            return
+
+        config = {
+            "repositories": [{
+                "slug": slug,
+                "token": token,
+                "service_type": service_type,
+                "managers": [{
+                    "name": "init",
+                }]
+            }]
+        }
+
+
+        with open("kebechet.yml", "w") as config_file:
+            config_file.write(yaml.dump(config, sort_keys=False))
+
     @staticmethod
-    def get_github_slug(path):
+    def get_slug(path):
         repo = git.Repo(path)
         reader = repo.config_reader()
         reader.read()
         url = reader.get_value("remote \"origin\"", "url")
+        slug = ""
         if url.startswith("git@"):
             for i in range(len(url)):
                 if url[i] == ":":
-                    return url[i + 1:-len(".git")]
-        else:
+                    slug = url[i + 1:]
+        elif url.startswith("http"):
             for i in range(len(url) - 3):
                 if url[i:i + len(".com/")] == ".com/":
-                    return url[i + len(".com/"):-len(".git")]
+                    slug = url[i + len(".com/"):]
 
-    @classmethod
-    def create_yaml_file(cls, token: str, path: str, service_type: str):
-        if not os.path.exists(path+"/.git"):
-            _LOGGER.exception("An Error occurred retrieving git configurations from this repository")
-            return
-
-
-        slug = cls.get_github_slug(path)
-        config = {}
-        config["repositories"] = [
-            {"slug": slug,
-             "token": token,
-             "service_type": service_type,
-             "managers": [
-                 {"name": "init"}
-             ]
-             }
-        ]
-
-        with open("kebechet.yml", "w") as config_file:
-            config_file.write(yaml.dump(config))
+        if slug.endswith(".git"):
+            return slug[:-len(".git")]
+        return slug
 
 
 config = _Config()

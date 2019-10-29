@@ -20,7 +20,6 @@
 import logging
 
 import click
-import os
 from thoth.common import init_logging
 
 from kebechet import __version__ as kebechet_version
@@ -96,7 +95,7 @@ def cli_run_url(url, service):
 @click.option("-s", "--service-type", default="github")
 def cli_init(token, service_type):
     """Initializes Kebechet by creating YAML configuration file."""
-    config.create_yaml_file(token, os.getcwd(), service_type)
+    config.init(token=token, service_type=service_type)
 
 
 if __name__ == "__main__":
