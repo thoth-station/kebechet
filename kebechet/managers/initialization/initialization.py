@@ -48,7 +48,9 @@ def create_config_file(service_type, slug: str):
             "slug": slug,
             "token": _GIT_TOKEN_VARIABLE,
             "service_type": service_type,
-            "managers": []
+            "managers": [
+                {"name": "info"}
+            ]
         }]
     }
 
@@ -75,7 +77,7 @@ class InitManager(ManagerBase):
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
 
             os.environ[_GIT_TOKEN_VARIABLE] = token
-            create_config_file(service_type=service_type, slug=slug)
+            create_config_file(service_type=service_type, slug=self.slug)
 
             repo.git.checkout("-B", _GIT_BRANCH_NAME)
 
