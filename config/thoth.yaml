@@ -594,3 +594,11 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: AICoE/frauddetection-producer-consumer
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
