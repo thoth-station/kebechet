@@ -529,6 +529,21 @@ repositories:
           labels: [bot]
           changelog_file: false
 
+  - slug: thoth-station/thoth-pybench
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - pacospace
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
+
   - slug: AICoE/prometheus-api-client-python
     token: "{KEBECHET_TOKEN}"
     managers:
