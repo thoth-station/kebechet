@@ -356,41 +356,23 @@ class _Config:
 
     @classmethod
     def init(cls, service_type, token: str):
-        """Initializes Kebechet YAML configuration file."""
-        from kebechet.managers import REGISTERED_MANAGERS
+        """Initialize Kebechet YAML configuration file."""
+        from kebechet.managers.initialization import initialization, util
+
         repo_path = os.getcwd()
         try:
-            slug = cls.get_slug(repo_path)
-        except git.InvalidGitRepositoryError:
-            _LOGGER.error("This is not a valid repo to initialize Kebechet, canceling operation!")
+            slug = util.get_slug(repo_path)
+        except git.InvalidGitRepositoryError or util.SlugNotFoundException:
+            _LOGGER.exception(
+                "This is not a valid git repo to initialize Kebechet, canceling operation!"
+            )
             return
 
-        kebechet_manager = REGISTERED_MANAGERS.get("init")
-        instance = kebechet_manager(
+        instance = initialization.InitManager(
             slug, ServiceType.by_name(service_type), None, token
         )
 
         instance.run(repo_path=repo_path, token=token, service_type=service_type)
-
-    @staticmethod
-    def get_slug(path):
-        repo = git.Repo(path)
-        reader = repo.config_reader()
-        reader.read()
-        url = reader.get_value("remote \"origin\"", "url")
-        slug = ""
-        if url.startswith("git@"):
-            for i in range(len(url)):
-                if url[i] == ":":
-                    slug = url[i + 1:]
-        elif url.startswith("http"):
-            for i in range(len(url) - 3):
-                if url[i:i + len(".com/")] == ".com/":
-                    slug = url[i + len(".com/"):]
-
-        if slug.endswith(".git"):
-            return slug[:-len(".git")]
-        return slug
 
 
 config = _Config()
