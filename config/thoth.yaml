@@ -388,6 +388,14 @@ repositories:
           labels: [bot]
       - name: info
 
+  - slug: thoth-station/graph-backup-job
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
   - slug: AICoE/sesheta
     token: "{KEBECHET_TOKEN}"
     managers:
