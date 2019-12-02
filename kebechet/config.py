@@ -355,9 +355,13 @@ class _Config:
             _LOGGER.info("Finished management for %r", slug)
 
     @classmethod
-    def init(cls, service_type, token: str):
+    def init(cls, service_type, token, managers: str):
         """Initialize Kebechet YAML configuration file."""
         from kebechet.managers.initialization import initialization, util
+
+        if token is None:
+            _LOGGER.error("Please pass a valid token")
+            return
 
         repo_path = os.getcwd()
         try:
@@ -372,7 +376,7 @@ class _Config:
             slug, ServiceType.by_name(service_type), None, token
         )
 
-        instance.run(repo_path=repo_path, token=token, service_type=service_type)
+        instance.run(token=token, service_type=service_type, managers=managers)
 
 
 config = _Config()

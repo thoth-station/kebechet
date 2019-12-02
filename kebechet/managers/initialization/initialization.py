@@ -40,29 +40,30 @@ class InitManager(ManagerBase):
     """Manager for initializing Kebechet config file."""
 
     def run(
-        self,
-        repo_path: str = None,
-        token: str = None,
-        service_type: str = None,
-        slug: str = None,
+            self,
+            token: str = None,
+            service_type: str = None,
+            slug: str = None,
+            managers: str = None,
     ) -> typing.Optional[dict]:
         """Run the Initialization Manager."""
-        for file_name in os.listdir(repo_path):
+        if self.has_mr_opened(_GIT_BRANCH_NAME):
+            return
+
+        for file_name in os.listdir(os.getcwd()):
             if file_name == _KEBECHET_CONFIG_FILE_NAME:
                 _LOGGER.warning(
                     f"There is already a file called {_KEBECHET_CONFIG_FILE_NAME}"
                 )
 
-        if self.has_mr_opened(_GIT_BRANCH_NAME):
-            _LOGGER.exception(
-                f" There is already a new merge Request opened with kebechet YAML file, skipping"
-            )
-            return
-
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
-
             os.environ[_GIT_TOKEN_VARIABLE] = token
-            create_config_file(service_type=service_type, slug=self.slug)
+
+            valid_managers = self.__get_valid_managers(managers)
+
+            create_config_file(
+                service_type=service_type, slug=self.slug, managers=valid_managers
+            )
 
             repo.git.checkout("-b", _GIT_BRANCH_NAME)
 
@@ -89,5 +90,25 @@ class InitManager(ManagerBase):
         """Check if has already a Merge Request from a given branch."""
         for mr in self.sm.repository.merge_requests:
             if mr.head_branch_name == branch_name:
+                _LOGGER.exception(
+                    f" There is already a new merge Request opened with kebechet YAML file, skipping"
+                )
                 return True
         return False
+
+    def __get_valid_managers(self, managers: str) -> typing.List[str]:
+        from kebechet.managers import REGISTERED_MANAGERS
+
+        valid_managers = []
+        if managers is None:
+            return valid_managers
+        managers = managers.split(",")
+        for manager in managers:
+            if manager not in REGISTERED_MANAGERS:
+                _LOGGER.warning(
+                    f"There is no manager called {manager}, ignoring it"
+                )
+            else:
+                valid_managers.append(manager)
+
+        return valid_managers

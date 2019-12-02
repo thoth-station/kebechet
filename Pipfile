@@ -10,7 +10,7 @@ requests = "*"
 toml = "*"
 "delegator.py" = "*"
 gitpython = "==1.0.1"
-pyyaml = "*"
+pyyaml = ">=5.1"
 igitt = {git = "https://gitlab.com/gitmate/open-source/IGitt.git"}
 semver = "*"
 thoth-common = "*"

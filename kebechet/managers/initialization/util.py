@@ -1,9 +1,12 @@
 """Just some utility methods."""
+from typing import Dict, List, Any
+
 import git
 import yaml
 
 _KEBECHET_CONFIG_FILE_NAME = "kebechet.yaml"
-_GIT_TOKEN_VARIABLE = "${KEBECHET_TOKEN}"
+_KEBECHET_MANAGER_LABELS = ["kebechet", "bot"]
+_GIT_TOKEN_VARIABLE = "{KEBECHET_TOKEN}"
 _GIT_BRANCH_NAME = "kebechet-initialization"
 _GIT_COMMIT_MESSAGE = "Creating kebechet YAML file"
 _GIT_MR_LABELS = ["enhancement", "bot"]
@@ -50,18 +53,48 @@ def __get_slug_from_url(url: str) -> str:
     raise SlugNotFoundException
 
 
-def create_config_file(service_type, slug: str):
+def __get_user_from_slug(slug: str) -> str:
+    for i in range(len(slug)):
+        if slug[i] == "/":
+            return slug[:i]
+
+
+def create_config_file(service_type, managers, slug: str):
     """Create a config file using a given git slug."""
     config = {
         "repositories": [
-            {
-                "slug": slug,
-                "token": _GIT_TOKEN_VARIABLE,
-                "service_type": service_type,
-                "managers": [{"name": "info"}],
-            }
+            {"slug": slug, "token": _GIT_TOKEN_VARIABLE, "service_type": service_type, }
         ]
     }
 
+    username = __get_user_from_slug(slug)
+    managers_config = __get_managers_config(managers=managers, username=username)
+    if len(managers_config) > 0:
+        config["repositories"][0]["managers"] = managers_config
+
     with open(_KEBECHET_CONFIG_FILE_NAME, "w") as config_file:
-        config_file.write(yaml.dump(config, sort_keys=False))
+        noalias_dumper = yaml.dumper.SafeDumper
+        noalias_dumper.ignore_aliases = lambda self, data: True
+        config_file.write(yaml.dump(config, sort_keys=False, Dumper=noalias_dumper))
+
+
+def __get_managers_config(managers: List, username: str) -> List[Dict[str, Any]]:
+    configs = {
+        "update": {"labels": _KEBECHET_MANAGER_LABELS, },
+        "version": {"labels": _KEBECHET_MANAGER_LABELS, "maintainers": [username], },
+        "thoth-provenance": {"labels": _KEBECHET_MANAGER_LABELS, },
+        "thoth-advise": {"labels": _KEBECHET_MANAGER_LABELS, },
+        "pipfile-requirements": {"lockfile": "false"},
+    }
+
+    conf = []
+
+    for manager in managers:
+        if manager in ["info"]:
+            conf.append(
+                {"name": manager, }
+            )
+        else:
+            conf.append({"name": manager, "configuration": configs[manager]})
+
+    return conf

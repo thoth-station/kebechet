@@ -93,9 +93,10 @@ def cli_run_url(url, service):
 @cli.command("init")
 @click.option("--token")
 @click.option("--service-type", default="github")
-def cli_init(token, service_type):
+@click.option("--managers")
+def cli_init(token, service_type, managers):
     """Initialize Kebechet by creating YAML configuration file."""
-    config.init(token=token, service_type=service_type)
+    config.init(token=token, service_type=service_type, managers=managers)
 
 
 if __name__ == "__main__":
