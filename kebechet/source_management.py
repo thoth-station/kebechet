@@ -78,7 +78,7 @@ class SourceManagement:
         if issue:
             _LOGGER.info(f"Issue already noted on upstream with id #{issue.number}")
             if not refresh_comment:
-                return None
+                return issue
 
             comment_body = refresh_comment(issue)
             if comment_body:
@@ -90,9 +90,8 @@ class SourceManagement:
             issue = self.repository.create_issue(title, body())
             issue.labels = set(labels or [])
             _LOGGER.info(f"Reported issue {title!r} with id #{issue.number}")
-            return issue
 
-        return None
+        return issue
 
     def close_issue_if_exists(self, title: str, comment: str = None):
         """Close the given issue (referenced by its title) and close it with a comment."""
