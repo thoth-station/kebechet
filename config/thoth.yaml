@@ -552,6 +552,20 @@ repositories:
           labels: [bot]
           changelog_file: false
 
+  - slug: thoth-station/s2i-thoth
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: version
+        configuration:
+          maintainers:
+            - harshad16
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
+
   - slug: AICoE/prometheus-api-client-python
     token: "{KEBECHET_TOKEN}"
     managers:
