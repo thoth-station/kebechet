@@ -13,6 +13,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
@@ -639,3 +640,21 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: AICoE/SrcOpsMetrics
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - xtuchyna
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
