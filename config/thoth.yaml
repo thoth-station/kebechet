@@ -659,3 +659,14 @@ repositories:
             - sesheta
           labels: [bot]
           changelog_file: true
+
+  - slug: durandom/64fbc27e213f5a61c975ab29df94536b88f03270
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot, kebechet]
+      - name: version
+        configuration:
+          labels: [bot, kebechet]
+          changelog_file: true
