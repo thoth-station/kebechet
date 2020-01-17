@@ -490,6 +490,7 @@ repositories:
           maintainers:
             - fridex
             - goern
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
