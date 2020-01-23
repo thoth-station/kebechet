@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kebechet</title>
@@ -30,6 +30,25 @@
       <description>Kebechet  I&amp;rsquo;m Kebechet, goddess of freshness. I will keep your sources and dependencies fresh and up-to-date.
  Kebechet is a SourceOps bot that automates updating dependencies of your project. Currently, it supports managing and updating Python projects based on pipenv files (Pipfile and Pipfile.lock) or requirements.txt/requirements.in files (see pip-tools) - Kebechet is a replacement for it.
 Configuration of Kebechet Kebechet is configured using a simple YAML configuration file. Check the documentation of managers to get all the available options.</description>
+    </item>
+    
+    <item>
+      <title>Qeb-Hwt</title>
+      <link>https://thoth-station.ninja/kebechet/github-app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://thoth-station.ninja/kebechet/github-app/</guid>
+      <description>Thoth&amp;rsquo;s GitHub App To use Thoth&amp;rsquo;s GitHub App called Qeb-Hwt, please see our GitHub Marketplace page, just install it to your GitHub user or organization, grant it access to all the repositories (or just a few) and start receiving Pull Request Checks from our Cyborgs.</description>
+    </item>
+    
+    <item>
+      <title>Qeb-Hwt GitHub App</title>
+      <link>https://thoth-station.ninja/kebechet/github-app-installed/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://thoth-station.ninja/kebechet/github-app-installed/</guid>
+      <description>Well done! You have installed and configured Thoth&amp;rsquo;s GitHub App to give advises to Pull Requests opened with the configured Repositories!
+Thanks for testing out our pre-release service, feel free to give feedback, have ideas, or raise questions using our GitHub issue tracker.</description>
     </item>
     
   </channel>
