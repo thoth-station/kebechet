@@ -157,7 +157,6 @@ class _Config:
             try:
                 items = dict(entry)
                 value = (
-                    items.pop("managers"),
                     items.pop("slug"),
                     items.pop("service_type", None),
                     items.pop("service_url", None),
@@ -290,13 +289,19 @@ class _Config:
         config.from_file(configuration_file)
 
         for (
-            managers,
             slug,
             service_type,
             service_url,
             token,
             tls_verify,
         ) in config.iter_entries():
+            #cls._tls_verification(service_url, slug, verify=tls_verify)          
+            tempfile = config.download_conf_from_url(service_url, service_type)
+            managers = cls._managers_from_file(tempfile.name)
+
+            scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(service_url)
+            slug = slug[1:]
+            service_url = f"{scheme}://{host}"
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
             if service_url and not service_url.startswith(("https://", "http://")):
@@ -351,7 +356,8 @@ class _Config:
                         "An error occurred during run of manager %r %r for %r, skipping",
                         manager, kebechet_manager, slug,
                     )
-
+                # Close the temp file for that iteration. 
+                tempfile.close()
             _LOGGER.info("Finished management for %r", slug)
 
 
