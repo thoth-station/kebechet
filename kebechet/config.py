@@ -357,7 +357,7 @@ class _Config:
                         manager, kebechet_manager, slug,
                     )
                 # Close the temp file for that iteration. 
-                tempfile.close()
+            tempfile.close()
             _LOGGER.info("Finished management for %r", slug)
 
 
