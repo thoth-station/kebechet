@@ -109,7 +109,7 @@ class _Config:
         managers = cls._managers_from_file(tempfile.name)
 
         # If called from run_webhook tls verify is always true.
-        if tls_verify != None:
+        if tls_verify is not None:
             tls_verify = cls._tls_verify_from_file(tempfile.name)
 
         scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)

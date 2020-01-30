@@ -88,15 +88,17 @@ def cli_run_results(origin, service, analysis_id):
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
-    config.run_url(url, service)
+    config.run_url(url, service, None)
+
 
 @cli.command("run-webhook")
 @click.argument("slug", envvar="KEBECHET_REPO_SLUG")
 @click.argument("service_type", envvar="KEBECHET_SERVICE_NAME")
 @click.option("-u", "--service_url", envvar="KEBECHET_SERVICE_NAME")
 def cli_run_webhook(slug, service_type, service_url):
-    """Run Kebechet by providing a slug(repo name), service_type, url(optional) as --service_url."""
+    """Run Kebechet by providing a slug(repo name), service_type, url(optional) as."""
     config.run_webhook(slug, service_type, service_url)
+
 
 if __name__ == "__main__":
     cli()
