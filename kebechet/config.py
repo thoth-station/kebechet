@@ -37,12 +37,8 @@ class _Config:
 
     # This is used to generate service urls from slugs.
     _SERVICE_URLS = {
-        "github": {
-                "service_url": "https://github.com/{slug}"
-            },
-        "gitlab": {
-            "service_url": "https://github.com/{slug}"
-            }
+        "github": {"service_url": "https://github.com/{slug}"},
+        "gitlab": {"service_url": "https://github.com/{slug}"},
     }
 
     def __init__(self):
@@ -94,15 +90,27 @@ class _Config:
         return tempfile
 
     @classmethod
-    def run_url(cls, url: str, service: str):
+    def run_webhook(cls, slug: str, service_type: str, service_url: str = None):
+        if not service_url:
+            service_url = cls._SERVICE_URLS[service_type]["service_url"].format(
+                slug=slug
+            )
+        cls.run_url(service_url, service_type, True)
+
+    @classmethod
+    def run_url(cls, url: str, service: str, tls_verify: bool):
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
 
         global config
         from kebechet.managers import REGISTERED_MANAGERS
+
         tempfile = config.download_conf_from_url(url, service)
         managers = cls._managers_from_file(tempfile.name)
-        tls_verify = cls._tls_verify_from_file(tempfile.name)
+
+        # If called from run_webhook tls verify is always true.
+        if tls_verify != None:
+            tls_verify = cls._tls_verify_from_file(tempfile.name)
 
         scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)
         slug = slug[1:]
@@ -118,12 +126,12 @@ class _Config:
                 service_url,
             )
 
-        if (service_url and service_url.endswith('/')):
+        if service_url and service_url.endswith("/"):
             service_url = service_url[:-1]
 
         service = Service(service, url)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -133,7 +141,8 @@ class _Config:
                 manager_name = manager.pop("name")
             except Exception:
                 _LOGGER.exception(
-                    "No manager name provided in configuration entry for %r, ignoring entry", slug,
+                    "No manager name provided in configuration entry for %r, ignoring entry",
+                    slug,
                 )
                 continue
             kebechet_manager = REGISTERED_MANAGERS.get(manager_name)
@@ -149,14 +158,14 @@ class _Config:
                     "Ignoring option %r in manager entry for %r", manager, slug,
                 )
             try:
-                instance = kebechet_manager(
-                    slug, service.service, service_url, token
-                )
+                instance = kebechet_manager(slug, service.service, service_url, token)
                 instance.run(**manager_configuration)
             except Exception as exc:
                 _LOGGER.exception(
                     "An error occurred during run of manager %r %r for %r, skipping",
-                    manager, kebechet_manager, slug,
+                    manager,
+                    kebechet_manager,
+                    slug,
                 )
 
         temp_file.close()
@@ -176,7 +185,9 @@ class _Config:
 
                 if items:
                     _LOGGER.warning(
-                        "Unknown configuration entry in configuration of %r: %r", value[1], items,
+                        "Unknown configuration entry in configuration of %r: %r",
+                        value[1],
+                        items,
                     )
 
                 yield value
@@ -192,7 +203,9 @@ class _Config:
         urllib3.disable_warnings()
         if not verify:
             _LOGGER.warning(
-                "Turning off TLS certificate verification for %r hosted at %r", slug, service_url,
+                "Turning off TLS certificate verification for %r hosted at %r",
+                slug,
+                service_url,
             )
 
         # Please close your eyes when reading this - it's pretty ugly solution but is somehow applicable to
@@ -245,6 +258,7 @@ class _Config:
         """Run result managers (meant to be triggered automatically)."""
         global config
         from kebechet.managers import ThothAdviseManager, ThothProvenanceManager
+
         tempfile = config.download_conf_from_url(origin, service)
         managers = _Config._managers_from_file(tempfile.name)
         tls_verify = _Config._tls_verify_from_file(tempfile.name)
@@ -263,23 +277,30 @@ class _Config:
                 service_url,
             )
 
-        if (service_url and service_url.endswith('/')):
+        if service_url and service_url.endswith("/"):
             service_url = service_url[:-1]
 
         service = Service(service, origin)
         token = service.token
-        _LOGGER.debug("Using token %r%r", token[:3], "*"*len(token[3:]))
+        _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
             manager_name = manager.pop("name")
             if analysis_id.startswith("adviser") and manager_name == "thoth-advise":
                 kebechet_manager = ThothAdviseManager
                 break
-            elif analysis_id.startswith("provenance") and manager_name == "thoth-provenance":
+            elif (
+                analysis_id.startswith("provenance")
+                and manager_name == "thoth-provenance"
+            ):
                 kebechet_manager = ThothProvenanceManager
                 break
             else:
-                _LOGGER.debug("Manager %r does not correspond with id:%r, skipping", manager_name, analysis_id)
+                _LOGGER.debug(
+                    "Manager %r does not correspond with id:%r, skipping",
+                    manager_name,
+                    analysis_id,
+                )
         else:
             _LOGGER.error("No manager configuration found for id: %r", analysis_id)
             return
@@ -299,22 +320,13 @@ class _Config:
         config.from_file(configuration_file)
 
         for (
+            managers,
             slug,
             service_type,
             service_url,
             token,
             tls_verify,
         ) in config.iter_entries():
-            s_url = cls._SERVICE_URLS[service_type]['service_url'].format(slug=slug)
-            # Override from kebechet config own config if exists.
-            if service_url:
-                s_url = service_url
-            tempfile = config.download_conf_from_url(s_url, service_type)
-            managers = cls._managers_from_file(tempfile.name)
-
-            scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(s_url)
-            slug = slug[1:]
-            service_url = f"{scheme}://{host}"
             cls._tls_verification(service_url, slug, verify=tls_verify)
 
             if service_url and not service_url.startswith(("https://", "http://")):
@@ -331,7 +343,7 @@ class _Config:
             if token:
                 # Allow token expansion based on env variables.
                 token = token.format(**os.environ)
-                _LOGGER.debug("Using token '%r%r'", token[:3], '*'*len(token[3:]))
+                _LOGGER.debug("Using token '%r%r'", token[:3], "*" * len(token[3:]))
 
             for manager in managers:
                 # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
@@ -341,7 +353,8 @@ class _Config:
                     manager_name = manager.pop("name")
                 except Exception:
                     _LOGGER.exception(
-                        "No manager name provided in configuration entry for %r, ignoring entry", slug,
+                        "No manager name provided in configuration entry for %r, ignoring entry",
+                        slug,
                     )
                     continue
 
@@ -367,10 +380,10 @@ class _Config:
                 except Exception as exc:
                     _LOGGER.exception(
                         "An error occurred during run of manager %r %r for %r, skipping",
-                        manager, kebechet_manager, slug,
+                        manager,
+                        kebechet_manager,
+                        slug,
                     )
-            # Close the temp file for that iteration.
-            tempfile.close()
             _LOGGER.info("Finished management for %r", slug)
 
 
