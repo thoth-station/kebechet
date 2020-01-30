@@ -90,7 +90,7 @@ class Service():
         }
 
     def download_kebechet_config(self):
-        """Return a temporary file containing this repos' .kebechet.yaml contents."""
+        """Return a temporary file containing this repos' .thoth.yaml contents."""
         down_url = self.get_kebechet_download_url()
         auth = self.get_auth_header()
         _LOGGER.info("Downloading from %s", down_url)

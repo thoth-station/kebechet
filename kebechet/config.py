@@ -35,6 +35,17 @@ _LOGGER = logging.getLogger(__name__)
 class _Config:
     """Library-wide configuration."""
 
+    # This is used to generate service urls from slugs.
+    _SERVICE_URLS = {
+        "github": {
+                "service_url": "https://github.com/{slug}"
+            },
+        "gitlab": {
+            "service_url": "https://github.com/{slug}"
+            } 
+    }
+        
+    
     def __init__(self):
         self._repositories = None
 
@@ -295,11 +306,14 @@ class _Config:
             token,
             tls_verify,
         ) in config.iter_entries():
-            #cls._tls_verification(service_url, slug, verify=tls_verify)          
-            tempfile = config.download_conf_from_url(service_url, service_type)
+            s_url = cls._SERVICE_URLS[service_type]['service_url'].format(slug=slug)
+            # Override from kebechet config own config if exists.
+            if service_url:
+                s_url= service_url
+            tempfile = config.download_conf_from_url(s_url, service_type)
             managers = cls._managers_from_file(tempfile.name)
 
-            scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(service_url)
+            scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(s_url)
             slug = slug[1:]
             service_url = f"{scheme}://{host}"
             cls._tls_verification(service_url, slug, verify=tls_verify)
