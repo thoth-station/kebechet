@@ -42,10 +42,9 @@ class _Config:
             },
         "gitlab": {
             "service_url": "https://github.com/{slug}"
-            } 
+            }
     }
-        
-    
+
     def __init__(self):
         self._repositories = None
 
@@ -309,7 +308,7 @@ class _Config:
             s_url = cls._SERVICE_URLS[service_type]['service_url'].format(slug=slug)
             # Override from kebechet config own config if exists.
             if service_url:
-                s_url= service_url
+                s_url = service_url
             tempfile = config.download_conf_from_url(s_url, service_type)
             managers = cls._managers_from_file(tempfile.name)
 
@@ -370,7 +369,7 @@ class _Config:
                         "An error occurred during run of manager %r %r for %r, skipping",
                         manager, kebechet_manager, slug,
                     )
-                # Close the temp file for that iteration. 
+            # Close the temp file for that iteration.
             tempfile.close()
             _LOGGER.info("Finished management for %r", slug)
 
