@@ -1,5 +1,0 @@
----
-repositories:
-  - slug: saisankargochhayat/kebechet_sample
-    token: "{KEBECHET_TOKEN}"
-    service_type: github
