@@ -176,6 +176,7 @@ class _Config:
             try:
                 items = dict(entry)
                 value = (
+                    items.pop("managers"),
                     items.pop("slug"),
                     items.pop("service_type", None),
                     items.pop("service_url", None),
