@@ -38,7 +38,7 @@ class _Config:
     # This is used to generate service urls from slugs.
     _SERVICE_URLS = {
         "github": {"service_url": "https://github.com/{slug}"},
-        "gitlab": {"service_url": "https://github.com/{slug}"},
+        "gitlab": {"service_url": "https://gitlab.com/{slug}"},
     }
 
     def __init__(self):

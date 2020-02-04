@@ -22,7 +22,7 @@ export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChec
 
 case $KEBECHET_SUBCOMMAND in
     'run-webhook') 
-        exec pipenv run python3 kebechet-cli run-url
+        exec pipenv run python3 kebechet-cli run-webhook
         ;;
     'run-url') 
         exec pipenv run python3 kebechet-cli run-url
