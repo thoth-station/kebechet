@@ -37,8 +37,8 @@ class _Config:
 
     # This is used to generate service urls from slugs.
     _SERVICE_URLS = {
-        "github": {"service_url": "https://github.com/{slug}"},
-        "gitlab": {"service_url": "https://gitlab.com/{slug}"},
+        "github": "https://github.com/{slug}",
+        "gitlab": "https://gitlab.com/{slug}",
     }
 
     def __init__(self):
@@ -92,7 +92,7 @@ class _Config:
     @classmethod
     def run_webhook(cls, slug: str, service_type: str, service_url: str = None):
         if not service_url:
-            service_url = cls._SERVICE_URLS[service_type]["service_url"].format(
+            service_url = cls._SERVICE_URLS[service_type].format(
                 slug=slug
             )
         cls.run_url(service_url, service_type, True)
