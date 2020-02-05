@@ -90,12 +90,13 @@ class _Config:
         return tempfile
 
     @classmethod
-    def run_webhook(cls, slug: str, service_type: str, service_url: str = None):
-        if not service_url:
-            service_url = cls._SERVICE_URLS[service_type].format(
-                slug=slug
-            )
-        cls.run_url(service_url, service_type, True)
+    def run_webhook(cls, payload: dict):
+        print(payload["event"])
+        # if not service_url:
+        #     service_url = cls._SERVICE_URLS[service_type].format(
+        #         slug=slug
+        #     )
+        # cls.run_url(service_url, service_type, True)
 
     @classmethod
     def run_url(cls, url: str, service: str, tls_verify: bool):

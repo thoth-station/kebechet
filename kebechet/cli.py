@@ -19,6 +19,7 @@
 
 
 import logging
+import os
 
 import click
 import json
@@ -93,13 +94,24 @@ def cli_run_url(url, service):
 
 
 @cli.command("run-webhook")
-@click.argument("payload", nargs=1)
-def cli_run_webhook(payload):
+@click.argument("web_payload", nargs=1)
+def cli_run_webhook(web_payload):
     """Run Kebechet by providing a webhook payload."""
-    json_payload = json.loads(payload)
-    print(json_payload["event"])
-    #config.run_webhook(slug, service_type, service_url)
-
+    payload = None
+    if os.path.isfile(web_payload):
+        with open(web_payload) as f:
+            try:
+                payload = json.load(f)
+            except json.decoder.JSONDecodeError:
+                _LOGGER.error("Webhook file coudn't be parsed as a json.")
+    else:
+        # If the json is passed a string. 
+        try:
+            payload = json.loads(web_payload)
+        except json.decoder.JSONDecodeError:
+            _LOGGER.error("Webhook payload coudn't be parsed.")
+    if payload:
+        config.run_webhook(payload)
 
 if __name__ == "__main__":
     cli()
