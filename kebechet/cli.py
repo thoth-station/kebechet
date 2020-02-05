@@ -21,6 +21,7 @@
 import logging
 
 import click
+import json
 from thoth.common import init_logging
 
 from kebechet import __version__ as kebechet_version
@@ -92,12 +93,12 @@ def cli_run_url(url, service):
 
 
 @cli.command("run-webhook")
-@click.argument("slug", envvar="KEBECHET_REPO_SLUG")
-@click.argument("service_type", envvar="KEBECHET_SERVICE_NAME")
-@click.option("-u", "--service_url", envvar="KEBECHET_SERVICE_NAME")
-def cli_run_webhook(slug, service_type, service_url):
-    """Run Kebechet by providing a slug(repo name), service_type, url(optional) as."""
-    config.run_webhook(slug, service_type, service_url)
+@click.argument("payload", nargs=1)
+def cli_run_webhook(payload):
+    """Run Kebechet by providing a webhook payload."""
+    json_payload = json.loads(payload)
+    print(json_payload["event"])
+    #config.run_webhook(slug, service_type, service_url)
 
 
 if __name__ == "__main__":
