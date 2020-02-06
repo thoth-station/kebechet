@@ -100,16 +100,10 @@ def cli_run_webhook(web_payload):
     payload = None
     if os.path.isfile(web_payload):
         with open(web_payload) as f:
-            try:
-                payload = json.load(f)
-            except json.decoder.JSONDecodeError:
-                _LOGGER.error("Webhook file coudn't be parsed as a json.")
+            payload = json.load(f)
     else:
         # If the json is passed a string.
-        try:
-            payload = json.loads(web_payload)
-        except json.decoder.JSONDecodeError:
-            _LOGGER.error("Webhook payload coudn't be parsed.")
+        payload = json.loads(web_payload)
     if payload:
         config.run_webhook(payload)
 

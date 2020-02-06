@@ -36,9 +36,7 @@ class PayloadParser():
 
         # For github webhooks
         if 'event' in payload:
-            if payload['event'] in self._IGNORED_GITHUB_EVENTS:
-                pass
-            else:
+            if payload['event'] not in self._IGNORED_GITHUB_EVENTS:
                 github_payload = payload['payload']
                 if self._GITHUB in github_payload['sender']['url'] and payload['event'] != 'integration_installation':
                     self.service_type = 'github'
