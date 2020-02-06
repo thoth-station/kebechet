@@ -105,13 +105,14 @@ def cli_run_webhook(web_payload):
             except json.decoder.JSONDecodeError:
                 _LOGGER.error("Webhook file coudn't be parsed as a json.")
     else:
-        # If the json is passed a string. 
+        # If the json is passed a string.
         try:
             payload = json.loads(web_payload)
         except json.decoder.JSONDecodeError:
             _LOGGER.error("Webhook payload coudn't be parsed.")
     if payload:
         config.run_webhook(payload)
+
 
 if __name__ == "__main__":
     cli()

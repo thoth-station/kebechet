@@ -21,7 +21,7 @@ from .enums import ServiceType
 
 
 class PayloadParser():
-    """ Allow Kebechet to parse webhook payload of different services."""
+    """Allow Kebechet to parse webhook payload of different services."""
 
     _GITHUB = "api.github.com"
     _GITLAB = "gitlab.com"
@@ -29,10 +29,11 @@ class PayloadParser():
     _IGNORED_GITHUB_EVENTS = ['installation', 'integration_installation']
 
     def __init__(self, payload: dict):
+        """Initialize the parameters we require from the services."""
         self.service_type = None
         self.url = None
         self.event = None
-        
+
         # For github webhooks
         if 'event' in payload:
             if payload['event'] in self._IGNORED_GITHUB_EVENTS:
@@ -47,18 +48,18 @@ class PayloadParser():
         elif 'project' in payload:
             if self._GITLAB in payload['project']['web_url']:
                 self.service_type = 'gitlab'
-    
+
     def github_parser(self, payload):
         """Parse Github data."""
-        self.url = payload["repository"]["html_url"]            
+        self.url = payload["repository"]["html_url"]
 
     def gitlab_parser(self, payload):
         """Parse Gitlab data."""
         self.url = payload['project']['web_url']
-        self.event = payload['object_kind']        
-    
+        self.event = payload['object_kind']
+
     def parsed_data(self):
-        """Returns parsed data if its of a supported service."""
+        """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None
         parsed_payload = {
