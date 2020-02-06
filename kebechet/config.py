@@ -28,18 +28,13 @@ import requests
 from .exception import ConfigurationError
 from .enums import ServiceType
 from .services import Service
+from .payload_parser import PayloadParser
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class _Config:
     """Library-wide configuration."""
-
-    # This is used to generate service urls from slugs.
-    _SERVICE_URLS = {
-        "github": "https://github.com/{slug}",
-        "gitlab": "https://gitlab.com/{slug}",
-    }
 
     def __init__(self):
         self._repositories = None
@@ -91,12 +86,10 @@ class _Config:
 
     @classmethod
     def run_webhook(cls, payload: dict):
-        print(payload["event"])
-        # if not service_url:
-        #     service_url = cls._SERVICE_URLS[service_type].format(
-        #         slug=slug
-        #     )
-        # cls.run_url(service_url, service_type, True)
+        payload = PayloadParser(payload)
+        parsed_payload = payload.parsed_data()
+        if parsed_payload:
+            cls.run_url(parsed_payload['url'], parsed_payload['service_type'], True)
 
     @classmethod
     def run_url(cls, url: str, service: str, tls_verify: bool):
