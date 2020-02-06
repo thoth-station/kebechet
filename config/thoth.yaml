@@ -551,3 +551,11 @@ repositories:
             - sesheta
           labels: [bot]
           changelog_file: false
+
+  - slug: thoth-station/package-update-job
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
