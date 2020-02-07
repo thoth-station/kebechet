@@ -106,6 +106,8 @@ def cli_run_webhook(web_payload):
         payload = json.loads(web_payload)
     if payload:
         config.run_webhook(payload)
+    else:
+        _LOGGER.exception("Payload passed to webhook handler is empty.")
 
 
 if __name__ == "__main__":

@@ -18,6 +18,9 @@
 """Provides abstraction of payload parsing functions."""
 
 from .enums import ServiceType
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PayloadParser():
@@ -38,7 +41,7 @@ class PayloadParser():
         if 'event' in payload:
             if payload['event'] not in self._IGNORED_GITHUB_EVENTS:
                 github_payload = payload['payload']
-                if self._GITHUB in github_payload['sender']['url'] and payload['event'] != 'integration_installation':
+                if self._GITHUB in github_payload['sender']['url']:
                     self.service_type = 'github'
                     self.event = payload['event']
                     self.github_parser(github_payload)
@@ -46,6 +49,8 @@ class PayloadParser():
         elif 'project' in payload:
             if self._GITLAB in payload['project']['web_url']:
                 self.service_type = 'gitlab'
+        else:
+            _LOGGER.exception("Payload passed is not supported.")
 
     def github_parser(self, payload):
         """Parse Github data."""
