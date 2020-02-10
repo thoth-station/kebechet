@@ -552,6 +552,24 @@ repositories:
           labels: [bot]
           changelog_file: false
 
+  - slug: thoth-station/s2i
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: version
+        configuration:
+          maintainers:
+            - harshad16
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
+
   - slug: thoth-station/package-update-job
     token: "{KEBECHET_TOKEN}"
     managers:
