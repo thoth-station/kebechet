@@ -19,9 +19,12 @@
 
 
 import logging
+import os
 
 import click
+import json
 from thoth.common import init_logging
+from kebechet.exception import WebhookPayloadError
 
 from kebechet import __version__ as kebechet_version
 from kebechet.config import config
@@ -88,7 +91,23 @@ def cli_run_results(origin, service, analysis_id):
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
-    config.run_url(url, service)
+    config.run_url(url, service, None)
+
+
+@cli.command("run-webhook")
+@click.argument("web_payload", nargs=1)
+def cli_run_webhook(web_payload):
+    """Run Kebechet by providing a webhook payload."""
+    payload = None
+    if os.path.isfile(web_payload):
+        with open(web_payload) as f:
+            payload = json.load(f)
+    else:
+        # If the json is passed a string.
+        payload = json.loads(web_payload)
+    if not payload:
+        raise WebhookPayloadError("Webhook payload is empty or cannot be parsed.")
+    config.run_webhook(payload)
 
 
 if __name__ == "__main__":

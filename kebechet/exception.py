@@ -54,3 +54,11 @@ class DependencyManagementError(KebechetException):
 
     This errors are usually wrong or missing Pipfile, Pipfile.lock, requirments.in or requirments.txt.
     """
+
+
+class WebhookPayloadError(KebechetException):
+    """
+    An exception raised if there is an error if the webhook passed cannot be parsed as a json.
+
+    Generally the payload is empty or not of proper json format.
+    """
