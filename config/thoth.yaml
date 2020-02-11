@@ -421,13 +421,6 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: thoth-station/graph-sync-operator
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-
   - slug: thoth-station/workload-operator
     token: "{KEBECHET_TOKEN}"
     managers:
