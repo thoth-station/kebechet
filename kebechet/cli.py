@@ -24,6 +24,7 @@ import os
 import click
 import json
 from thoth.common import init_logging
+from kebechet.exception import WebhookPayloadError
 
 from kebechet import __version__ as kebechet_version
 from kebechet.config import config
@@ -104,10 +105,9 @@ def cli_run_webhook(web_payload):
     else:
         # If the json is passed a string.
         payload = json.loads(web_payload)
-    if payload:
-        config.run_webhook(payload)
-    else:
-        _LOGGER.exception("Payload passed to webhook handler is empty.")
+    if not payload:
+        raise WebhookPayloadError("Webhook payload is empty or cannot be parsed.")
+    config.run_webhook(payload)
 
 
 if __name__ == "__main__":

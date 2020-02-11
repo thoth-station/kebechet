@@ -19,6 +19,8 @@
 
 from .enums import ServiceType
 import logging
+from .exception import WebhookPayloadError
+from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class PayloadParser():
 
     _IGNORED_GITHUB_EVENTS = ['installation', 'integration_installation']
 
-    def __init__(self, payload: dict):
+    def __init__(self, payload: dict) -> None:
         """Initialize the parameters we require from the services."""
         self.service_type = None
         self.url = None
@@ -41,27 +43,29 @@ class PayloadParser():
         if 'event' in payload:
             if payload['event'] not in self._IGNORED_GITHUB_EVENTS:
                 github_payload = payload['payload']
-                if self._GITHUB in github_payload['sender']['url']:
+                parsed_url = urlparse(github_payload['sender']['url'])
+                if self._GITHUB in parsed_url.netloc:
                     self.service_type = 'github'
                     self.event = payload['event']
                     self.github_parser(github_payload)
         # For gitlab webhooks
         elif 'project' in payload:
-            if self._GITLAB in payload['project']['web_url']:
+            parsed_url = urlparse(payload['project']['web_url'])
+            if self._GITLAB in parsed_url.netloc:
                 self.service_type = 'gitlab'
         else:
-            _LOGGER.exception("Payload passed is not supported.")
+            raise WebhookPayloadError("Payload passed is not supported.")
 
-    def github_parser(self, payload):
+    def github_parser(self, payload: dict) -> None:
         """Parse Github data."""
         self.url = payload["repository"]["html_url"]
 
-    def gitlab_parser(self, payload):
+    def gitlab_parser(self, payload: dict) -> None:
         """Parse Gitlab data."""
         self.url = payload['project']['web_url']
         self.event = payload['object_kind']
 
-    def parsed_data(self):
+    def parsed_data(self) -> dict:
         """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None
