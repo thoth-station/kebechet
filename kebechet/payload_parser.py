@@ -38,6 +38,7 @@ class PayloadParser():
         self.service_type = None
         self.url = None
         self.event = None
+        self.parsed_payload = None
 
         # For github webhooks
         if 'event' in payload:
@@ -69,9 +70,9 @@ class PayloadParser():
         """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None
-        parsed_payload = {
+        self.parsed_payload = {
             'service_type': self.service_type,
             'url': self.url,
             'event': self.event
         }
-        return parsed_payload
+        return self.parsed_payload
