@@ -50,6 +50,7 @@ _RELEASE_TITLES = {
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['issues', 'issue']
 
+
 class VersionError(Exception):
     """An exception raised on invalid version provided or found in the repo."""
 

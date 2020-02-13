@@ -32,6 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'merge_request']
 
+
 class PipfileRequirementsManager(ManagerBase):
     """Keep requirements.txt in sync with Pipfile or Pipfile.lock."""
 
@@ -76,7 +77,7 @@ class PipfileRequirementsManager(ManagerBase):
         if self.event not in _EVENTS_SUPPORTED:
             _LOGGER.info("PipfileRequirementsManager doesn't act on %r events.", self.event)
             return
-        
+
         file_name = 'Pipfile.lock' if lockfile else 'Pipfile'
         file_url = construct_raw_file_url(self.service_url, self.slug, file_name, self.service_type)
 

@@ -42,6 +42,7 @@ _BRANCH_NAME = "kebechet_thoth"
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
 
+
 class ThothProvenanceManager(ManagerBase):
     """Manage source issues of dependencies."""
 

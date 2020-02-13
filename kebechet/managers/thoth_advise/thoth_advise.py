@@ -39,6 +39,7 @@ _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
 
+
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
 
