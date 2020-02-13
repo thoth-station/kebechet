@@ -89,10 +89,10 @@ class _Config:
         payload = PayloadParser(payload)
         parsed_payload = payload.parsed_data()
         if parsed_payload:
-            cls.run_url(parsed_payload['url'], parsed_payload['service_type'], True)
+            cls.run_url(parsed_payload['url'], parsed_payload['service_type'], parsed_payload['event'], True)
 
     @classmethod
-    def run_url(cls, url: str, service: str, tls_verify: bool):
+    def run_url(cls, url: str, service: str, event: str, tls_verify: bool):
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
 
@@ -152,7 +152,7 @@ class _Config:
                     "Ignoring option %r in manager entry for %r", manager, slug,
                 )
             try:
-                instance = kebechet_manager(slug, service.service, service_url, token)
+                instance = kebechet_manager(slug, service.service, service_url, event, token)
                 instance.run(**manager_configuration)
             except Exception as exc:
                 _LOGGER.exception(

@@ -28,6 +28,8 @@ from .messages import INFO_REPORT
 _INFO_ISSUE_NAME = 'Kebechet info'
 
 _LOGGER = logging.getLogger(__name__)
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['issues', 'issue']
 
 
 class InfoManager(ManagerBase):
@@ -35,6 +37,9 @@ class InfoManager(ManagerBase):
 
     def run(self) -> typing.Optional[dict]:
         """Check for info issue and close it with a report."""
+        if self.event not in _EVENTS_SUPPORTED:
+            _LOGGER.info("Info manager doesn't act on %r events.", self.event)
+            return
         issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
             _LOGGER.info("No issue to report to, exiting")

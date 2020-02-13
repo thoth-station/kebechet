@@ -51,6 +51,9 @@ _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
+
 # Note: We cannot use pipenv as a library (at least not now - version 2018.05.18) - there is a need to call it
 # as a subprocess as pipenv keeps path to the virtual environment in the global context that is not
 # updated on subsequent calls.
@@ -603,6 +606,10 @@ class UpdateManager(ManagerBase):
 
     def run(self, labels: list) -> typing.Optional[dict]:
         """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
+        if self.event not in _EVENTS_SUPPORTED:
+            _LOGGER.info("Update Manager doesn't act on %r events.", self.event)
+            return
+
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ['PIPENV_VENV_IN_PROJECT'] = '1'
 

@@ -60,13 +60,14 @@ def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> st
 class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
-    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
+    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, event: str = None, token: str = None):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
         # This needs to be called before instantiation of SourceManagement due to changes in global variables.
         self.service_url = _init_igitt(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug
+        self.event = event
         self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
         self._repo = None

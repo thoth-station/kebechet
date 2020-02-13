@@ -36,7 +36,8 @@ from kebechet.utils import cloned_repo
 
 _BRANCH_NAME = "kebechet_thoth"
 _LOGGER = logging.getLogger(__name__)
-
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
 
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
@@ -126,6 +127,10 @@ class ThothAdviseManager(ManagerBase):
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
+        if self.event not in _EVENTS_SUPPORTED:
+            _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.event)
+            return
+
         if analysis_id is None:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
                 self.repo = repo
