@@ -5,11 +5,12 @@ metadata:
   annotations:
     description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet Job
-    version: 1.0.0
-    tags: poc,thoth,ai-stacks,kebechet
+    version: 1.0.1
+    tags: thoth,ai-stacks,kebechet,cyborg,srcops
     template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
     template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
     template.openshift.io/provider-display-name: Red Hat, Inc.
+    thoth-station.ninja/template-version: 1.0.1
   labels:
     app: thoth
     template: kebechet
@@ -31,7 +32,7 @@ parameters:
     required: true
     name: IMAGE_STREAM_TAG
     value: "latest"
-  - description: The repositories full URL 
+  - description: The repositories full URL
     displayName: Repository URL
     required: true
     name: KEBECHET_REPO_URL
@@ -67,6 +68,8 @@ objects:
         componenet: kebechet
         task: kebechet
         mark: cleanup
+    annotations:
+      thoth-station.ninja/template-version: 1.0.1
     spec:
       backoffLimit: 0
       template:
@@ -80,16 +83,16 @@ objects:
             - image: ${IMAGE_STREAM_REGISTRY}/${IMAGE_STREAM_NAMESPACE}/kebechet-job:${IMAGE_STREAM_TAG}
               name: kebechet
               volumeMounts:
-              - name: ssh-config
-                mountPath: /home/user/.ssh
-                readOnly: true
+                - name: ssh-config
+                  mountPath: /home/user/.ssh
+                  readOnly: true
               env:
                 - name: PIPENV_NOSPIN
-                  value: '1'
+                  value: "1"
                 - name: PIPENV_COLORBLIND
-                  value: '1'
+                  value: "1"
                 - name: PIPENV_HIDE_EMOJIS
-                  value: '1'
+                  value: "1"
                 - name: KEBECHET_VERBOSE
                   value: "${KEBECHET_VERBOSE}"
                 - name: KEBECHET_SUBCOMMAND
@@ -146,4 +149,3 @@ objects:
                   - key: ssh-privatekey
                     path: id_rsa
                     mode: 0600
-  

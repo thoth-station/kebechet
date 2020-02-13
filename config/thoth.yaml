@@ -1,5 +1,117 @@
 ---
 repositories:
+  - slug: thoth-station/common
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/analyzer
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/python
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - fridex
+            - goern
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/storages
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/solver
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/lab
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+            - CermakM
+            - harshad16
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
   - slug: thoth-station/adviser
     token: "{KEBECHET_TOKEN}"
     managers:
@@ -35,45 +147,9 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/analyzer
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
   - slug: thoth-station/cleanup-job
     token: "{KEBECHET_TOKEN}"
     managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/common
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
       - name: update
         configuration:
           labels: [bot]
@@ -130,26 +206,6 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: thoth-station/lab
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-            - CermakM
-            - harshad16
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
   - slug: thoth-station/package-analyzer
     token: "{KEBECHET_TOKEN}"
     managers:
@@ -187,24 +243,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/python
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - fridex
-            - goern
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
   - slug: thoth-station/package-releases-job
     token: "{KEBECHET_TOKEN}"
     managers:
@@ -234,43 +272,6 @@ repositories:
           maintainers:
             - goern
             - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/solver
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/storages
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-            - pacospace
           assignees:
             - sesheta
           labels: [bot]
@@ -313,6 +314,24 @@ repositories:
   - slug: thoth-station/messaging
     token: "{KEBECHET_TOKEN}"
     managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: thoth-station/thamos
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: pipfile-requirements
       - name: update
         configuration:
           labels: [bot]
@@ -370,21 +389,13 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: AICoE/sesheta
+  - slug: thoth-station/graph-backup-job
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
           labels: [bot]
       - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
 
   - slug: thoth-station/srcops-testing
     token: "{KEBECHET_TOKEN}"
@@ -410,37 +421,12 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: thoth-station/graph-sync-operator
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-
   - slug: thoth-station/workload-operator
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
         configuration:
           labels: [bot]
-
-  - slug: thoth-station/thamos
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
 
   - slug: thoth-station/invectio
     token: "{KEBECHET_TOKEN}"
@@ -481,26 +467,11 @@ repositories:
           maintainers:
             - fridex
             - goern
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
           changelog_file: true
-
-  - slug: AICoE/log-anomaly-detector
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-
-  - slug: AICoE/prometheus-flatliner
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
 
   - slug: thoth-station/metrics-exporter
     token: "{KEBECHET_TOKEN}"
@@ -527,15 +498,7 @@ repositories:
           labels: [bot]
       - name: info
 
-  - slug: AICoE/prometheus-anomaly-detector
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-
-  - slug: AICoE/prometheus-api-client-python
+  - slug: thoth-station/stub-api
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
@@ -546,30 +509,61 @@ repositories:
         configuration:
           maintainers:
             - goern
-            - 4n4nd
             - harshad16
+            - fridex
           assignees:
             - sesheta
           labels: [bot]
-          changelog_file: true
+          changelog_file: false
 
-  - slug: AICoE/prometheus-scraper
+  - slug: thoth-station/thoth-pybench
     token: "{KEBECHET_TOKEN}"
     managers:
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - pacospace
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
+
+  - slug: thoth-station/s2i-thoth
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: version
+        configuration:
+          maintainers:
+            - harshad16
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: false
+
+  - slug: thoth-station/s2i
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
       - name: update
         configuration:
           labels: [bot]
-      - name: info
-
-  - slug: AICoE/workshop-coding-best-practices
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
+      - name: version
         configuration:
+          maintainers:
+            - harshad16
+            - goern
+            - fridex
+          assignees:
+            - sesheta
           labels: [bot]
-      - name: info
+          changelog_file: false
 
-  - slug: AICoE/ludus
+  - slug: thoth-station/package-update-job
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update

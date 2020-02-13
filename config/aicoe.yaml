@@ -1,0 +1,120 @@
+---
+repositories:
+  - slug: AICoE/sesheta
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - fridex
+          assignees:
+            - sesheta
+          labels: [bot]
+
+  - slug: AICoE/prometheus-api-client-python
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - 4n4nd
+            - harshad16
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: AICoE/log-anomaly-detector
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-flatliner
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-anomaly-detector
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/prometheus-scraper
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/workshop-coding-best-practices
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/ludus
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/frauddetection-producer-consumer
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+
+  - slug: AICoE/SrcOpsMetrics
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - goern
+            - xtuchyna
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+
+  - slug: durandom/64fbc27e213f5a61c975ab29df94536b88f03270
+    token: '{KEBECHET_TOKEN}'
+    managers:
+      - name: update
+        configuration:
+          labels: [bot, kebechet]
+      - name: version
+        configuration:
+          labels: [bot, kebechet]
+          changelog_file: true
