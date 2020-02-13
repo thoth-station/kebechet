@@ -15,6 +15,7 @@ igitt = {git = "https://gitlab.com/gitmate/open-source/IGitt.git"}
 semver = "*"
 thoth-common = "*"
 thamos = "*"
+ogr = "*"
 
 [dev-packages]
 pytest = "*"
