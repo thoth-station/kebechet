@@ -59,9 +59,9 @@ class SourceManagement:
     def get_issue(self, title: str) -> Issue:
         """Retrieve issue with the given title."""
         for issue in self.repository.get_issue_list():
-            if issue.title == title:
+            if issue._raw_issue.title == title:
                 return issue
-
+            
         return None
 
     def open_issue_if_not_exist(self, title: str, body: typing.Callable,
@@ -69,21 +69,22 @@ class SourceManagement:
         """Open the given issue if does not exist already (as opened)."""
         _LOGGER.debug(f"Reporting issue {title!r}")
         issue = self.get_issue(title)
+        #TODO add comments to issue
         if issue:
-            _LOGGER.info(f"Issue already noted on upstream with id #{issue.number}")
+            _LOGGER.info(f"Issue already noted on upstream with id #{issue._raw_issue.number}")
             if not refresh_comment:
                 return issue
 
             comment_body = refresh_comment(issue)
             if comment_body:
                 issue.add_comment(comment_body)
-                _LOGGER.info(f"Added refresh comment to issue #{issue.number}")
+                _LOGGER.info(f"Added refresh comment to issue #{issue._raw_issue.number}")
             else:
                 _LOGGER.debug(f"Refresh comment not added")
         else:
             issue = self.repository.create_issue(title, body())
             issue.labels = set(labels or [])
-            _LOGGER.info(f"Reported issue {title!r} with id #{issue.number}")
+            _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.number}")
 
         return issue
 
