@@ -35,6 +35,7 @@ class PayloadParser():
 
     def __init__(self, payload: dict) -> None:
         """Initialize the parameters we require from the services."""
+        self.raw_payload = payload
         self.service_type = None
         self.url = None
         self.event = None
@@ -73,6 +74,7 @@ class PayloadParser():
         self.parsed_payload = {
             'service_type': self.service_type,
             'url': self.url,
-            'event': self.event
+            'event': self.event,
+            'raw_payload': self.raw_payload
         }
         return self.parsed_payload
