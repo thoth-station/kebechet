@@ -33,7 +33,7 @@ from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
 from kebechet.source_management import Issue
-from kebechet.source_management import MergeRequest
+from kebechet.source_management import PullRequest
 from kebechet.utils import cloned_repo
 
 from .messages import ISSUE_CLOSE_COMMENT
@@ -210,7 +210,7 @@ class UpdateManager(ManagerBase):
         return f'kebechet-{package_name}-{new_package_version}'
 
     def _open_merge_request_update(self, dependency: str, old_version: str, new_version: str,
-                                   labels: list, files: list, merge_request: MergeRequest) -> typing.Optional[int]:
+                                   labels: list, files: list, merge_request: PullRequest) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
         branch_name = self._construct_branch_name(dependency, new_version)
         commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
@@ -302,7 +302,7 @@ class UpdateManager(ManagerBase):
 
     def _create_update(self, dependency: str, package_version: str, old_version: str,
                        is_dev: bool = False, labels: list = None, old_environment: dict = None,
-                       merge_request: MergeRequest = None, pipenv_used: bool = True,
+                       merge_request: PullRequest = None, pipenv_used: bool = True,
                        req_dev: bool = False) -> typing.Union[tuple, None]:
         """Create an update for the given dependency when dependencies are managed by Pipenv.
 
@@ -460,9 +460,9 @@ class UpdateManager(ManagerBase):
     def _delete_old_branches(self, outdated: dict) -> None:
         """Delete old kebechet branches from the remote repository."""
         branches = {
-            entry['name']
+            entry
             for entry in self.sm.list_branches()
-            if entry['name'].startswith('kebechet-')
+            if entry.startswith('kebechet-')
         }
         for package_name, info in outdated.items():
             # Do not remove active branches - branches we issued PRs in.

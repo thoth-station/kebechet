@@ -27,6 +27,8 @@ from ogr.services.github import GithubService
 from ogr.services.gitlab import GitlabService
 
 from .enums import ServiceType
+from ogr.abstract import Issue
+from ogr.abstract import PullRequest
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -100,9 +102,13 @@ class SourceManagement:
             issue = self.repository.create_issue(title, body())
             issue.add_label(*set(labels or []))
             if self.service_type == ServiceType.GITHUB:
-                _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.number}")
+                _LOGGER.info(
+                    f"Reported issue {title!r} with id #{issue._raw_issue.number}"
+                )
             elif self.service_type == ServiceType.GITLAB:
-                _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.iid}")
+                _LOGGER.info(
+                    f"Reported issue {title!r} with id #{issue._raw_issue.iid}"
+                )
 
         return issue
 
@@ -122,7 +128,7 @@ class SourceManagement:
         response = requests.Session().post(
             f"{BASE_URL['github']}/repos/{self.slug}/issues/{issue._raw_issue.number}/assignees",
             headers={f"Authorization": f"token {self.token}"},
-            json=data
+            json=data,
         )
 
         response.raise_for_status()
@@ -134,7 +140,7 @@ class SourceManagement:
         response = requests.Session().put(
             f"{BASE_URL['gitlab']}/repos/{self.slug}/issues/{issue._raw_issue.iid}/assignees",
             headers={f"Authorization": f"token {self.token}"},
-            json=data
+            json=data,
         )
 
         response.raise_for_status()
@@ -151,7 +157,7 @@ class SourceManagement:
 
     def open_merge_request(
         self, commit_msg: str, branch_name: str, body: str, labels: list
-    ) -> MergeRequest:
+    ) -> PullRequest:
         """Open a merge request for the given branch."""
         try:
             merge_request = self.repository.create_pr(

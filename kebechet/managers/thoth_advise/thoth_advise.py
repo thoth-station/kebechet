@@ -31,7 +31,7 @@ from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
 from kebechet.source_management import Issue
-from kebechet.source_management import MergeRequest
+from kebechet.source_management import PullRequest
 from kebechet.utils import cloned_repo
 
 _BRANCH_NAME = "kebechet_thoth"
