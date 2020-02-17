@@ -30,12 +30,15 @@ from .enums import ServiceType
 
 
 _LOGGER = logging.getLogger(__name__)
+BASE_URL = {"github": "https://api.github.com", "gitlab": "https://gitlab.com//api/v4"}
 
 
 class SourceManagement:
     """Abstract source code management services like GitHub and GitLab."""
 
-    def __init__(self, service_type: ServiceType, service_url: str, token: str, slug: str):
+    def __init__(
+        self, service_type: ServiceType, service_url: str, token: str, slug: str
+    ):
         """Initialize source code management tools abstraction.
 
         Note that we are using OGR for calls. OGR keeps URL to services in its global context per GitHub/GitLab.
@@ -49,10 +52,14 @@ class SourceManagement:
 
         if self.service_type == ServiceType.GITHUB:
             self.service = GithubService(self.token)
-            self.repository = self.service.get_project(repo=self.repo, namespace=self.namespace)
+            self.repository = self.service.get_project(
+                repo=self.repo, namespace=self.namespace
+            )
         elif self.service_type == ServiceType.GITLAB:
             self.service = GitlabService(self.token)
-            self.repository = self.service.get_project(repo=self.repo, namespace=self.namespace)
+            self.repository = self.service.get_project(
+                repo=self.repo, namespace=self.namespace
+            )
         else:
             raise NotImplementedError
 
@@ -61,23 +68,32 @@ class SourceManagement:
         for issue in self.repository.get_issue_list():
             if issue._raw_issue.title == title:
                 return issue
-            
+
         return None
 
-    def open_issue_if_not_exist(self, title: str, body: typing.Callable,
-                                refresh_comment: typing.Callable = None, labels: list = None) -> Issue:
+    def open_issue_if_not_exist(
+        self,
+        title: str,
+        body: typing.Callable,
+        refresh_comment: typing.Callable = None,
+        labels: list = None,
+    ) -> Issue:
         """Open the given issue if does not exist already (as opened)."""
         _LOGGER.debug(f"Reporting issue {title!r}")
         issue = self.get_issue(title)
         if issue:
-            _LOGGER.info(f"Issue already noted on upstream with id #{issue._raw_issue.number}")
+            _LOGGER.info(
+                f"Issue already noted on upstream with id #{issue._raw_issue.number}"
+            )
             if not refresh_comment:
                 return issue
 
             comment_body = refresh_comment(issue)
             if comment_body:
                 issue.comment(comment_body)
-                _LOGGER.info(f"Added refresh comment to issue #{issue._raw_issue.number}")
+                _LOGGER.info(
+                    f"Added refresh comment to issue #{issue._raw_issue.number}"
+                )
             else:
                 _LOGGER.debug(f"Refresh comment not added")
         else:
@@ -97,35 +113,46 @@ class SourceManagement:
         issue.comment(comment)
         issue.close()
 
-
+    # OGR doesnt have this yet, to be implemented using REST calls.
     def assign(self, issue: Issue, assignees: typing.List[str]) -> None:
         """Assign users (by their accounts) to the given issue."""
         if self.service_type == ServiceType.GITHUB:
-            users = (GitHubUser(GitHubToken(self.token), username) for username in assignees)
+            users = (
+                GitHubUser(GitHubToken(self.token), username) for username in assignees
+            )
         elif self.service_type == ServiceType.GITLAB:
-            users = (GitLabUser(GitLabPrivateToken(self.token), username) for username in assignees)
+            users = (
+                GitLabUser(GitLabPrivateToken(self.token), username)
+                for username in assignees
+            )
         else:
             raise NotImplementedError
 
         issue.assign(*users)
 
-    def open_merge_request(self, commit_msg: str, branch_name: str, body: str, labels: list) -> MergeRequest:
+    def open_merge_request(
+        self, commit_msg: str, branch_name: str, body: str, labels: list
+    ) -> MergeRequest:
         """Open a merge request for the given branch."""
         try:
-            merge_request = self.repository.create_pr(commit_msg, body, 'master', branch_name)
+            merge_request = self.repository.create_pr(
+                commit_msg, body, "master", branch_name
+            )
             merge_request.add_label(labels)
 
         except Exception as exc:
             raise RuntimeError(f"Failed to create a pull request: {exc}")
         else:
-            _LOGGER.info(f"Newly created pull request #{merge_request.id} available at {merge_request.url}")
+            _LOGGER.info(
+                f"Newly created pull request #{merge_request.id} available at {merge_request.url}"
+            )
             return merge_request
 
     def _github_delete_branch(self, branch: str) -> None:
         """Delete the given branch from remote repository."""
         response = requests.Session().delete(
-            f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/git/refs/heads/{branch}',
-            headers={f'Authorization': f'token {self.token}'},
+            f"{BASE_URL['github']}/repos/{self.slug}/git/refs/heads/{branch}",
+            headers={f"Authorization": f"token {self.token}"},
         )
 
         response.raise_for_status()
@@ -134,46 +161,23 @@ class SourceManagement:
     def _gitlab_delete_branch(self, branch: str) -> None:
         """Delete the given branch from remote repository."""
         response = requests.Session().delete(
-            f'{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/repository/branches/{branch}',
-            params={'private_token': self.token},
+            f"{BASE_URL['gitlab']}/projects/{quote_plus(self.slug)}/repository/branches/{branch}",
+            params={"private_token": self.token},
         )
         response.raise_for_status()
-
-    def _github_list_branches(self) -> typing.Set[str]:
-        """Get listing of all branches available on the remote GitHub repository."""
-        response = requests.Session().get(
-            f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/branches',
-            headers={f'Authorization': f'token {self.token}'},
-        )
-
-        response.raise_for_status()
-        # TODO: pagination?
-        return response.json()
-
-    def _gitlab_list_branches(self) -> typing.Set[str]:
-        """Get listing of all branches available on the remote GitLab repository."""
-        response = requests.Session().get(
-            f"{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/repository/branches",
-            params={'private_token': self.token},
-        )
-
-        response.raise_for_status()
-        # TODO: pagination?
-        return response.json()
 
     def list_branches(self) -> set:
         """Get branches available on remote."""
-        # TODO: remove this logic once IGitt will support branch operations
-        if self.service_type == ServiceType.GITHUB:
-            return self._github_list_branches()
-        elif self.service_type == ServiceType.GITLAB:
-            return self._gitlab_list_branches()
+        try:
+            branches = self.repository.get_branches()
+        except Exception as exc:
+            raise RuntimeError(f"Cannot fetch branches. Error is: {exc}")
         else:
-            raise NotImplementedError
+            return branches
 
     def delete_branch(self, branch_name: str) -> None:
         """Delete the given branch from remote."""
-        # TODO: remove this logic once IGitt will support branch operations
+        # TODO: remove this logic once OGR will support branch operations
         if self.service_type == ServiceType.GITHUB:
             return self._github_delete_branch(branch_name)
         elif self.service_type == ServiceType.GITLAB:
