@@ -69,7 +69,6 @@ class SourceManagement:
         """Open the given issue if does not exist already (as opened)."""
         _LOGGER.debug(f"Reporting issue {title!r}")
         issue = self.get_issue(title)
-        #TODO add comments to issue
         if issue:
             _LOGGER.info(f"Issue already noted on upstream with id #{issue._raw_issue.number}")
             if not refresh_comment:
@@ -77,13 +76,13 @@ class SourceManagement:
 
             comment_body = refresh_comment(issue)
             if comment_body:
-                issue.add_comment(comment_body)
+                issue.comment(comment_body)
                 _LOGGER.info(f"Added refresh comment to issue #{issue._raw_issue.number}")
             else:
                 _LOGGER.debug(f"Refresh comment not added")
         else:
             issue = self.repository.create_issue(title, body())
-            issue.labels = set(labels or [])
+            issue.add_label(*set(labels or []))
             _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.number}")
 
         return issue
@@ -95,61 +94,9 @@ class SourceManagement:
             _LOGGER.debug(f"Issue {title!r} not found, not closing it")
             return
 
-        issue.add_comment(comment)
+        issue.comment(comment)
         issue.close()
 
-    def _github_open_merge_request(self, commit_msg, body, branch_name) -> GitHubMergeRequest:
-        """Create a GitHub pull request with the given dependency update."""
-        url = f'{IGitt.GitHub.BASE_URL}/repos/{self.slug}/pulls'
-        response = requests.Session().post(
-            url,
-            headers={
-                'Accept': 'application/vnd.github.v3+json',
-                'Authorization': f'token {self.token}'
-            },
-            json={
-                'title': commit_msg,
-                'body': body,
-                'head': branch_name,
-                'base': 'master',
-                'maintainer_can_modify': True
-            }
-        )
-        try:
-            response.raise_for_status()
-        except Exception as exc:
-            raise RuntimeError(f"Failed to create a pull request: {response.text}") from exc
-
-        mr_number = response.json()['number']
-        _LOGGER.info(f"Newly created pull request #{mr_number} available at {response.json()['html_url']}")
-        return GitHubMergeRequest.from_data(
-            response.json(), token=GitHubToken(self.token), repository=self.slug, number=mr_number
-        )
-
-    def _gitlab_open_merge_request(self, commit_msg, body, branch_name) -> GitLabMergeRequest:
-        url = f'{IGitt.GitLab.BASE_URL}/projects/{quote_plus(self.slug)}/merge_requests'
-        # Use Session as these calls are mocked based on tls_verify configuration.
-        response = requests.Session().post(
-            url,
-            params={'private_token': self.token},
-            json={
-                'title': commit_msg,
-                'description': body,
-                'source_branch': branch_name,
-                'target_branch': 'master',
-                'allow_collaboration': True
-            }
-        )
-        try:
-            response.raise_for_status()
-        except Exception as exc:
-            raise RuntimeError(f"Failed to create a pull request: {response.text}") from exc
-
-        mr_number = response.json()['iid']
-        _LOGGER.info(f"Newly created pull request #{mr_number} available at {response.json()['web_url']}")
-        return GitLabMergeRequest.from_data(
-            response.json(), token=GitLabPrivateToken(self.token), repository=self.slug, number=mr_number
-        )
 
     def assign(self, issue: Issue, assignees: typing.List[str]) -> None:
         """Assign users (by their accounts) to the given issue."""
@@ -164,15 +111,15 @@ class SourceManagement:
 
     def open_merge_request(self, commit_msg: str, branch_name: str, body: str, labels: list) -> MergeRequest:
         """Open a merge request for the given branch."""
-        if self.service_type == ServiceType.GITHUB:
-            merge_request = self._github_open_merge_request(commit_msg, body, branch_name)
-        elif self.service_type == ServiceType.GITLAB:
-            merge_request = self._gitlab_open_merge_request(commit_msg, body, branch_name)
-        else:
-            raise NotImplementedError
+        try:
+            merge_request = self.repository.create_pr(commit_msg, body, 'master', branch_name)
+            merge_request.add_label(labels)
 
-        merge_request.labels = set(labels or [])
-        return merge_request
+        except Exception as exc:
+            raise RuntimeError(f"Failed to create a pull request: {exc}")
+        else:
+            _LOGGER.info(f"Newly created pull request #{merge_request.id} available at {merge_request.url}")
+            return merge_request
 
     def _github_delete_branch(self, branch: str) -> None:
         """Delete the given branch from remote repository."""

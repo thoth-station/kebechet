@@ -99,7 +99,7 @@ class SourceManagement:
         if not issue:
             _LOGGER.debug(f"Issue {title!r} not found, not closing it")
             return
-
+        
         issue.add_comment(comment)
         issue.close()
 
