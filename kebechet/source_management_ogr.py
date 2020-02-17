@@ -99,7 +99,10 @@ class SourceManagement:
         else:
             issue = self.repository.create_issue(title, body())
             issue.add_label(*set(labels or []))
-            _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.number}")
+            if self.service_type == ServiceType.GITHUB:
+                _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.number}")
+            elif self.service_type == ServiceType.GITLAB:
+                _LOGGER.info(f"Reported issue {title!r} with id #{issue._raw_issue.iid}")
 
         return issue
 
