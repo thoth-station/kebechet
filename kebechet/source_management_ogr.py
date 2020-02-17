@@ -83,7 +83,7 @@ class SourceManagement:
         issue = self.get_issue(title)
         if issue:
             _LOGGER.info(
-                f"Issue already noted on upstream with id #{issue._raw_issue.number}"
+                f"Issue already noted on upstream with title #{issue._raw_issue.title}"
             )
             if not refresh_comment:
                 return issue
@@ -92,7 +92,7 @@ class SourceManagement:
             if comment_body:
                 issue.comment(comment_body)
                 _LOGGER.info(
-                    f"Added refresh comment to issue #{issue._raw_issue.number}"
+                    f"Added refresh comment to issue with title #{issue._raw_issue.title}"
                 )
             else:
                 _LOGGER.debug(f"Refresh comment not added")
@@ -113,22 +113,38 @@ class SourceManagement:
         issue.comment(comment)
         issue.close()
 
-    # OGR doesnt have this yet, to be implemented using REST calls.
+    def _github_assign(self, issue: Issue, assignees: typing.List[str]) -> None:
+        """Assign the given users to a particular issue."""
+        data = {"assignees": assignees}
+        response = requests.Session().post(
+            f"{BASE_URL['github']}/repos/{self.slug}/issues/{issue._raw_issue.number}/assignees",
+            headers={f"Authorization": f"token {self.token}"},
+            json=data
+        )
+
+        response.raise_for_status()
+
+    def _gitlab_assign(self, issue: Issue, assignees: typing.List[str]) -> None:
+        """Assign the given users to a particular issue. Gitlab assignee id's are different from username."""
+        assignees = [int(assignee) for assignee in assignees]
+        data = {"assignees": assignees}
+        response = requests.Session().put(
+            f"{BASE_URL['gitlab']}/repos/{self.slug}/issues/{issue._raw_issue.iid}/assignees",
+            headers={f"Authorization": f"token {self.token}"},
+            json=data
+        )
+
+        response.raise_for_status()
+
     def assign(self, issue: Issue, assignees: typing.List[str]) -> None:
         """Assign users (by their accounts) to the given issue."""
+        # Replace with OGR methods, when implemented in OGR.
         if self.service_type == ServiceType.GITHUB:
-            users = (
-                GitHubUser(GitHubToken(self.token), username) for username in assignees
-            )
+            self._github_assign(issue, assignees)
         elif self.service_type == ServiceType.GITLAB:
-            users = (
-                GitLabUser(GitLabPrivateToken(self.token), username)
-                for username in assignees
-            )
+            self._gitlab_assign(issue, assignees)
         else:
             raise NotImplementedError
-
-        issue.assign(*users)
 
     def open_merge_request(
         self, commit_msg: str, branch_name: str, body: str, labels: list
