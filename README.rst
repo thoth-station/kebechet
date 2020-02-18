@@ -67,3 +67,6 @@ To deploy kebechet on OpenShift cluster. Use the following Ansible command with 
 * ``KEBECHET_APPLICATION_NAMESPACE``: The OpenShift namespace can be used for the application purposes, all the templates, builds, secrets, configmap and jobs are stored in the ``KEBECHET_APPLICATION_NAMESPACE``.
 
 * ``OCP_URL`` and ``OCP_TOKEN``: The OpenShift credentials used to login to.
+
+
+(Test)
