@@ -194,7 +194,7 @@ class SourceManagement:
             raise RuntimeError(f"Cannot fetch branches. Error is: {exc}")
         else:
             return branches
-    
+
     def get_prs(self) -> list:
         """Get all the open PR objects as a list for a repo."""
         try:
