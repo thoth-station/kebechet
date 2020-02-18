@@ -128,8 +128,8 @@ class ThothAdviseManager(ManagerBase):
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
-        if self.event not in _EVENTS_SUPPORTED:
-            _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.event)
+        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+            _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.parsed_payload.get('event'))
             return
 
         if analysis_id is None:

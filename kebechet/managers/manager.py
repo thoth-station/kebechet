@@ -68,9 +68,9 @@ class ManagerBase:
         self.service_url = _init_igitt(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug
+        # Parsed paylad structure can be accessed in payload_parser.py
         if parsed_payload:
-            self.event = parsed_payload['event']
-            self.raw_payload = parsed_payload['raw_payload']
+            self.parsed_payload = parsed_payload
         self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
         self._repo = None

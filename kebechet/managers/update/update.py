@@ -606,8 +606,8 @@ class UpdateManager(ManagerBase):
 
     def run(self, labels: list) -> typing.Optional[dict]:
         """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
-        if self.event not in _EVENTS_SUPPORTED:
-            _LOGGER.info("Update Manager doesn't act on %r events.", self.event)
+        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+            _LOGGER.info("Update Manager doesn't act on %r events.", self.parsed_payload.get('event'))
             return
 
         # We will keep venv in the project itself - we have permissions in the cloned repo.
