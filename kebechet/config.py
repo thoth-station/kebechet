@@ -92,7 +92,7 @@ class _Config:
             cls.run_url(parsed_payload['url'], parsed_payload['service_type'], parsed_payload, True)
 
     @classmethod
-    def run_url(cls, url: str, service: str, parsed_payload: str, tls_verify: bool):
+    def run_url(cls, url: str, service: str, parsed_payload: dict, tls_verify: bool):
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
 
