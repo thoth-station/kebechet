@@ -101,13 +101,8 @@ class SourceManagement:
         else:
             issue = self.repository.create_issue(title, body())
             issue.add_label(*set(labels or []))
-            if self.service_type == ServiceType.GITHUB:
-                _LOGGER.info(
-                    f"Reported issue {title!r} with id #{issue._raw_issue.number}"
-                )
-            elif self.service_type == ServiceType.GITLAB:
-                _LOGGER.info(
-                    f"Reported issue {title!r} with id #{issue._raw_issue.iid}"
+            _LOGGER.info(
+                    f"Reported issue {title!r} with id #{issue.id}"
                 )
 
         return issue
@@ -199,6 +194,15 @@ class SourceManagement:
             raise RuntimeError(f"Cannot fetch branches. Error is: {exc}")
         else:
             return branches
+    
+    def get_prs(self) -> list:
+        """Get all the open PR objects as a list for a repo."""
+        try:
+            prs = self.repository.get_pr_list()
+        except Exception as exc:
+            raise RuntimeError(f"Cannot fetch PR's. Error is - {exc}")
+        else:
+            return prs
 
     def delete_branch(self, branch_name: str) -> None:
         """Delete the given branch from remote."""

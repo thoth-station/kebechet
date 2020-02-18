@@ -24,6 +24,7 @@ import json
 import typing
 from thamos import lib
 
+from ogr.abstract import PullRequest
 import git
 
 from kebechet.exception import DependencyManagementError
@@ -83,7 +84,7 @@ class ThothAdviseManager(ManagerBase):
 
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
-            if mr.head_branch_name == branch_name:
+            if mr.source_branch == branch_name:
                 _LOGGER.info('Merge request already exists, updating...')
                 return
 
@@ -147,7 +148,7 @@ class ThothAdviseManager(ManagerBase):
                 res = lib.get_analysis_results(analysis_id)
                 branch_name = self._construct_branch_name()
                 branch = self.repo.git.checkout("-B", branch_name)
-                self._cached_merge_requests = self.sm.repository.merge_requests
+                self._cached_merge_requests = self.sm.repository.get_pr_list()
 
                 if res is None:
                     _LOGGER.error("Advise failed on server side, contact the maintainer")
