@@ -49,10 +49,12 @@ class PayloadParser():
                     self.event = payload['event']
                     self.github_parser(github_payload)
         # For gitlab webhooks
-        elif 'project' in payload:
-            parsed_url = urlparse(payload['project']['web_url'])
+        elif 'payload' in payload:
+            gitlab_payload = payload['payload']
+            parsed_url = urlparse(gitlab_payload['project']['web_url'])
             if self._GITLAB in parsed_url.netloc:
                 self.service_type = 'gitlab'
+                self.gitlab_parser(gitlab_payload)
         else:
             raise WebhookPayloadError("Payload passed is not supported.")
 
