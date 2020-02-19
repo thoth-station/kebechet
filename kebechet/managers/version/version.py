@@ -221,9 +221,10 @@ class VersionManager(ManagerBase):
     def run(self, maintainers: list = None, assignees: list = None,
             labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
-        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-            _LOGGER.info("Version Manager doesn't act on %r events.", self.parsed_payload.get('event'))
-            return
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("Version Manager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
 
         reported_issues = []
         for issue in self.sm.repository.issues:

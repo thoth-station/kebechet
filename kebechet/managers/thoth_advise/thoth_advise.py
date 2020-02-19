@@ -128,9 +128,10 @@ class ThothAdviseManager(ManagerBase):
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
-        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-            _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.parsed_payload.get('event'))
-            return
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
 
         if analysis_id is None:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:

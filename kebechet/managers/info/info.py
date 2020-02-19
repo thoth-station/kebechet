@@ -37,9 +37,10 @@ class InfoManager(ManagerBase):
 
     def run(self) -> typing.Optional[dict]:
         """Check for info issue and close it with a report."""
-        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-            _LOGGER.info("Info manager doesn't act on %r events.", self.parsed_payload.get('event'))
-            return
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("Info manager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
         issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
             _LOGGER.info("No issue to report to, exiting")

@@ -74,9 +74,10 @@ class PipfileRequirementsManager(ManagerBase):
 
     def run(self, lockfile: bool = False) -> None:
         """Keep your requirements.txt in sync with Pipfile/Pipfile.lock."""
-        if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-            _LOGGER.info("PipfileRequirementsManager doesn't act on %r events.", self.parsed_payload.get('event'))
-            return
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("PipfileRequirementsManager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
 
         file_name = 'Pipfile.lock' if lockfile else 'Pipfile'
         file_url = construct_raw_file_url(self.service_url, self.slug, file_name, self.service_type)
