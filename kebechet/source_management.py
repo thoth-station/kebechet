@@ -32,6 +32,7 @@ from ogr.abstract import PullRequest
 from .exception import CannotFetchPRError
 from .exception import CannotFetchBranchesError
 from .exception import CreatePRError
+import json
 
 _LOGGER = logging.getLogger(__name__)
 BASE_URL = {"github": "https://api.github.com", "gitlab": "https://gitlab.com//api/v4"}
@@ -103,9 +104,7 @@ class SourceManagement:
         else:
             issue = self.repository.create_issue(title, body())
             issue.add_label(*set(labels or []))
-            _LOGGER.info(
-                    f"Reported issue {title!r} with id #{issue.id}"
-                )
+            _LOGGER.info(f"Reported issue {title!r} with id #{issue.id}")
 
         return issue
 
@@ -130,9 +129,23 @@ class SourceManagement:
 
         response.raise_for_status()
 
+    def _gitlab_fetch_userid(self, usernames: typing.List[str]) -> typing.List[int]:
+        """Method fetches the corresponding user ids for usernames."""
+        user_ids = []
+        for username in usernames:
+            response = requests.Session().get(
+                f"{BASE_URL['gitlab']}/users?username={username}",
+                headers={f"Authorization": f"token {self.token}"},
+            )
+            res = json.loads(response.text)
+            userid = res.pop().get("id")
+            if userid:
+                user_ids.append(userid)
+        return user_ids
+
     def _gitlab_assign(self, issue: Issue, assignees: typing.List[str]) -> None:
         """Assign the given users to a particular issue. Gitlab assignee id's are different from username."""
-        assignees = [int(assignee) for assignee in assignees]
+        assignees = self._gitlab_fetch_userid(assignees)
         data = {"assignees": assignees}
         response = requests.Session().put(
             f"{BASE_URL['gitlab']}/repos/{self.slug}/issues/{issue._raw_issue.iid}/assignees",
