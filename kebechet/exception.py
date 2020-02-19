@@ -62,3 +62,27 @@ class WebhookPayloadError(KebechetException):
 
     Generally the payload is empty or not of proper json format.
     """
+
+
+class CannotFetchPRError(KebechetException):
+    """
+    An exception raised if there OGR cannot fetch the PR's for a repo.
+
+    Generally the token is invalid or doesn't have access to the repo.
+    """
+
+
+class CannotFetchBranchesError(KebechetException):
+    """
+    An exception raised if there OGR cannot fetch the repo branches.
+
+    Generally the token is invalid or doesn't have access to the repo.
+    """
+
+
+class CreatePRError(KebechetException):
+    """
+    An exception raised if there OGR cannot create an PR.
+
+    Generally the token is invalid or doesn't have access to the repo.
+    """

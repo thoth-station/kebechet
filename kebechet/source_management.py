@@ -29,7 +29,9 @@ from ogr.services.gitlab import GitlabService
 from .enums import ServiceType
 from ogr.abstract import Issue
 from ogr.abstract import PullRequest
-
+from .exception import CannotFetchPRError
+from .exception import CannotFetchBranchesError
+from .exception import CreatePRError
 
 _LOGGER = logging.getLogger(__name__)
 BASE_URL = {"github": "https://api.github.com", "gitlab": "https://gitlab.com//api/v4"}
@@ -161,7 +163,7 @@ class SourceManagement:
             merge_request.add_label(labels)
 
         except Exception as exc:
-            raise RuntimeError(f"Failed to create a pull request: {exc}")
+            raise CreatePRError(f"Failed to create a pull request: {exc}")
         else:
             _LOGGER.info(
                 f"Newly created pull request #{merge_request.id} available at {merge_request.url}"
@@ -191,7 +193,7 @@ class SourceManagement:
         try:
             branches = self.repository.get_branches()
         except Exception as exc:
-            raise RuntimeError(f"Cannot fetch branches. Error is: {exc}")
+            raise CannotFetchBranchesError(f"Cannot fetch branches. Error is: {exc}")
         else:
             return branches
 
@@ -200,7 +202,7 @@ class SourceManagement:
         try:
             prs = self.repository.get_pr_list()
         except Exception as exc:
-            raise RuntimeError(f"Cannot fetch PR's. Error is - {exc}")
+            raise CannotFetchPRError(f"Cannot fetch PR's. Error is - {exc}")
         else:
             return prs
 
