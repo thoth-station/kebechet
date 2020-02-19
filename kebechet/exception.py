@@ -49,40 +49,35 @@ class PullRequestError(KebechetException):
 
 
 class DependencyManagementError(KebechetException):
-    """
-    An exception raised if there is an error in dependency management in the repo.
+    """An exception raised if there is an error in dependency management in the repo.
 
     This errors are usually wrong or missing Pipfile, Pipfile.lock, requirments.in or requirments.txt.
     """
 
 
 class WebhookPayloadError(KebechetException):
-    """
-    An exception raised if there is an error if the webhook passed cannot be parsed as a json.
+    """An exception raised if there is an error if the webhook passed cannot be parsed as a json.
 
     Generally the payload is empty or not of proper json format.
     """
 
 
 class CannotFetchPRError(KebechetException):
-    """
-    An exception raised if there OGR cannot fetch the PR's for a repo.
+    """An exception raised if there OGR cannot fetch the PR's for a repo.
 
     Generally the token is invalid or doesn't have access to the repo.
     """
 
 
 class CannotFetchBranchesError(KebechetException):
-    """
-    An exception raised if there OGR cannot fetch the repo branches.
+    """An exception raised if there OGR cannot fetch the repo branches.
 
     Generally the token is invalid or doesn't have access to the repo.
     """
 
 
 class CreatePRError(KebechetException):
-    """
-    An exception raised if there OGR cannot create an PR.
+    """An exception raised if there OGR cannot create an PR.
 
     Generally the token is invalid or doesn't have access to the repo.
     """

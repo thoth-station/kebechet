@@ -9,3 +9,4 @@ requests==2.18.4
 semver
 sentry-sdk
 thoth-common
+ogr
