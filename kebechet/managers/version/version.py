@@ -227,7 +227,7 @@ class VersionManager(ManagerBase):
                 return
 
         reported_issues = []
-        for issue in self.sm.repository.issues:
+        for issue in self.sm.repository.get_issue_list():
             issue_title = issue.title.strip()
 
             if issue_title.startswith((_NO_VERSION_FOUND_ISSUE_NAME, _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME)):
@@ -248,11 +248,11 @@ class VersionManager(ManagerBase):
                     try:
                         self.sm.assign(issue, assignees)
                     except Exception:
-                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.number}")
+                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.id}")
                         issue.comment("Unable to assign provided assignees, please check bot configuration.")
 
                 maintainers = maintainers or self._get_maintainers(labels)
-                if issue.author.username.lower() not in (m.lower() for m in maintainers):
+                if issue.author.lower() not in (m.lower() for m in maintainers):
                     issue.comment(
                         f"Sorry, @{issue.author} but you are not stated in maintainers section for "
                         f"this project. Maintainers are @" + ', @'.join(maintainers)
@@ -292,7 +292,7 @@ class VersionManager(ManagerBase):
                 )
 
                 _LOGGER.info(
-                    f"Opened merge request with {request.number} for new release of {self.slug} "
+                    f"Opened merge request with {request.id} for new release of {self.slug} "
                     f"in version {version_identifier}"
                 )
 
