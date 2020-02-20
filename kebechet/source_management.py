@@ -122,7 +122,7 @@ class SourceManagement:
         """Assign the given users to a particular issue."""
         data = {"assignees": assignees}
         response = requests.Session().post(
-            f"{BASE_URL['github']}/repos/{self.slug}/issues/{issue._raw_issue.number}/assignees",
+            f"{BASE_URL['github']}/repos/{self.slug}/issues/{issue.id}/assignees",
             headers={f"Authorization": f"token {self.token}"},
             json=data,
         )
@@ -148,7 +148,7 @@ class SourceManagement:
         assignees = self._gitlab_fetch_userid(assignees)
         data = {"assignees": assignees}
         response = requests.Session().put(
-            f"{BASE_URL['gitlab']}/repos/{self.slug}/issues/{issue._raw_issue.iid}/assignees",
+            f"{BASE_URL['gitlab']}/repos/{self.slug}/issues/{issue.id}/assignees",
             headers={f"Authorization": f"token {self.token}"},
             json=data,
         )
@@ -173,7 +173,7 @@ class SourceManagement:
             merge_request = self.repository.create_pr(
                 commit_msg, body, "master", branch_name
             )
-            merge_request.add_label(labels)
+            merge_request.add_label(*labels)
 
         except Exception as exc:
             raise CreatePRError(f"Failed to create a pull request: {exc}")
