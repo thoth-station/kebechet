@@ -173,7 +173,6 @@ class SourceManagement:
             merge_request = self.repository.create_pr(
                 commit_msg, body, "master", branch_name
             )
-            _LOGGER.info(labels)
             merge_request.add_label(*labels)
 
         except Exception as exc:
