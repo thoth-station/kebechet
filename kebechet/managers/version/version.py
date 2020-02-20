@@ -22,7 +22,7 @@ import logging
 import typing
 
 from git import Repo
-from IGitt.Interfaces.Issue import Issue
+from ogr.abstract import Issue
 import yaml
 import semver
 from datetime import datetime
@@ -109,7 +109,7 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
+                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
                 labels
             )
 
@@ -118,7 +118,7 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda x: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
+                lambda x: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
                 labels
             )
 
@@ -212,7 +212,7 @@ class VersionManager(ManagerBase):
         if issue.description:
             body = issue.description + '\n\n'
 
-        body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(changelog)
         return body
 
     def run(self, maintainers: list = None, assignees: list = None,
@@ -232,7 +232,7 @@ class VersionManager(ManagerBase):
 
             _LOGGER.info(
                 "Found an issue #%s which is a candidate for request of new version release: %s",
-                issue.number, issue.title
+                issue.id, issue.title
             )
 
             with cloned_repo(self.service_url, self.slug) as repo:
@@ -241,12 +241,12 @@ class VersionManager(ManagerBase):
                         self.sm.assign(issue, assignees)
                     except Exception:
                         _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.number}")
-                        issue.add_comment("Unable to assign provided assignees, please check bot configuration.")
+                        issue.comment("Unable to assign provided assignees, please check bot configuration.")
 
                 maintainers = maintainers or self._get_maintainers(labels)
                 if issue.author.username.lower() not in (m.lower() for m in maintainers):
-                    issue.add_comment(
-                        f"Sorry, @{issue.author.username} but you are not stated in maintainers section for "
+                    issue.comment(
+                        f"Sorry, @{issue.author} but you are not stated in maintainers section for "
                         f"this project. Maintainers are @" + ', @'.join(maintainers)
                         if maintainers else "Sorry, no maintainers configured."
                     )
@@ -258,7 +258,7 @@ class VersionManager(ManagerBase):
                     version_identifier, old_version = self._adjust_version_in_sources(repo, labels, issue)
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
-                    issue.add_comment(str(exc))
+                    issue.comment(str(exc))
                     issue.close()
                     raise
 
@@ -289,5 +289,5 @@ class VersionManager(ManagerBase):
                 )
 
         for reported_issue in reported_issues:
-            reported_issue.add_comment("Closing as this issue is no longer relevant.")
+            reported_issue.comment("Closing as this issue is no longer relevant.")
             reported_issue.close()

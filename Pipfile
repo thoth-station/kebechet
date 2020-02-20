@@ -11,10 +11,10 @@ toml = "*"
 "delegator.py" = "*"
 gitpython = "==1.0.1"
 pyyaml = "*"
-igitt = {git = "https://gitlab.com/gitmate/open-source/IGitt.git"}
 semver = "*"
 thoth-common = "*"
 thamos = "*"
+ogr = "*"
 
 [dev-packages]
 pytest = "*"

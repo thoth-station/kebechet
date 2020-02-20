@@ -25,6 +25,9 @@ import json
 import typing
 from itertools import chain
 from functools import partial
+from ogr.abstract import PRStatus
+from ogr.abstract import IssueComment
+from ogr.abstract import Issue
 
 import git
 
@@ -33,7 +36,7 @@ from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
 from kebechet.source_management import Issue
-from kebechet.source_management import MergeRequest
+from kebechet.source_management import PullRequest
 from kebechet.utils import cloned_repo
 
 from .messages import ISSUE_CLOSE_COMMENT
@@ -210,7 +213,7 @@ class UpdateManager(ManagerBase):
         return f'kebechet-{package_name}-{new_package_version}'
 
     def _open_merge_request_update(self, dependency: str, old_version: str, new_version: str,
-                                   labels: list, files: list, merge_request: MergeRequest) -> typing.Optional[int]:
+                                   labels: list, files: list, merge_request: PullRequest) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
         branch_name = self._construct_branch_name(dependency, new_version)
         commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
@@ -235,7 +238,7 @@ class UpdateManager(ManagerBase):
         """Check whether the given update was already proposed as a pull request."""
         branch_name = self._construct_branch_name(package_name, new_package_version)
         response = {mr for mr in self._cached_merge_requests
-                    if mr.head_branch_name == branch_name and mr.state in ('opened', 'open')}
+                    if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
 
         if len(response) == 0:
             _LOGGER.debug(f"No pull request was found for update of {package_name} to version {new_package_version}")
@@ -302,7 +305,7 @@ class UpdateManager(ManagerBase):
 
     def _create_update(self, dependency: str, package_version: str, old_version: str,
                        is_dev: bool = False, labels: list = None, old_environment: dict = None,
-                       merge_request: MergeRequest = None, pipenv_used: bool = True,
+                       merge_request: PullRequest = None, pipenv_used: bool = True,
                        req_dev: bool = False) -> typing.Union[tuple, None]:
         """Create an update for the given dependency when dependencies are managed by Pipenv.
 
@@ -371,8 +374,8 @@ class UpdateManager(ManagerBase):
             return False
 
         branch_name = "kebechet-initial-lock"
-        request = {mr for mr in self.sm.repository.merge_requests
-                   if mr.head_branch_name == branch_name and mr.state in ('opened', 'open')}
+        request = {mr for mr in self.sm.get_prs()
+                   if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
 
         if req_dev and not pipenv_used:
             files = ['requirements-dev.txt']
@@ -422,7 +425,7 @@ class UpdateManager(ManagerBase):
             _LOGGER.debug("No need to update refresh comment, the issue is up to date")
             return
 
-        for issue_comment in issue.comments:
+        for issue_comment in issue.get_comments():
             if self.sha in issue_comment.body:
                 _LOGGER.debug(f"No need to update refresh comment, comment for the current "
                               f"master {self.sha[:7]!r} found in a comment")
@@ -454,15 +457,15 @@ class UpdateManager(ManagerBase):
         commit_msg = "Automatic dependency re-locking"
         branch_name = "kebechet-dependency-relock"
         self._git_push(":pushpin: " + commit_msg, branch_name, ['Pipfile.lock'])
-        pr_id = self.sm.open_merge_request(commit_msg, branch_name, f"Fixes: #{issue.number}", labels)
-        _LOGGER.info(f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.number}")
+        pr_id = self.sm.open_merge_request(commit_msg, branch_name, f"Fixes: #{issue.id}", labels)
+        _LOGGER.info(f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.id}")
 
     def _delete_old_branches(self, outdated: dict) -> None:
         """Delete old kebechet branches from the remote repository."""
         branches = {
-            entry['name']
+            entry
             for entry in self.sm.list_branches()
-            if entry['name'].startswith('kebechet-')
+            if entry.startswith('kebechet-')
         }
         for package_name, info in outdated.items():
             # Do not remove active branches - branches we issued PRs in.
@@ -548,7 +551,7 @@ class UpdateManager(ManagerBase):
         result = {}
         if outdated:
             # Do API calls only once, cache results.
-            self._cached_merge_requests = self.sm.repository.merge_requests
+            self._cached_merge_requests = self.sm.get_prs()
 
         for package_name in outdated.keys():
             # As an optimization, first check if the given PR is already present.
