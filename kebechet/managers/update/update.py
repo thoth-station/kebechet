@@ -231,7 +231,7 @@ class UpdateManager(ManagerBase):
 
         _LOGGER.info(f"Pull request #{merge_request.id} to update {dependency} from "
                      f"version {old_version} to {new_version} updated")
-        merge_request.add_comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
+        merge_request.comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
         return merge_request
 
     def _should_update(self, package_name, new_package_version) -> tuple:
@@ -402,7 +402,7 @@ class UpdateManager(ManagerBase):
             if self.sha != commits[0].parent.sha:
                 lock_func()
                 self._git_push(commit_msg, branch_name, files, force_push=True)
-                request.add_comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
+                request.comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
             else:
                 _LOGGER.info(f"Pull request #{request.id} is up to date for the current master branch")
         else:
