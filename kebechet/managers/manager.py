@@ -29,32 +29,8 @@ from kebechet.exception import PipenvError
 from kebechet.enums import ServiceType
 from kebechet.source_management import SourceManagement
 
-import IGitt.GitHub
-import IGitt.GitLab
-
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> str:
-    """Initialize IGitt library for calls to services.
-
-    IGitt uses environment variables to distinguish from services - we don't want this behaviour - we want to
-    have service configuration explicitly configurable (possible use multiple times and talking to
-    different services). Let's override IGitt behavior based on configuration.
-    """
-    if service_type == ServiceType.GITHUB:
-        IGitt.GitHub.GH_INSTANCE_URL = service_url or 'https://github.com'
-        IGitt.GitHub.BASE_URL = IGitt.GitHub.GH_INSTANCE_URL.replace('github.com', 'api.github.com')
-        service_url = IGitt.GitHub.GH_INSTANCE_URL
-    elif service_type == ServiceType.GITLAB:
-        IGitt.GitLab.GL_INSTANCE_URL = service_url or 'https://gitlab.com'
-        IGitt.GitLab.BASE_URL = IGitt.GitLab.GL_INSTANCE_URL + '/api/v4'
-        service_url = IGitt.GitLab.GL_INSTANCE_URL
-    else:
-        raise NotImplementedError
-
-    return service_url
 
 
 class ManagerBase:
@@ -65,7 +41,7 @@ class ManagerBase:
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
         # This needs to be called before instantiation of SourceManagement due to changes in global variables.
-        self.service_url = _init_igitt(service_type, service_url)
+        self.service_url = service_url
         # Allow token expansion from env vars.
         self.slug = slug
         # Parsed paylad structure can be accessed in payload_parser.py
