@@ -229,7 +229,7 @@ class UpdateManager(ManagerBase):
             merge_request = self.sm.open_merge_request(commit_msg, branch_name, body, labels)
             return merge_request
 
-        _LOGGER.info(f"Pull request #{merge_request.number} to update {dependency} from "
+        _LOGGER.info(f"Pull request #{merge_request.id} to update {dependency} from "
                      f"version {old_version} to {new_version} updated")
         merge_request.add_comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
         return merge_request
@@ -251,7 +251,7 @@ class UpdateManager(ManagerBase):
                              "the pull request as additional commits (by a maintaner?)")
                 return response, False
 
-            pr_number = response.number
+            pr_number = response.id
             if self.sha != commits[0].parent.sha:
                 _LOGGER.debug(f"Found already existing  pull request #{pr_number} for old master "
                               f"branch {commits[0].parent.sha[:7]!r} updating pull request based on "
@@ -327,7 +327,7 @@ class UpdateManager(ManagerBase):
             merge_request = self._open_merge_request_update(
                 dependency, old_version, package_version, labels, ['Pipfile.lock'], merge_request
             )
-            return old_version, package_version, merge_request.number
+            return old_version, package_version, merge_request.id
 
         # For either requirements.txt  or requirements-dev.text scenario we need to propagate all changes
         # (updates of transitive dependencies) into requirements.txt or requirements-dev file
@@ -336,7 +336,7 @@ class UpdateManager(ManagerBase):
         merge_request = self._open_merge_request_update(
             dependency, old_version, package_version, labels, [output_file], merge_request
         )
-        return old_version, package_version, merge_request.number
+        return old_version, package_version, merge_request.id
 
     @classmethod
     def _replicate_old_environment(cls) -> None:
@@ -389,7 +389,7 @@ class UpdateManager(ManagerBase):
             lock_func()
             self._git_push(commit_msg, branch_name, files)
             request = self.sm.open_merge_request(commit_msg, branch_name, body='', labels=labels)
-            _LOGGER.info(f"Initial dependency lock present in PR #{request.number}")
+            _LOGGER.info(f"Initial dependency lock present in PR #{request.id}")
         elif len(request) == 1:
             request = list(request)[0]
             commits = request.commits
@@ -404,7 +404,7 @@ class UpdateManager(ManagerBase):
                 self._git_push(commit_msg, branch_name, files, force_push=True)
                 request.add_comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
             else:
-                _LOGGER.info(f"Pull request #{request.number} is up to date for the current master branch")
+                _LOGGER.info(f"Pull request #{request.id} is up to date for the current master branch")
         else:
             raise DependencyManagementError(
                 f"Found two or more pull requests for initial requirements lock for branch {branch_name}"
@@ -561,7 +561,7 @@ class UpdateManager(ManagerBase):
             merge_request, should_update = self._should_update(package_name, new_version)
             if not should_update:
                 _LOGGER.info(f"Skipping update creation for {package_name} from version {old_version} to "
-                             f"{new_version} as the given update already exists in PR #{merge_request.number}")
+                             f"{new_version} as the given update already exists in PR #{merge_request.id}")
                 continue
 
             try:
