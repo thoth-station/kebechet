@@ -35,9 +35,11 @@ class PayloadParser():
 
     def __init__(self, payload: dict) -> None:
         """Initialize the parameters we require from the services."""
+        self.raw_payload = payload
         self.service_type = None
         self.url = None
         self.event = None
+        self.parsed_payload = None
 
         # For github webhooks
         if 'event' in payload:
@@ -71,9 +73,10 @@ class PayloadParser():
         """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None
-        parsed_payload = {
+        self.parsed_payload = {
             'service_type': self.service_type,
             'url': self.url,
-            'event': self.event
+            'event': self.event,
+            'raw_payload': self.raw_payload
         }
-        return parsed_payload
+        return self.parsed_payload

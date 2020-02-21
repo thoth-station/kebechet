@@ -36,13 +36,18 @@ _LOGGER = logging.getLogger(__name__)
 class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
-    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
+    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, parsed_payload: dict = None,
+                 token: str = None):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
         # This needs to be called before instantiation of SourceManagement due to changes in global variables.
         self.service_url = service_url
         # Allow token expansion from env vars.
         self.slug = slug
+        # Parsed paylad structure can be accessed in payload_parser.py
+        self.parsed_payload = None
+        if parsed_payload:
+            self.parsed_payload = parsed_payload
         self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
         self._repo = None

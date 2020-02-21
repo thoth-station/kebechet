@@ -47,6 +47,9 @@ _RELEASE_TITLES = {
     "finalize version": semver.finalize_version,
 }
 
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['issues', 'issue']
+
 
 class VersionError(Exception):
     """An exception raised on invalid version provided or found in the repo."""
@@ -218,6 +221,11 @@ class VersionManager(ManagerBase):
     def run(self, maintainers: list = None, assignees: list = None,
             labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("Version Manager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
+
         reported_issues = []
         for issue in self.sm.repository.get_issue_list():
             issue_title = issue.title.strip()
