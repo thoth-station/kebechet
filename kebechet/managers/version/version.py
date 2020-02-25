@@ -113,6 +113,7 @@ class VersionManager(ManagerBase):
             self.sm.open_issue_if_not_exist(
                 error_msg,
                 lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                None,
                 labels
             )
 
@@ -121,7 +122,8 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda x: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                None,
                 labels
             )
 
