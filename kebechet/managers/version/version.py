@@ -212,7 +212,8 @@ class VersionManager(ManagerBase):
         if not issue.description:
             return ""
 
-        result = issue.description.replace(
+        result = "\n".join(issue.description.splitlines())
+        result = result.replace(
             "Hey, Kebechet!\n\nCreate a new patch release, please.",
             f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n"
         )
