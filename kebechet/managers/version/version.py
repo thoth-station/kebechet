@@ -208,15 +208,32 @@ class VersionManager(ManagerBase):
         return changelog
 
     @staticmethod
-    def _construct_pr_body(issue: Issue, changelog: str) -> str:
+    def _adjust_pr_body(issue: Issue) -> str:
+        if not issue.description:
+            return ""
+
+        result = issue.description.replace(
+            "Hey, Kebechet!\n\nCreate a new patch release, please.",
+            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n"
+        )
+
+        result = result.replace(
+            "Hey, Kebechet!\n\nCreate a new minor release, please.",
+            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.\n\n"
+        )
+
+        return result.replace(
+            "Hey, Kebechet!\n\nCreate a new major release, please.",
+            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.\n\n"
+        )
+
+    @classmethod
+    def _construct_pr_body(cls, issue: Issue, changelog: str) -> str:
         """Construct body of the opened pull request with version update."""
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
-        body = ''
-        if issue.description:
-            body = issue.description + '\n\n'
-
+        body = cls._adjust_pr_body(issue)
         body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(changelog)
         return body
 
