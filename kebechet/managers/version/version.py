@@ -300,9 +300,9 @@ class VersionManager(ManagerBase):
                 
                 # If an issue exists, we close it as there is no change to source code.
                 if not changelog:
-                    issue.comment(
-                        f'Closing the issue as there is no changelog between the new release of {self.slug}.  :stop_sign:'
-                    )
+                    message = f'Closing the issue as there is no changelog between the new release of {self.slug}.  :stop_sign:'
+                    _LOGGER.info(message)
+                    issue.comment(message)
                     issue.close()
                     return
                 
