@@ -297,6 +297,15 @@ class VersionManager(ManagerBase):
                 changelog = self._compute_changelog(
                     repo, old_version, version_identifier, version_file=changelog_file
                 )
+
+                # If an issue exists, we close it as there is no change to source code.
+                if not changelog:
+                    message = f'Closing the issue as there is no changelog between the new release of {self.slug}.'
+                    _LOGGER.info(message)
+                    issue.comment(message)
+                    issue.close()
+                    return
+
                 branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
