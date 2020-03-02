@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c5560902844f79debe6965648b6d449033b8a759cae393741af2cf0a8457b197"
+            "sha256": "143fa97f0fb19de061f2d968d65d53465799abdf216937d2a3d4350083f0fbc7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -213,21 +213,20 @@
             ],
             "version": "==3.0.12"
         },
-        "gitdb2": {
+        "gitdb": {
             "hashes": [
-                "sha256:2207d5de990b1abe81960c20337c5e080e0490b4942bb252a40934b1838a78c7",
-                "sha256:6e46b9a55fc23d444b1dd984247df81a98c7b55b84a45ce14f3aa3c77b152118"
+                "sha256:284a6a4554f954d6e737cddcff946404393e030b76a282c6640df8efd6b3da5e",
+                "sha256:598e0096bb3175a0aab3a0b5aedaa18a9a25c6707e0eca0695ba1a0baf1b2150"
             ],
-            "index": "pypi",
-            "version": "==3.0.1"
+            "version": "==4.0.2"
         },
         "gitpython": {
             "hashes": [
-                "sha256:ad61bc25deadb535b047684d06f3654c001d9415e1971e51c9c20f5b510076e9",
-                "sha256:b8367c432de995dc330b5b146c5bfdc0926b8496e100fda6692134e00c0dcdc5"
+                "sha256:43da89427bdf18bf07f1164c6d415750693b4d50e28fc9b68de706245147b9dd",
+                "sha256:e426c3b587bd58c482f0b7fe6145ff4ac7ae6c82673fc656f489719abca6f4cb"
             ],
             "index": "pypi",
-            "version": "==2.1.8"
+            "version": "==3.1.0"
         },
         "google-auth": {
             "hashes": [
@@ -629,13 +628,6 @@
             "hashes": [
                 "sha256:171484fe62793e3626c8b05dd752eb2ca01854b0c55a1efc0dc4210fccb65446",
                 "sha256:5fead614cf2de17ee0707a8c6a5f2aa5a2fc6c698c70993ba42f515485ffda78"
-            ],
-            "version": "==3.0.1"
-        },
-        "smmap2": {
-            "hashes": [
-                "sha256:0cb6ea470b1ad9a65a02ca7f4c7ae601861f7dd24a43812ca51cfca2892bb524",
-                "sha256:44cc8bdaf96442dbb9a8e2e14377d074b3d0eea292eee3c95c8c449b6c92c557"
             ],
             "version": "==3.0.1"
         },

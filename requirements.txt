@@ -4,8 +4,7 @@ pipenv
 toml
 delegator.py
 pyyaml
-gitpython==2.1.8
-gitdb2==3.0.1
+gitpython==3.1.0
 requests==2.18.4
 semver
 sentry-sdk
