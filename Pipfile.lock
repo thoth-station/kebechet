@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2d0ccf9d202631d041cb74487126819001289588b320c6b141eab555648b73c1"
+            "sha256": "c5560902844f79debe6965648b6d449033b8a759cae393741af2cf0a8457b197"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -213,19 +213,21 @@
             ],
             "version": "==3.0.12"
         },
-        "gitdb": {
+        "gitdb2": {
             "hashes": [
-                "sha256:284a6a4554f954d6e737cddcff946404393e030b76a282c6640df8efd6b3da5e",
-                "sha256:598e0096bb3175a0aab3a0b5aedaa18a9a25c6707e0eca0695ba1a0baf1b2150"
+                "sha256:2207d5de990b1abe81960c20337c5e080e0490b4942bb252a40934b1838a78c7",
+                "sha256:6e46b9a55fc23d444b1dd984247df81a98c7b55b84a45ce14f3aa3c77b152118"
             ],
-            "version": "==4.0.2"
+            "index": "pypi",
+            "version": "==3.0.1"
         },
         "gitpython": {
             "hashes": [
-                "sha256:9c88c17bbcae2a445ff64024ef13526224f70e35e38c33416be5ceb56ca7f760"
+                "sha256:ad61bc25deadb535b047684d06f3654c001d9415e1971e51c9c20f5b510076e9",
+                "sha256:b8367c432de995dc330b5b146c5bfdc0926b8496e100fda6692134e00c0dcdc5"
             ],
             "index": "pypi",
-            "version": "==1.0.1"
+            "version": "==2.1.8"
         },
         "google-auth": {
             "hashes": [
@@ -258,11 +260,11 @@
         },
         "importlib-resources": {
             "hashes": [
-                "sha256:6e2783b2538bd5a14678284a3962b0660c715e5a0f10243fd5e00a4b5974f50b",
-                "sha256:d3279fd0f6f847cced9f7acc19bd3e5df54d34f93a2e7bb5f238f81545787078"
+                "sha256:44bbe129a4ff27fcc0bae81f10f411bb011015b9afb1f0dde6234724d96966ae",
+                "sha256:57919feb41464d207fd44cbb9359bd2d9ee7fb3ab327e1686662f3f5a973412f"
             ],
             "markers": "python_version < '3.7'",
-            "version": "==1.0.2"
+            "version": "==1.1.0"
         },
         "invectio": {
             "hashes": [
@@ -630,6 +632,13 @@
             ],
             "version": "==3.0.1"
         },
+        "smmap2": {
+            "hashes": [
+                "sha256:0cb6ea470b1ad9a65a02ca7f4c7ae601861f7dd24a43812ca51cfca2892bb524",
+                "sha256:44cc8bdaf96442dbb9a8e2e14377d074b3d0eea292eee3c95c8c449b6c92c557"
+            ],
+            "version": "==3.0.1"
+        },
         "termcolor": {
             "hashes": [
                 "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"
@@ -765,6 +774,7 @@
                 "sha256:12248a63bbdf7548f89cb4c7cda4681e537031eda29c02ea29674bc6854460c2",
                 "sha256:7c0f8e91abc0dc07a5068f315c52cb30c66bfbc581e5b50704c8a2f6ebae794a"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.0.0"
         }
     },
@@ -1169,6 +1179,7 @@
                 "sha256:12248a63bbdf7548f89cb4c7cda4681e537031eda29c02ea29674bc6854460c2",
                 "sha256:7c0f8e91abc0dc07a5068f315c52cb30c66bfbc581e5b50704c8a2f6ebae794a"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.0.0"
         }
     }

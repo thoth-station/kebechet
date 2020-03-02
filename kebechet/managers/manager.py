@@ -33,6 +33,18 @@ from kebechet.source_management import SourceManagement
 _LOGGER = logging.getLogger(__name__)
 
 
+def _init_service_url(service_type: ServiceType = None, service_url: str = None) -> str:
+    """Needed for the cron job to initialize the service_url if not provided."""
+    if service_type == ServiceType.GITHUB:
+        service_url = service_url or 'https://github.com'
+    elif service_type == ServiceType.GITLAB:
+        service_url = service_url or 'https://gitlab.com'
+    else:
+        raise NotImplementedError
+
+    return service_url
+
+
 class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
@@ -40,8 +52,8 @@ class ManagerBase:
                  token: str = None):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
-        # This needs to be called before instantiation of SourceManagement due to changes in global variables.
-        self.service_url = service_url
+        # This needs to be called before instantiation of service url, if not provided.
+        self.service_url = _init_service_url(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug
         # Parsed paylad structure can be accessed in payload_parser.py

@@ -5,6 +5,7 @@ toml
 delegator.py
 pyyaml
 gitpython==2.1.8
+gitdb2==3.0.1
 requests==2.18.4
 semver
 sentry-sdk
