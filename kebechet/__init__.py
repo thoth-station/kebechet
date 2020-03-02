@@ -1,6 +1,6 @@
 """Update dependencies stated in the Pipfile.lock for the given repo or repositories."""
 
-from .enums import ServiceType
+from sourcemanagement.enums import ServiceType
 from .managers import InfoManager
 from .managers import UpdateManager
 

@@ -25,9 +25,6 @@ import json
 import typing
 from itertools import chain
 from functools import partial
-from ogr.abstract import PRStatus
-from ogr.abstract import IssueComment
-from ogr.abstract import Issue
 
 import git
 
@@ -35,8 +32,9 @@ from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
-from kebechet.source_management import Issue
-from kebechet.source_management import PullRequest
+from sourcemanagement.sourcemanagement import Issue
+from sourcemanagement.sourcemanagement import PullRequest
+from sourcemanagement.sourcemanagement import PRStatus
 from kebechet.utils import cloned_repo
 
 from .messages import ISSUE_CLOSE_COMMENT

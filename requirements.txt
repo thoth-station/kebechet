@@ -9,4 +9,4 @@ requests
 semver
 sentry-sdk
 thoth-common
-ogr
+thoth-sourcemanagement

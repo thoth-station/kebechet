@@ -26,7 +26,7 @@ from urllib.parse import urljoin
 
 import git
 
-from .enums import ServiceType
+from sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 

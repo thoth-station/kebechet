@@ -14,7 +14,7 @@ pyyaml = "*"
 semver = "*"
 thoth-common = "*"
 thamos = "*"
-ogr = "*"
+thoth-sourcemanagement = "*"
 
 [dev-packages]
 pytest = "*"
