@@ -5,7 +5,7 @@ toml
 delegator.py
 pyyaml
 gitpython>=3.1.0
-requests>=2.22.0
+requests
 semver
 sentry-sdk
 thoth-common
