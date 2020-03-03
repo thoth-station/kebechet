@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2d0ccf9d202631d041cb74487126819001289588b320c6b141eab555648b73c1"
+            "sha256": "143fa97f0fb19de061f2d968d65d53465799abdf216937d2a3d4350083f0fbc7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -222,10 +222,11 @@
         },
         "gitpython": {
             "hashes": [
-                "sha256:9c88c17bbcae2a445ff64024ef13526224f70e35e38c33416be5ceb56ca7f760"
+                "sha256:43da89427bdf18bf07f1164c6d415750693b4d50e28fc9b68de706245147b9dd",
+                "sha256:e426c3b587bd58c482f0b7fe6145ff4ac7ae6c82673fc656f489719abca6f4cb"
             ],
             "index": "pypi",
-            "version": "==1.0.1"
+            "version": "==3.1.0"
         },
         "google-auth": {
             "hashes": [
@@ -258,11 +259,11 @@
         },
         "importlib-resources": {
             "hashes": [
-                "sha256:6e2783b2538bd5a14678284a3962b0660c715e5a0f10243fd5e00a4b5974f50b",
-                "sha256:d3279fd0f6f847cced9f7acc19bd3e5df54d34f93a2e7bb5f238f81545787078"
+                "sha256:44bbe129a4ff27fcc0bae81f10f411bb011015b9afb1f0dde6234724d96966ae",
+                "sha256:57919feb41464d207fd44cbb9359bd2d9ee7fb3ab327e1686662f3f5a973412f"
             ],
             "markers": "python_version < '3.7'",
-            "version": "==1.0.2"
+            "version": "==1.1.0"
         },
         "invectio": {
             "hashes": [
@@ -765,6 +766,7 @@
                 "sha256:12248a63bbdf7548f89cb4c7cda4681e537031eda29c02ea29674bc6854460c2",
                 "sha256:7c0f8e91abc0dc07a5068f315c52cb30c66bfbc581e5b50704c8a2f6ebae794a"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.0.0"
         }
     },
@@ -1169,6 +1171,7 @@
                 "sha256:12248a63bbdf7548f89cb4c7cda4681e537031eda29c02ea29674bc6854460c2",
                 "sha256:7c0f8e91abc0dc07a5068f315c52cb30c66bfbc581e5b50704c8a2f6ebae794a"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.0.0"
         }
     }

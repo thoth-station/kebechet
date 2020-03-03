@@ -369,6 +369,7 @@ class _Config:
 
                 try:
                     instance = kebechet_manager(
+                        # The service type is set by default to github.
                         slug, ServiceType.by_name(service_type), service_url, None, token
                     )
                     instance.run(**manager_configuration)
