@@ -23,7 +23,7 @@ import tempfile
 import logging
 import os
 
-from sourcemanagement.enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 

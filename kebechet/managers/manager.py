@@ -26,8 +26,8 @@ import delegator
 import kebechet
 
 from kebechet.exception import PipenvError
-from sourcemanagement.enums import ServiceType
-from sourcemanagement.sourcemanagement import SourceManagement
+from thoth.sourcemanagement.enums import ServiceType
+from thoth.sourcemanagement.sourcemanagement import SourceManagement
 
 
 _LOGGER = logging.getLogger(__name__)
