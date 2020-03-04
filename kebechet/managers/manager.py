@@ -26,8 +26,8 @@ import delegator
 import kebechet
 
 from kebechet.exception import PipenvError
-from kebechet.enums import ServiceType
-from kebechet.source_management import SourceManagement
+from thoth.sourcemanagement.enums import ServiceType
+from thoth.sourcemanagement.sourcemanagement import SourceManagement
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class ManagerBase:
         self.service_url = _init_service_url(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug
-        # Parsed paylad structure can be accessed in payload_parser.py
+        # Parsed payload structure can be accessed in payload_parser.py
         self.parsed_payload = None
         if parsed_payload:
             self.parsed_payload = parsed_payload

@@ -26,7 +26,7 @@ import urllib3
 import requests
 
 from .exception import ConfigurationError
-from .enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 from .services import Service
 from .payload_parser import PayloadParser
 

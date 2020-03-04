@@ -17,7 +17,7 @@
 
 """Provides abstraction of payload parsing functions."""
 
-from .enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 import logging
 from .exception import WebhookPayloadError
 from urllib.parse import urlparse

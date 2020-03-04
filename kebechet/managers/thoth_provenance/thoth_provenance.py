@@ -31,8 +31,8 @@ from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
-from kebechet.source_management import Issue
-from kebechet.source_management import PullRequest
+from thoth.sourcemanagement.sourcemanagement import Issue
+from thoth.sourcemanagement.sourcemanagement import PullRequest
 from kebechet.utils import cloned_repo
 
 
