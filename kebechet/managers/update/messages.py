@@ -81,6 +81,23 @@ Once this issue is resolved, the issue will be automatically closed by bot.
 
 """
 
+ISSUE_PIPENV_UPDATE_ALL_GITLAB = \
+    """
+Automatic dependency update failed for the current master with SHA {sha}.
+
+The automatic dependency management cannot continue. Please fix errors reported bellow.
+
+""" + PIPENV_REPORT + """
+
+##### Notes
+
+For more information, see [Pipfile]({service_url}/{slug}/-/blob/{sha}/Pipfile) and
+ [Pipfile.lock]({service_url}/{slug}/-/blob/{sha}/Pipfile.lock).
+
+Once this issue is resolved, the issue will be automatically closed by bot.
+
+"""
+
 # A refresh comment when master branch changed when updating all dependencies (issue was already created).
 ISSUE_COMMENT_UPDATE_ALL = \
     """
@@ -138,6 +155,49 @@ Most likely the deployment build will fail.
 For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
 """
 
+ISSUE_REPLICATE_ENV_GITLAB = \
+    """
+Unable to replicate environment provided in [Pipfile.lock]({service_url}/{slug}/-/blob/{sha}/Pipfile.lock).
+
+Most likely the deployment build will fail.
+
+##### Command
+
+```
+  $ {command}
+```
+
+<details>
+  <summary>Standard output</summary>
+
+```
+{stdout}
+```
+
+</details>
+
+<details>
+  <summary>Standard error</summary>
+
+```
+{stderr}
+```
+
+</details>
+
+<details>
+  <summary>Environment details</summary>
+
+```
+{environment_details}
+```
+
+</details>
+
+For more information, see [Pipfile]({service_url}/{slug}/-/blob/{sha}/Pipfile) and
+ [Pipfile.lock]({service_url}/{slug}/-/blob/{sha}/Pipfile.lock).
+"""
+
 ISSUE_NO_DEPENDENCY_MANAGEMENT = \
     """No dependency management found for this repository. If you want to keep your dependencies managed, \
 please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
@@ -155,6 +215,44 @@ Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed
 
 ISSUE_INITIAL_LOCK = \
     """Failed to perform initial lock of your dependencies based on your [{file}](/{slug}/blob/{sha}/{file}).
+
+See attached report below to inspect this issue.
+
+##### Command
+
+```
+  $ {command}
+```
+
+<details>
+  <summary>Standard output</summary>
+
+```
+{stdout}
+```
+
+</details>
+
+<details>
+  <summary>Standard error</summary>
+
+```
+{stderr}
+```
+
+</details>
+
+<details>
+  <summary>Environment details</summary>
+
+```
+{environment_details}
+```
+"""
+
+ISSUE_INITIAL_LOCK_GITLAB = \
+    """Failed to perform initial lock of your dependencies based on your
+     [{file}]({service_url}/{slug}/-/blob/{sha}/{file}).
 
 See attached report below to inspect this issue.
 
