@@ -43,6 +43,7 @@ from .messages import ISSUE_INITIAL_LOCK
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
+from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\\[)')
@@ -239,23 +240,23 @@ class UpdateManager(ManagerBase):
         """Check whether the given update was already proposed as a pull request."""
         branch_name = self._construct_branch_name(package_name, new_package_version)
         response = {mr for mr in self._cached_merge_requests
-                    if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
+                    if mr.source_branch == branch_name and mr.status == PRStatus.open}
 
         if len(response) == 0:
             _LOGGER.debug(f"No pull request was found for update of {package_name} to version {new_package_version}")
             return None, True
         elif len(response) == 1:
             response = list(response)[0]
-            commits = response.commits
+            commits = response.get_all_commits()
             if len(commits) != 1:
                 _LOGGER.info("Update of package {package_name} to version {new_package_version} will not be issued,"
                              "the pull request as additional commits (by a maintaner?)")
                 return response, False
 
             pr_number = response.id
-            if self.sha != commits[0].parent.sha:
+            if self.sha != commits[0]:
                 _LOGGER.debug(f"Found already existing  pull request #{pr_number} for old master "
-                              f"branch {commits[0].parent.sha[:7]!r} updating pull request based on "
+                              f"branch {commits[0][:7]!r} updating pull request based on "
                               f"branch {branch_name!r} for the current master branch {self.sha[:7]!r}")
                 return response, True
             else:
@@ -376,7 +377,7 @@ class UpdateManager(ManagerBase):
 
         branch_name = "kebechet-initial-lock"
         request = {mr for mr in self.sm.get_prs()
-                   if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
+                   if mr.source_branch == branch_name and mr.status == PRStatus.open}
 
         if req_dev and not pipenv_used:
             files = ['requirements-dev.txt']
@@ -393,14 +394,14 @@ class UpdateManager(ManagerBase):
             _LOGGER.info(f"Initial dependency lock present in PR #{request.id}")
         elif len(request) == 1:
             request = list(request)[0]
-            commits = request.commits
+            commits = request.get_all_commits()
 
-            if len(request.commits) != 1:
+            if len(commits) != 1:
                 _LOGGER.info("There have been done changes in the original pull request (multiple commits found), "
                              "aborting doing changes to the adjusted opened pull request")
                 return False
 
-            if self.sha != commits[0].parent.sha:
+            if self.sha != commits[0]:
                 lock_func()
                 self._git_push(commit_msg, branch_name, files, force_push=True)
                 request.comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
@@ -442,12 +443,15 @@ class UpdateManager(ManagerBase):
 
     def _relock_all(self, exc: PipenvError, labels: list) -> None:
         """Re-lock all dependencies given the Pipfile."""
+        pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+        piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
         issue = self.sm.open_issue_if_not_exist(
             _ISSUE_REPLICATE_ENV_NAME,
             lambda: ISSUE_REPLICATE_ENV.format(
                 **exc.__dict__,
                 sha=self.sha,
-                slug=self.slug,
+                pip_url=pip_url,
+                piplock_url=piplock_url,
                 environment_details=self.get_environment_details()
             ),
             refresh_comment=partial(self._add_refresh_comment, exc),
@@ -499,12 +503,14 @@ class UpdateManager(ManagerBase):
                 return {}
         except PipenvError as exc:
             _LOGGER.exception("Failed to perform initial dependency lock")
+            file_name = 'requirements.txt' if not req_dev else 'requirements-dev.txt' if not pipenv_used else 'Pipfile'
+            file_url = construct_raw_file_url(self.service_url, self.slug, file_name, self.service_type)
             self.sm.open_issue_if_not_exist(
                 _ISSUE_INITIAL_LOCK_NAME,
                 body=lambda: ISSUE_INITIAL_LOCK.format(
                     sha=self.sha,
-                    slug=self.slug,
-                    file='requirements.in' if not req_dev else 'requirements-dev.in' if not pipenv_used else 'Pipfile',
+                    url=file_url,
+                    file=file_name,
                     environment_details=self.get_environment_details(),
                     **exc.__dict__
                 ),
@@ -522,11 +528,14 @@ class UpdateManager(ManagerBase):
                 self._pipenv_update_all()
             except PipenvError as exc:
                 _LOGGER.warning("Failed to update dependencies to their latest version, reporting issue")
+                pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+                piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
                 self.sm.open_issue_if_not_exist(
                     _ISSUE_UPDATE_ALL_NAME,
                     body=lambda: ISSUE_PIPENV_UPDATE_ALL.format(
                         sha=self.sha,
-                        slug=self.slug,
+                        pip_url=pip_url,
+                        piplock_url=piplock_url,
                         environment_details=self.get_environment_details(),
                         dependency_graph=self.get_dependency_graph(graceful=True),
                         **exc.__dict__
