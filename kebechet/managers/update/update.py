@@ -96,7 +96,7 @@ class UpdateManager(ManagerBase):
         except Exception as exc:
             # TODO: open a PR to fix this
             raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
-    
+
         # We look for normalized dependency in Pipfile.lock.
         normalized_dependency = re.sub(r"[-_.]+", "-", dependency).lower()
         version = pipfile_lock_content['develop' if is_dev else 'default'].get(

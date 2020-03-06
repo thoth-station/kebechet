@@ -1,0 +1,47 @@
+---
+repositories:
+  - slug: saisankargochhayat/prometheus-anomaly-detector
+    token: "{GITHUB_KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: saisankargochhayat/flake_fork
+    token: "{GITLAB_KEBECHET_TOKEN}"
+    service_type: gitlab
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  # - slug: saisankargochhayat/kebechet_sample
+  #   token: "{GITLAB_KEBECHET_TOKEN}"
+  #   service_type: gitlab
+  #   managers:
+  #     - name: info
+  #     - name: update
+  #       configuration:
+  #         labels: [bot]
+
+  # - slug: saisankargochhayat/kebechet_sample
+  #   token: "{KEBECHET_TOKEN}"
+  #   managers:
+  #     - name: pipfile-requirements
+  #     - name: version
+  #       configuration:
+  #         maintainers:
+  #           - goern
+  #           - fridex
+  #           - saisankargochhayat
+  #         assignees:
+  #           - sesheta
+  #         labels: [bot]
+  #         changelog_file: true
+  #     - name: update
+  #       configuration:
+  #         labels: [bot]
+  #     - name: info
+  
