@@ -40,14 +40,9 @@ from kebechet.utils import cloned_repo
 from .messages import ISSUE_CLOSE_COMMENT
 from .messages import ISSUE_COMMENT_UPDATE_ALL
 from .messages import ISSUE_INITIAL_LOCK
-from .messages import ISSUE_INITIAL_LOCK_GITLAB
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
-from .messages import ISSUE_PIPENV_UPDATE_ALL_GITLAB
 from .messages import ISSUE_REPLICATE_ENV
-from .messages import ISSUE_REPLICATE_ENV_GITLAB
-
-from thoth.sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile('(==|===|<=|>=|~=|!=|<|>|\\[)')
@@ -244,7 +239,7 @@ class UpdateManager(ManagerBase):
         """Check whether the given update was already proposed as a pull request."""
         branch_name = self._construct_branch_name(package_name, new_package_version)
         response = {mr for mr in self._cached_merge_requests
-                    if mr.source_branch == branch_name and mr.status == PRStatus.open}
+                    if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
 
         if len(response) == 0:
             _LOGGER.debug(f"No pull request was found for update of {package_name} to version {new_package_version}")
@@ -381,7 +376,7 @@ class UpdateManager(ManagerBase):
 
         branch_name = "kebechet-initial-lock"
         request = {mr for mr in self.sm.get_prs()
-                   if mr.source_branch == branch_name and mr.status == PRStatus.open}
+                   if mr.source_branch == branch_name and mr.status in (PRStatus.open)}
 
         if req_dev and not pipenv_used:
             files = ['requirements-dev.txt']
@@ -398,14 +393,14 @@ class UpdateManager(ManagerBase):
             _LOGGER.info(f"Initial dependency lock present in PR #{request.id}")
         elif len(request) == 1:
             request = list(request)[0]
-            commits = request.get_all_commits()
+            commits = request.commits
 
-            if len(commits) != 1:
+            if len(request.commits) != 1:
                 _LOGGER.info("There have been done changes in the original pull request (multiple commits found), "
                              "aborting doing changes to the adjusted opened pull request")
                 return False
 
-            if self.sha != commits[0]:
+            if self.sha != commits[0].parent.sha:
                 lock_func()
                 self._git_push(commit_msg, branch_name, files, force_push=True)
                 request.comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
@@ -452,12 +447,6 @@ class UpdateManager(ManagerBase):
             lambda: ISSUE_REPLICATE_ENV.format(
                 **exc.__dict__,
                 sha=self.sha,
-                slug=self.slug,
-                environment_details=self.get_environment_details()
-            ) if self.service_type == ServiceType.GITHUB else ISSUE_REPLICATE_ENV_GITLAB.format(
-                **exc.__dict__,
-                sha=self.sha,
-                service_url=self.service_url,
                 slug=self.slug,
                 environment_details=self.get_environment_details()
             ),
@@ -518,13 +507,6 @@ class UpdateManager(ManagerBase):
                     file='requirements.in' if not req_dev else 'requirements-dev.in' if not pipenv_used else 'Pipfile',
                     environment_details=self.get_environment_details(),
                     **exc.__dict__
-                ) if self.service_type == ServiceType.GITHUB else ISSUE_INITIAL_LOCK_GITLAB.format(
-                    sha=self.sha,
-                    service_url=self.service_url,
-                    slug=self.slug,
-                    file='requirements.in' if not req_dev else 'requirements-dev.in' if not pipenv_used else 'Pipfile',
-                    environment_details=self.get_environment_details(),
-                    **exc.__dict__
                 ),
                 refresh_comment=partial(self._add_refresh_comment, exc),
                 labels=labels
@@ -544,13 +526,6 @@ class UpdateManager(ManagerBase):
                     _ISSUE_UPDATE_ALL_NAME,
                     body=lambda: ISSUE_PIPENV_UPDATE_ALL.format(
                         sha=self.sha,
-                        slug=self.slug,
-                        environment_details=self.get_environment_details(),
-                        dependency_graph=self.get_dependency_graph(graceful=True),
-                        **exc.__dict__
-                    ) if self.service_type == ServiceType.GITHUB else ISSUE_PIPENV_UPDATE_ALL_GITLAB.format(
-                        sha=self.sha,
-                        service_url=self.service_url,
                         slug=self.slug,
                         environment_details=self.get_environment_details(),
                         dependency_graph=self.get_dependency_graph(graceful=True),
