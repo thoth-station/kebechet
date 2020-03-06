@@ -247,16 +247,16 @@ class UpdateManager(ManagerBase):
             return None, True
         elif len(response) == 1:
             response = list(response)[0]
-            commits = response.commits
+            commits = response.get_all_commits()
             if len(commits) != 1:
                 _LOGGER.info("Update of package {package_name} to version {new_package_version} will not be issued,"
                              "the pull request as additional commits (by a maintaner?)")
                 return response, False
 
             pr_number = response.id
-            if self.sha != commits[0].parent.sha:
+            if self.sha != commits[0]:
                 _LOGGER.debug(f"Found already existing  pull request #{pr_number} for old master "
-                              f"branch {commits[0].parent.sha[:7]!r} updating pull request based on "
+                              f"branch {commits[0][:7]!r} updating pull request based on "
                               f"branch {branch_name!r} for the current master branch {self.sha[:7]!r}")
                 return response, True
             else:
