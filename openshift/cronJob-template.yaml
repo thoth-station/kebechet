@@ -53,6 +53,8 @@ objects:
                   volumeMounts:
                     - name: ssh-config
                       mountPath: /home/user/.ssh
+                    - name: cabundle-crt
+                      mountPath: /etc/pki/tls/certs
                   env:
                     - name: PIPENV_NOSPIN
                       value: "1"
@@ -66,6 +68,16 @@ objects:
                       valueFrom:
                         secretKeyRef:
                           key: github-oauth-token
+                          name: kebechet-secret
+                    - name: KEBECHET_GITLAB_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          key: gitlab-oauth-token
+                          name: kebechet-secret
+                    - name: KEBECHET_GITLABCEE_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          key: gitlabcee-oauth-token
                           name: kebechet-secret
                     - name: KEBECHET_CONFIGURATION_PATH
                       valueFrom:
@@ -87,6 +99,8 @@ objects:
                         configMapKeyRef:
                           key: storage-bucket-name
                           name: thoth
+                    - name: REQUESTS_CA_BUNDLE
+                      value: "/etc/pki/tls/certs/ca-bundle"
                   resources:
                     requests:
                       memory: "2Gi"
@@ -108,4 +122,10 @@ objects:
                       - key: ssh-privatekey
                         path: id_rsa
                         mode: 0600
+                - name: cabundle-crt
+                  secret:
+                    secretName: kebechet-secret
+                    items:
+                      - key: ca-bundle-crt
+                        path: ca-bundle
               restartPolicy: Never

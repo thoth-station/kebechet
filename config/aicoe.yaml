@@ -107,6 +107,16 @@ repositories:
             - sesheta
           labels: [bot]
           changelog_file: true
+    
+  - slug: data-hub/ai-ingest
+    service_url: https://gitlab.cee.redhat.com
+    service_type: gitlab
+    token: "{KEBECHET_GITLABCEE_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
 
   - slug: durandom/64fbc27e213f5a61c975ab29df94536b88f03270
     token: '{KEBECHET_TOKEN}'
