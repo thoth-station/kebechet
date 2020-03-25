@@ -55,6 +55,14 @@ class Service():
             "auth": {"header": "Private-Token", "value": "{token}"},
             "slug_method": _encode_fslash.__func__,
         },
+        "gitlabcee": {
+            "token": "KEBECHET_GITLABCEE_TOKEN",
+            "service_type": ServiceType.GITLAB,
+            "config_url": "https://gitlab.cee.redhat.com/api/v4/projects/{slug}/repository/files/\
+.thoth.yaml/raw?ref={branch}",
+            "auth": {"header": "Private-Token", "value": "{token}"},
+            "slug_method": _encode_fslash.__func__,
+        }
     }
 
     def __init__(self, service, url, branch="master"):

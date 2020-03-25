@@ -36,6 +36,11 @@ _LOGGER = logging.getLogger(__name__)
 class _Config:
     """Library-wide configuration."""
 
+    # Add more custom deployments to here, and then to services.py.
+    _CUSTOM_DEPLOYMENTS = {
+        "gitlab.cee.redhat.com": "gitlabcee"
+    }
+
     def __init__(self):
         self._repositories = None
 
@@ -93,6 +98,10 @@ class _Config:
 
     @classmethod
     def run_url(cls, url: str, service: str, parsed_payload: dict, tls_verify: bool):
+        for instance in cls._CUSTOM_DEPLOYMENTS.keys():
+            if instance in url:
+                service = cls._CUSTOM_DEPLOYMENTS[instance]
+
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
 

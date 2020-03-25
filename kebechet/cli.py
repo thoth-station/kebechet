@@ -91,7 +91,7 @@ def cli_run_results(origin, service, analysis_id):
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
-    config.run_url(url, service, None)
+    config.run_url(url, service, None, True)
 
 
 @cli.command("run-webhook")

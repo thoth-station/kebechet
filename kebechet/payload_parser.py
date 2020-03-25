@@ -29,7 +29,7 @@ class PayloadParser():
     """Allow Kebechet to parse webhook payload of different services."""
 
     _GITHUB = "api.github.com"
-    _GITLAB = "gitlab.com"
+    _GITLAB = "gitlab"
 
     _IGNORED_GITHUB_EVENTS = ['installation', 'integration_installation']
 
