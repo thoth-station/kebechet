@@ -193,7 +193,7 @@ See attached report below to inspect this issue.
 """
 
 
-ISSUE_UNSUPPORTED_APP = \
+ISSUE_UNSUPPORTED_PACKAGE = \
   """Kebechet cannot support maintaining this application as it contain's Git version of packages.
 
   The package causing the issue is - {package}

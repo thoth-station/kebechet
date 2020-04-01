@@ -43,7 +43,7 @@ from .messages import ISSUE_INITIAL_LOCK
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
-from .messages import ISSUE_UNSUPPORTED_APP
+from .messages import ISSUE_UNSUPPORTED_PACKAGE
 from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
-_ISSUE_UNSUPPORTED_APP = "Application cannot be managed by Kebechet"
+_ISSUE_UNSUPPORTED_PACKAGE = "Application cannot be managed by Kebechet due to Git package."
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
@@ -103,6 +103,9 @@ class UpdateManager(ManagerBase):
         normalized_dependency = re.sub(r"[-_.]+", "-", dependency).lower()
         version = pipfile_lock_content['develop' if is_dev else 'default'].get(
             normalized_dependency, {}).get('version')
+        # if not kept as normaized depedency in Pipfile.lock.
+        version = pipfile_lock_content['develop' if is_dev else 'default'].get(
+            dependency, {}).get('version')
         if not version:
             raise InternalError(
                 f"Failed to retrieve version information for dependency {dependency}, (dev: {is_dev})")
@@ -167,20 +170,24 @@ class UpdateManager(ManagerBase):
                     'dev': False,
                     'version': package_info['version'][len('=='):]
                 }
+            # Close git as a source issues.
+            self.sm.close_issue_if_exists(_ISSUE_UNSUPPORTED_PACKAGE, f"Issue closed as no packages use git as a \
+                        source anymore. Related SHA - {self.sha}")
         except KeyError as exc:
-            _LOGGER.info("Key Errror encountered, which is mostly due to version key.")
-            pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
-            piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
-            self.sm.open_issue_if_not_exist(
-                _ISSUE_UNSUPPORTED_APP,
-                lambda: ISSUE_UNSUPPORTED_APP.format(
-                    sha=self.sha,
-                    package=package_name,
-                    pip_url=pip_url,
-                    piplock_url=piplock_url,
-                    environment_details=self.get_environment_details()
+            if 'git' in package_info:
+                _LOGGER.info("Key Errror encountered, due package source being git.")
+                pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+                piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
+                self.sm.open_issue_if_not_exist(
+                    _ISSUE_UNSUPPORTED_PACKAGE,
+                    lambda: ISSUE_UNSUPPORTED_PACKAGE.format(
+                        sha=self.sha,
+                        package=package_name,
+                        pip_url=pip_url,
+                        piplock_url=piplock_url,
+                        environment_details=self.get_environment_details()
+                    )
                 )
-            )
         return result
 
     @classmethod
