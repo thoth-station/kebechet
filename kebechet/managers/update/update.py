@@ -182,7 +182,7 @@ class UpdateManager(ManagerBase):
         return result
 
     def _create_unsupported_package_issue(self, package_name):
-        """Create an issue as Kebechet doesn't support packages with git as source. """
+        """Create an issue as Kebechet doesn't support packages with git as source."""
         _LOGGER.info("Key Errror encountered, due package source being git.")
         pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
         piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
