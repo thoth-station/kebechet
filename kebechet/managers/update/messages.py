@@ -191,3 +191,20 @@ See attached report below to inspect this issue.
 {environment_details}
 ```
 """
+
+
+ISSUE_UNSUPPORTED_APP = \
+  """Kebechet cannot support maintaining this application as it contain's Git version of packages.
+
+  The package causing the issue is - {package}
+  Linked SHA - {sha}
+
+  For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
+
+  <details>
+    <summary>Environment details</summary>
+
+  ```
+  {environment_details}
+  ```
+  """

@@ -43,6 +43,7 @@ from .messages import ISSUE_INITIAL_LOCK
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
+from .messages import ISSUE_UNSUPPORTED_APP
 from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
+_ISSUE_UNSUPPORTED_APP = "Application cannot be managed by Kebechet"
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
@@ -143,8 +145,7 @@ class UpdateManager(ManagerBase):
 
         return direct_dependencies
 
-    @staticmethod
-    def _get_all_packages_versions() -> dict:
+    def _get_all_packages_versions(self) -> dict:
         """Parse Pipfile.lock file and retrieve all packages in the corresponding locked versions."""
         try:
             with open('Pipfile.lock') as pipfile_lock:
@@ -154,18 +155,32 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
 
         result = {}
-        for package_name, package_info in pipfile_lock_content['default'].items():
-            result[package_name.lower()] = {
-                'dev': False,
-                'version': package_info['version'][len('=='):]
-            }
+        try:
+            for package_name, package_info in pipfile_lock_content['default'].items():
+                result[package_name.lower()] = {
+                    'dev': False,
+                    'version': package_info['version'][len('=='):]
+                }
 
-        for package_name, package_info in pipfile_lock_content['develop'].items():
-            result[package_name.lower()] = {
-                'dev': False,
-                'version': package_info['version'][len('=='):]
-            }
-
+            for package_name, package_info in pipfile_lock_content['develop'].items():
+                result[package_name.lower()] = {
+                    'dev': False,
+                    'version': package_info['version'][len('=='):]
+                }
+        except KeyError as exc:
+            _LOGGER.info("Key Errror encountered, which is mostly due to version key.")
+            pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+            piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
+            self.sm.open_issue_if_not_exist(
+                _ISSUE_UNSUPPORTED_APP,
+                lambda: ISSUE_UNSUPPORTED_APP.format(
+                    sha=self.sha,
+                    package=package_name,
+                    pip_url=pip_url,
+                    piplock_url=piplock_url,
+                    environment_details=self.get_environment_details()
+                )
+            )
         return result
 
     @classmethod
