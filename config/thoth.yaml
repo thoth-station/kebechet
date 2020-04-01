@@ -580,3 +580,11 @@ repositories:
       - name: update
         configuration:
           labels: [bot]
+
+  - slug: thoth-station/advise-reporter
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
