@@ -572,3 +572,11 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/unresolved-package-handler
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
