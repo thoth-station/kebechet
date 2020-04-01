@@ -190,6 +190,7 @@ See attached report below to inspect this issue.
 ```
 {environment_details}
 ```
+</details>
 """
 
 
@@ -207,4 +208,5 @@ ISSUE_UNSUPPORTED_PACKAGE = \
   ```
   {environment_details}
   ```
+  </details>
   """

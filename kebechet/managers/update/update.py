@@ -53,7 +53,7 @@ _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
-_ISSUE_UNSUPPORTED_PACKAGE = "Application cannot be managed by Kebechet due to Git package."
+_ISSUE_UNSUPPORTED_PACKAGE = "Application cannot be managed by Kebechet due to Git package"
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
