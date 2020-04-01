@@ -158,37 +158,44 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
 
         result = {}
-        try:
-            for package_name, package_info in pipfile_lock_content['default'].items():
-                result[package_name.lower()] = {
-                    'dev': False,
-                    'version': package_info['version'][len('=='):]
-                }
 
-            for package_name, package_info in pipfile_lock_content['develop'].items():
-                result[package_name.lower()] = {
-                    'dev': False,
-                    'version': package_info['version'][len('=='):]
-                }
-            # Close git as a source issues.
-            self.sm.close_issue_if_exists(_ISSUE_UNSUPPORTED_PACKAGE, f"Issue closed as no packages use git as a \
-                        source anymore. Related SHA - {self.sha}")
-        except KeyError as exc:
+        for package_name, package_info in pipfile_lock_content['default'].items():
             if 'git' in package_info:
-                _LOGGER.info("Key Errror encountered, due package source being git.")
-                pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
-                piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
-                self.sm.open_issue_if_not_exist(
-                    _ISSUE_UNSUPPORTED_PACKAGE,
-                    lambda: ISSUE_UNSUPPORTED_PACKAGE.format(
-                        sha=self.sha,
-                        package=package_name,
-                        pip_url=pip_url,
-                        piplock_url=piplock_url,
-                        environment_details=self.get_environment_details()
-                    )
-                )
+                self._create_unsupported_package_issue(package_name)
+                raise DependencyManagementError(f"Failed to find version in package that uses git source.")
+            result[package_name.lower()] = {
+                'dev': False,
+                'version': package_info['version'][len('=='):]
+            }
+
+        for package_name, package_info in pipfile_lock_content['develop'].items():
+            if 'git' in package_info:
+                self._create_unsupported_package_issue(package_name)
+                raise DependencyManagementError(f"Failed to find version in package that uses git source.")
+            result[package_name.lower()] = {
+                'dev': False,
+                'version': package_info['version'][len('=='):]
+            }
+        # Close git as a source issues.
+        self.sm.close_issue_if_exists(_ISSUE_UNSUPPORTED_PACKAGE, f"Issue closed as no packages use git as a \
+                    source anymore. Related SHA - {self.sha}")
         return result
+
+    def _create_unsupported_package_issue(self, package_name):
+        """Create an issue as Kebechet doesn't support packages with git as source. """
+        _LOGGER.info("Key Errror encountered, due package source being git.")
+        pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+        piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
+        self.sm.open_issue_if_not_exist(
+            _ISSUE_UNSUPPORTED_PACKAGE,
+            lambda: ISSUE_UNSUPPORTED_PACKAGE.format(
+                sha=self.sha,
+                package=package_name,
+                pip_url=pip_url,
+                piplock_url=piplock_url,
+                environment_details=self.get_environment_details()
+            )
+        )
 
     @classmethod
     def _get_direct_dependencies_version(cls) -> dict:
