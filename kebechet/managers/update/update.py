@@ -43,6 +43,7 @@ from .messages import ISSUE_INITIAL_LOCK
 from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
+from .messages import ISSUE_UNSUPPORTED_PACKAGE
 from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ _ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
 _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
+_ISSUE_UNSUPPORTED_PACKAGE = "Application cannot be managed by Kebechet due to Git package"
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
@@ -101,6 +103,9 @@ class UpdateManager(ManagerBase):
         normalized_dependency = re.sub(r"[-_.]+", "-", dependency).lower()
         version = pipfile_lock_content['develop' if is_dev else 'default'].get(
             normalized_dependency, {}).get('version')
+        # if not kept as normaized depedency in Pipfile.lock.
+        version = pipfile_lock_content['develop' if is_dev else 'default'].get(
+            dependency, {}).get('version')
         if not version:
             raise InternalError(
                 f"Failed to retrieve version information for dependency {dependency}, (dev: {is_dev})")
@@ -143,8 +148,7 @@ class UpdateManager(ManagerBase):
 
         return direct_dependencies
 
-    @staticmethod
-    def _get_all_packages_versions() -> dict:
+    def _get_all_packages_versions(self) -> dict:
         """Parse Pipfile.lock file and retrieve all packages in the corresponding locked versions."""
         try:
             with open('Pipfile.lock') as pipfile_lock:
@@ -154,19 +158,44 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(f"Failed to load Pipfile.lock file: {str(exc)}") from exc
 
         result = {}
+
         for package_name, package_info in pipfile_lock_content['default'].items():
+            if 'git' in package_info:
+                self._create_unsupported_package_issue(package_name)
+                raise DependencyManagementError(f"Failed to find version in package that uses git source.")
             result[package_name.lower()] = {
                 'dev': False,
                 'version': package_info['version'][len('=='):]
             }
 
         for package_name, package_info in pipfile_lock_content['develop'].items():
+            if 'git' in package_info:
+                self._create_unsupported_package_issue(package_name)
+                raise DependencyManagementError("Failed to find version in package that uses git source.")
             result[package_name.lower()] = {
                 'dev': False,
                 'version': package_info['version'][len('=='):]
             }
-
+        # Close git as a source issues.
+        self.sm.close_issue_if_exists(_ISSUE_UNSUPPORTED_PACKAGE, f"Issue closed as no packages use git as a \
+                    source anymore. Related SHA - {self.sha}")
         return result
+
+    def _create_unsupported_package_issue(self, package_name):
+        """Create an issue as Kebechet doesn't support packages with git as source."""
+        _LOGGER.info("Key Errror encountered, due package source being git.")
+        pip_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile", self.service_type)
+        piplock_url = construct_raw_file_url(self.service_url, self.slug, "Pipfile.lock", self.service_type)
+        self.sm.open_issue_if_not_exist(
+            _ISSUE_UNSUPPORTED_PACKAGE,
+            lambda: ISSUE_UNSUPPORTED_PACKAGE.format(
+                sha=self.sha,
+                package=package_name,
+                pip_url=pip_url,
+                piplock_url=piplock_url,
+                environment_details=self.get_environment_details()
+            )
+        )
 
     @classmethod
     def _get_direct_dependencies_version(cls) -> dict:
