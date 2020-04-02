@@ -171,7 +171,7 @@ class UpdateManager(ManagerBase):
         for package_name, package_info in pipfile_lock_content['develop'].items():
             if 'git' in package_info:
                 self._create_unsupported_package_issue(package_name)
-                raise DependencyManagementError(f"Failed to find version in package that uses git source.")
+                raise DependencyManagementError("Failed to find version in package that uses git source.")
             result[package_name.lower()] = {
                 'dev': False,
                 'version': package_info['version'][len('=='):]
