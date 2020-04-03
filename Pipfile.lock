@@ -680,11 +680,11 @@
         },
         "thoth-sourcemanagement": {
             "hashes": [
-                "sha256:78c1b614373fa9642200a63245488c9febd2b4568a35a370ff9b0e9f20ebcce4",
-                "sha256:8b5a34a35820cbd5cf222dcee42676ae3c40d0c9c92d03ae800844fec44850c4"
+                "sha256:b41f43bbcbadf28ec888e225595b8f454d09d8fef43b04fdc386d3a19f575d6b",
+                "sha256:d786c942edaa1f0f257d948841d722b1ab862ca62ee402a4aafc3850c34311fc"
             ],
             "index": "pypi",
-            "version": "==0.2.6"
+            "version": "==0.2.7"
         },
         "toml": {
             "hashes": [
