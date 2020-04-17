@@ -91,7 +91,7 @@ def cli_run_results(origin, service, analysis_id):
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
 def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
-    config.run_url(url, service, None)
+    config.run_url(url=url, service_type=service, parsed_payload=None, tls_verify=True)
 
 
 @cli.command("run-webhook")
@@ -107,7 +107,7 @@ def cli_run_webhook(web_payload):
         payload = json.loads(web_payload)
     if not payload:
         raise WebhookPayloadError("Webhook payload is empty or cannot be parsed.")
-    config.run_webhook(payload)
+    config.run_webhook(payload=payload)
 
 
 if __name__ == "__main__":
