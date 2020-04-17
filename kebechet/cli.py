@@ -93,6 +93,7 @@ def cli_run_url(url, service):
     """Run Kebechet by providing url to a git repository service."""
     config.run_url(url=url, service=service, parsed_payload=None, tls_verify=True)
 
+
 @cli.command("run-webhook")
 @click.argument("web_payload", nargs=1)
 def cli_run_webhook(web_payload):
