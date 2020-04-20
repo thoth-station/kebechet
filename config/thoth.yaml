@@ -343,6 +343,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
