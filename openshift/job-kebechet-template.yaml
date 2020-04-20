@@ -136,10 +136,10 @@ objects:
                   memory: "2Gi"
                   cpu: "2"
               livenessProbe:
-                # Give kebechet 2 minutes to compute results, kill it if it was not able result anything.
+                # Give kebechet 45 minutes to compute results, kill it if it was not able result anything.
                 tcpSocket:
                   port: 80
-                initialDelaySeconds: 120
+                initialDelaySeconds: 2700
                 failureThreshold: 1
           volumes:
             - name: ssh-config
