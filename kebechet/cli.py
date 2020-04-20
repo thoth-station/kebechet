@@ -95,7 +95,7 @@ def cli_run_url(url, service):
 
 
 @cli.command("run-webhook")
-@click.argument("web_payload", nargs=1)
+@click.argument("web_payload", nargs=1, envvar="KEBECHET_PAYLOAD")
 def cli_run_webhook(web_payload):
     """Run Kebechet by providing a webhook payload."""
     payload = None
