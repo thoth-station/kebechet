@@ -1,0 +1,74 @@
+# This template uses the kebechet-job argo workflow to run kebechet on a particular webhook. 
+apiVersion: v1
+kind: Template
+metadata:
+  name: kebechet
+  annotations:
+    description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
+    openshift.io/display-name: Kebechet Job
+    version: 1.0.1
+    tags: thoth,ai-stacks,kebechet,cyborg,srcops
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    thoth-station.ninja/template-version: 1.0.1
+  labels:
+    app: thoth
+    template: kebechet
+    component: kebechet
+
+parameters:
+  - name: WORKFLOW_ID
+    description: "a UUID for the workflow instance"
+    displayName: "Workflow UUID"
+    required: true
+  - name: WEBHOOK_PAYLOAD
+    description: "The webhook payload for kebecher run."
+    displayName: "Webhook Payload"
+    required: true
+
+objects:
+  - apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: "${WORKFLOW_ID}"
+      annotations:
+        thoth-station.ninja/template-version: 0.1.1
+      labels:
+        app: thoth
+        component: kebechet-job
+    spec:
+      serviceAccountName: argo
+      ttlStrategy:
+        secondsAfterSuccess: 900  # Keep kebechet for 15 minutes.
+        # secondsAfterFailure kept unset to keep failed kebechet workflows for debugging
+      podGC:
+        strategy: OnWorkflowSuccess
+      entrypoint: kebechet-job
+      arguments:
+        parameters:
+          - name: "WEBHOOK_PAYLOAD"
+            value: "${WEBHOOK_PAYLOAD}"
+
+      volumes:
+        - name: ssh-config
+          secret:
+            secretName: kebechet-secret     
+            items:
+            - key: ssh-privatekey
+              path: id_rsa
+      
+      templates:
+        - name: "kebechet-job"
+          archiveLocation:
+            archiveLogs: true
+          dag:
+            tasks:
+              - name: "kebechet-webhook-run"
+                templateRef:
+                  name: "kebechet-job"
+                  template: "kebechet-job"
+                arguments:
+                  parameters:
+                    - name: "WEBHOOK_PAYLOAD"
+                      value: "{{workflow.parameters.WEBHOOK_PAYLOAD}}"
