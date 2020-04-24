@@ -14,10 +14,14 @@ spec:
     - name: kebechet-job
       inputs:
         parameters:
-        - name: WEBHOOK_PAYLOAD 
+        - name: WEBHOOK_PAYLOAD
+        - name: IMAGE_STREAM_REGISTRY
+        - name: IMAGE_STREAM_NAMESPACE
+        - name: IMAGE_STREAM_TAG
       container:
-        # Chnage to thoth station kebechet master, repo.
-        image: "quay.io/saisankargochhayat/kebechet:master"
+        image: "{{inputs.parameters.IMAGE_STREAM_REGISTRY}}/\
+        {{inputs.parameters.IMAGE_STREAM_NAMESPACE}}/\
+        kebechet-job:{{inputs.parameters.IMAGE_STREAM_TAG}}"
         command: [sh, -c]
         args: [
             '

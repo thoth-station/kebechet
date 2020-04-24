@@ -26,6 +26,22 @@ parameters:
     description: "The webhook payload for kebecher run."
     displayName: "Webhook Payload"
     required: true
+  
+  - name: IMAGE_STREAM_REGISTRY
+    description: Registry the ImageStream to be use lives in
+    displayName: ImageStream Registry
+    required: true
+    value: "docker-registry.default.svc:5000"
+  - name: IMAGE_STREAM_NAMESPACE
+    description: Namespace the ImageStream to be use lives in
+    displayName: ImageStream Project
+    required: true
+    value: "thoth-test-core"
+  - name: IMAGE_STREAM_TAG
+    description: Tag of the ImageStream to be use
+    displayName: ImageStream Tag
+    required: true
+    value: "latest"
 
 objects:
   - apiVersion: argoproj.io/v1alpha1
@@ -49,6 +65,12 @@ objects:
         parameters:
           - name: "WEBHOOK_PAYLOAD"
             value: "${WEBHOOK_PAYLOAD}"
+          - name: IMAGE_STREAM_REGISTRY
+            value: "${IMAGE_STREAM_REGISTRY}"
+          - name: IMAGE_STREAM_NAMESPACE
+            value: "${IMAGE_STREAM_NAMESPACE}"
+          - name: IMAGE_STREAM_TAG
+            value: "${IMAGE_STREAM_TAG}"
 
       volumes:
         - name: ssh-config
@@ -72,3 +94,9 @@ objects:
                   parameters:
                     - name: "WEBHOOK_PAYLOAD"
                       value: "{{workflow.parameters.WEBHOOK_PAYLOAD}}"
+                    - name: IMAGE_STREAM_REGISTRY
+                      value: "{{workflow.parameters.IMAGE_STREAM_REGISTRY}}"
+                    - name: IMAGE_STREAM_NAMESPACE
+                      value: "{{workflow.parameters.IMAGE_STREAM_NAMESPACE}}"
+                    - name: IMAGE_STREAM_TAG
+                      value: "{{workflow.parameters.IMAGE_STREAM_TAG}}"
