@@ -1,0 +1,68 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: kebechet-job
+  annotations:
+    thoth-station.ninja/template-version: 0.1.1
+  labels:
+    app: thoth
+    component: kebechet-job
+
+spec:
+  templates:
+    - name: kebechet-job
+      inputs:
+        parameters:
+        - name: WEBHOOK_PAYLOAD
+        - name: IMAGE_STREAM_REGISTRY
+        - name: IMAGE_STREAM_NAMESPACE
+        - name: IMAGE_STREAM_TAG
+      container:
+        image: "{{inputs.parameters.IMAGE_STREAM_REGISTRY}}/\
+        {{inputs.parameters.IMAGE_STREAM_NAMESPACE}}/\
+        kebechet-job:{{inputs.parameters.IMAGE_STREAM_TAG}}"
+        env:
+          - name: PIPENV_NOSPIN
+            value: "1"
+          - name: PIPENV_COLORBLIND
+            value: "1"
+          - name: PIPENV_HIDE_EMOJIS
+            value: "1"
+          - name: KEBECHET_VERBOSE
+            value: "1"
+          - name: KEBECHET_SUBCOMMAND
+            value: "run-webhook"
+          - name: KEBECHET_PAYLOAD
+            value: "{{inputs.parameters.WEBHOOK_PAYLOAD}}"
+          - name: GITHUB_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: github-oauth-token
+                name: kebechet-secret
+          - name: GITLAB_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: gitlab-oauth-token
+                name: kebechet-secret
+          - name: PAGURE_KEBECHET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: pagure-oauth-token
+                name: kebechet-secret
+          - name: SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                key: sentry-dsn
+                name: thoth
+        volumeMounts:
+          - name: ssh-config
+            mountPath: /home/user/.ssh
+            readOnly: true
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 2Gi
