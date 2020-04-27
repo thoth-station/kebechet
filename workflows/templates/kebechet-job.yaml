@@ -22,12 +22,6 @@ spec:
         image: "{{inputs.parameters.IMAGE_STREAM_REGISTRY}}/\
         {{inputs.parameters.IMAGE_STREAM_NAMESPACE}}/\
         kebechet-job:{{inputs.parameters.IMAGE_STREAM_TAG}}"
-        command: [sh, -c]
-        args: [
-            '
-            ./app.sh
-            ',
-          ]
         env:
           - name: PIPENV_NOSPIN
             value: "1"

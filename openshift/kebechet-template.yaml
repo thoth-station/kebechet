@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: kebechet-job
+  name: kebechet
   annotations:
     description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
     openshift.io/display-name: Kebechet Job
@@ -14,8 +14,8 @@ metadata:
     thoth-station.ninja/template-version: 1.0.1
   labels:
     app: thoth
-    template: kebechet-job
-    component: kebechet-job
+    template: kebechet
+    component: kebechet
 
 parameters:
   - name: WORKFLOW_ID
@@ -52,7 +52,7 @@ objects:
         thoth-station.ninja/template-version: 0.1.1
       labels:
         app: thoth
-        component: kebechet-job
+        component: kebechet
     spec:
       serviceAccountName: argo
       ttlStrategy:
