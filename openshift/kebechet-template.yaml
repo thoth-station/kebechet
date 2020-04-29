@@ -36,7 +36,8 @@ parameters:
     description: Namespace the ImageStream to be use lives in
     displayName: ImageStream Project
     required: true
-    value: "thoth-test-core"
+    value: "thoth-infra-stage"
+    # set to 'thoth-test-core' to deploy to test. 
   - name: IMAGE_STREAM_TAG
     description: Tag of the ImageStream to be use
     displayName: ImageStream Tag
