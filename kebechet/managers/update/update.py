@@ -671,7 +671,6 @@ class UpdateManager(ManagerBase):
                 _ISSUE_MANUAL_UPDATE,
                 comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
             )
-            
 
             if os.path.isfile('Pipfile'):
                 _LOGGER.info("Using Pipfile for dependency management")
