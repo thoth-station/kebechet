@@ -613,3 +613,11 @@ repositories:
       - name: update
         configuration:
           labels: [bot]
+
+  - slug: thoth-station/slo-reporter
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          labels: [bot]
