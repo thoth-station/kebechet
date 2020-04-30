@@ -666,11 +666,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:0c51834be1c4b3db730c67e0fee0e7b7c79c8431e1d401e2af484b688288178b",
-                "sha256:561c19083e82cdaa4353175b858b4b09f526069b6297f4ba30468070bda648b7"
+                "sha256:142f3391a949a198f9460afbe9dc14d3b85c1932e44d37fb65318199a7e3fca4",
+                "sha256:41444385e6c180f1c41b34bb664d5205fa20e2ed4c9693bcb8d0fb32f0315a8f"
             ],
             "index": "pypi",
-            "version": "==0.13.1"
+            "version": "==0.13.2"
         },
         "thoth-python": {
             "hashes": [
