@@ -1,0 +1,103 @@
+# This template uses the kebechet-job argo workflow to run kebechet on a particular webhook. 
+apiVersion: v1
+kind: Template
+metadata:
+  name: kebechet
+  annotations:
+    description: This is Kebechet Job Config, this template is meant to be used by Bots, but could also be used by humans...
+    openshift.io/display-name: Kebechet Job
+    version: 1.0.1
+    tags: thoth,ai-stacks,kebechet,cyborg,srcops
+    template.openshift.io/documentation-url: https://github.com/thoth-station/kebechet/
+    template.openshift.io/long-description: This is Kebechet used for automatic package releases and updates.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    thoth-station.ninja/template-version: 1.0.1
+  labels:
+    app: thoth
+    template: kebechet
+    component: kebechet
+
+parameters:
+  - name: WORKFLOW_ID
+    description: "a UUID for the workflow instance"
+    displayName: "Workflow UUID"
+    required: true
+  - name: WEBHOOK_PAYLOAD
+    description: "The webhook payload for kebecher run."
+    displayName: "Webhook Payload"
+    required: true
+  
+  - name: IMAGE_STREAM_REGISTRY
+    description: Registry the ImageStream to be use lives in
+    displayName: ImageStream Registry
+    required: true
+    value: "docker-registry.default.svc:5000"
+  - name: IMAGE_STREAM_NAMESPACE
+    description: Namespace the ImageStream to be use lives in
+    displayName: ImageStream Project
+    required: true
+    value: "thoth-infra-stage"
+    # set to 'thoth-test-core' to deploy to test. 
+  - name: IMAGE_STREAM_TAG
+    description: Tag of the ImageStream to be use
+    displayName: ImageStream Tag
+    required: true
+    value: "latest"
+
+objects:
+  - apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: "${WORKFLOW_ID}"
+      annotations:
+        thoth-station.ninja/template-version: 0.1.1
+      labels:
+        app: thoth
+        component: kebechet
+    spec:
+      serviceAccountName: argo
+      ttlStrategy:
+        secondsAfterSuccess: 900  # Keep kebechet for 15 minutes.
+        # secondsAfterFailure kept unset to keep failed kebechet workflows for debugging
+      podGC:
+        strategy: OnWorkflowSuccess
+      entrypoint: kebechet-job
+      arguments:
+        parameters:
+          - name: "WEBHOOK_PAYLOAD"
+            value: "${WEBHOOK_PAYLOAD}"
+          - name: IMAGE_STREAM_REGISTRY
+            value: "${IMAGE_STREAM_REGISTRY}"
+          - name: IMAGE_STREAM_NAMESPACE
+            value: "${IMAGE_STREAM_NAMESPACE}"
+          - name: IMAGE_STREAM_TAG
+            value: "${IMAGE_STREAM_TAG}"
+
+      volumes:
+        - name: ssh-config
+          secret:
+            secretName: kebechet-secret     
+            items:
+            - key: ssh-privatekey
+              path: id_rsa
+      
+      templates:
+        - name: "kebechet-job"
+          archiveLocation:
+            archiveLogs: true
+          dag:
+            tasks:
+              - name: "kebechet-webhook-run"
+                templateRef:
+                  name: "kebechet-job"
+                  template: "kebechet-job"
+                arguments:
+                  parameters:
+                    - name: "WEBHOOK_PAYLOAD"
+                      value: "{{workflow.parameters.WEBHOOK_PAYLOAD}}"
+                    - name: IMAGE_STREAM_REGISTRY
+                      value: "{{workflow.parameters.IMAGE_STREAM_REGISTRY}}"
+                    - name: IMAGE_STREAM_NAMESPACE
+                      value: "{{workflow.parameters.IMAGE_STREAM_NAMESPACE}}"
+                    - name: IMAGE_STREAM_TAG
+                      value: "{{workflow.parameters.IMAGE_STREAM_TAG}}"

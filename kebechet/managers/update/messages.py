@@ -75,7 +75,7 @@ The automatic dependency management cannot continue. Please fix errors reported 
 
 ##### Notes
 
-For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
+For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
 
 Once this issue is resolved, the issue will be automatically closed by bot.
 
@@ -98,7 +98,8 @@ Closing this issue as it is no longer relevant for the current master with SHA {
 # Issue created when the environment cannot be replicated.
 ISSUE_REPLICATE_ENV = \
     """
-Unable to replicate environment provided in [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
+Unable to replicate environment provided in [Pipfile.lock]({piplock_url}).
+Linked SHA - {sha}
 
 Most likely the deployment build will fail.
 
@@ -135,7 +136,7 @@ Most likely the deployment build will fail.
 
 </details>
 
-For more information, see [Pipfile](/{slug}/blob/{sha}/Pipfile) and [Pipfile.lock](/{slug}/blob/{sha}/Pipfile.lock).
+For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
 """
 
 ISSUE_NO_DEPENDENCY_MANAGEMENT = \
@@ -154,7 +155,8 @@ Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed
 
 
 ISSUE_INITIAL_LOCK = \
-    """Failed to perform initial lock of your dependencies based on your [{file}](/{slug}/blob/{sha}/{file}).
+    """Failed to perform initial lock of your dependencies based on your [{file}]({url}}).
+       Linked SHA - {sha}
 
 See attached report below to inspect this issue.
 
@@ -188,4 +190,23 @@ See attached report below to inspect this issue.
 ```
 {environment_details}
 ```
+</details>
 """
+
+
+ISSUE_UNSUPPORTED_PACKAGE = \
+  """Kebechet cannot support maintaining this application as it contain's Git version of packages.
+
+  The package causing the issue is - {package}
+  Linked SHA - {sha}
+
+  For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
+
+  <details>
+    <summary>Environment details</summary>
+
+  ```
+  {environment_details}
+  ```
+  </details>
+  """

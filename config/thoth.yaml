@@ -107,6 +107,7 @@ repositories:
             - fridex
             - CermakM
             - harshad16
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
@@ -323,6 +324,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
@@ -341,6 +343,7 @@ repositories:
           maintainers:
             - goern
             - fridex
+            - pacospace
           assignees:
             - sesheta
           labels: [bot]
@@ -570,3 +573,51 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
+
+  - slug: thoth-station/unresolved-package-handler
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/advise-reporter
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/s2i-tensorflow-notebook
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/s2i-scipy-notebook
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/s2i-minimal-notebook
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/slo-reporter
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          labels: [bot]

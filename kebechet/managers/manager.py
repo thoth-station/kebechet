@@ -26,31 +26,19 @@ import delegator
 import kebechet
 
 from kebechet.exception import PipenvError
-from kebechet.enums import ServiceType
-from kebechet.source_management import SourceManagement
-
-import IGitt.GitHub
-import IGitt.GitLab
+from thoth.sourcemanagement.enums import ServiceType
+from thoth.sourcemanagement.sourcemanagement import SourceManagement
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> str:
-    """Initialize IGitt library for calls to services.
-
-    IGitt uses environment variables to distinguish from services - we don't want this behaviour - we want to
-    have service configuration explicitly configurable (possible use multiple times and talking to
-    different services). Let's override IGitt behavior based on configuration.
-    """
+def _init_service_url(service_type: ServiceType = None, service_url: str = None) -> str:
+    """Needed for the cron job to initialize the service_url if not provided."""
     if service_type == ServiceType.GITHUB:
-        IGitt.GitHub.GH_INSTANCE_URL = service_url or 'https://github.com'
-        IGitt.GitHub.BASE_URL = IGitt.GitHub.GH_INSTANCE_URL.replace('github.com', 'api.github.com')
-        service_url = IGitt.GitHub.GH_INSTANCE_URL
+        service_url = service_url or 'https://github.com'
     elif service_type == ServiceType.GITLAB:
-        IGitt.GitLab.GL_INSTANCE_URL = service_url or 'https://gitlab.com'
-        IGitt.GitLab.BASE_URL = IGitt.GitLab.GL_INSTANCE_URL + '/api/v4'
-        service_url = IGitt.GitLab.GL_INSTANCE_URL
+        service_url = service_url or 'https://gitlab.com'
     else:
         raise NotImplementedError
 
@@ -60,13 +48,18 @@ def _init_igitt(service_type: ServiceType = None, service_url: str = None) -> st
 class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
-    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, token: str = None):
+    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, parsed_payload: dict = None,
+                 token: str = None):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
-        # This needs to be called before instantiation of SourceManagement due to changes in global variables.
-        self.service_url = _init_igitt(service_type, service_url)
+        # This needs to be called before instantiation of service url, if not provided.
+        self.service_url = _init_service_url(service_type, service_url)
         # Allow token expansion from env vars.
         self.slug = slug
+        # Parsed payload structure can be accessed in payload_parser.py
+        self.parsed_payload = None
+        if parsed_payload:
+            self.parsed_payload = parsed_payload
         self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
         self._repo = None
