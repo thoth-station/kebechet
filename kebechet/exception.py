@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,8 +49,35 @@ class PullRequestError(KebechetException):
 
 
 class DependencyManagementError(KebechetException):
-    """
-    An exception raised if there is an error in dependency management in the repo.
+    """An exception raised if there is an error in dependency management in the repo.
 
     This errors are usually wrong or missing Pipfile, Pipfile.lock, requirments.in or requirments.txt.
+    """
+
+
+class WebhookPayloadError(KebechetException):
+    """An exception raised if there is an error if the webhook passed cannot be parsed as a json.
+
+    Generally the payload is empty or not of proper json format.
+    """
+
+
+class CannotFetchPRError(KebechetException):
+    """An exception raised if there OGR cannot fetch the PR's for a repo.
+
+    Generally the token is invalid or doesn't have access to the repo.
+    """
+
+
+class CannotFetchBranchesError(KebechetException):
+    """An exception raised if there OGR cannot fetch the repo branches.
+
+    Generally the token is invalid or doesn't have access to the repo.
+    """
+
+
+class CreatePRError(KebechetException):
+    """An exception raised if there OGR cannot create an PR.
+
+    Generally the token is invalid or doesn't have access to the repo.
     """

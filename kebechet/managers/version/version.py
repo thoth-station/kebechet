@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import logging
 import typing
 
 from git import Repo
-from IGitt.Interfaces.Issue import Issue
+from ogr.abstract import Issue
 import yaml
 import semver
 from datetime import datetime
@@ -46,6 +46,9 @@ _RELEASE_TITLES = {
     "new build release": semver.bump_build,
     "finalize version": semver.finalize_version,
 }
+
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['issues', 'issue']
 
 
 class VersionError(Exception):
@@ -109,7 +112,8 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
+                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                None,
                 labels
             )
 
@@ -118,7 +122,8 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda x: "Automated version release cannot be performed.\nRelated: #" + str(issue.number),
+                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                None,
                 labels
             )
 
@@ -203,23 +208,46 @@ class VersionManager(ManagerBase):
         return changelog
 
     @staticmethod
-    def _construct_pr_body(issue: Issue, changelog: str) -> str:
+    def _adjust_pr_body(issue: Issue) -> str:
+        if not issue.description:
+            return ""
+
+        result = "\n".join(issue.description.splitlines())
+        result = result.replace(
+            "Hey, Kebechet!\n\nCreate a new patch release, please.",
+            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n"
+        )
+
+        result = result.replace(
+            "Hey, Kebechet!\n\nCreate a new minor release, please.",
+            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.\n\n"
+        )
+
+        return result.replace(
+            "Hey, Kebechet!\n\nCreate a new major release, please.",
+            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.\n\n"
+        )
+
+    @classmethod
+    def _construct_pr_body(cls, issue: Issue, changelog: str) -> str:
         """Construct body of the opened pull request with version update."""
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
-        body = ''
-        if issue.description:
-            body = issue.description + '\n\n'
-
-        body += 'Related: #' + str(issue.number) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        body = cls._adjust_pr_body(issue)
+        body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(changelog)
         return body
 
     def run(self, maintainers: list = None, assignees: list = None,
             labels: list = None, changelog_file: bool = False) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("Version Manager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
+
         reported_issues = []
-        for issue in self.sm.repository.issues:
+        for issue in self.sm.repository.get_issue_list():
             issue_title = issue.title.strip()
 
             if issue_title.startswith((_NO_VERSION_FOUND_ISSUE_NAME, _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME)):
@@ -232,7 +260,7 @@ class VersionManager(ManagerBase):
 
             _LOGGER.info(
                 "Found an issue #%s which is a candidate for request of new version release: %s",
-                issue.number, issue.title
+                issue.id, issue.title
             )
 
             with cloned_repo(self.service_url, self.slug) as repo:
@@ -240,13 +268,13 @@ class VersionManager(ManagerBase):
                     try:
                         self.sm.assign(issue, assignees)
                     except Exception:
-                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.number}")
-                        issue.add_comment("Unable to assign provided assignees, please check bot configuration.")
+                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.id}")
+                        issue.comment("Unable to assign provided assignees, please check bot configuration.")
 
                 maintainers = maintainers or self._get_maintainers(labels)
-                if issue.author.username.lower() not in (m.lower() for m in maintainers):
-                    issue.add_comment(
-                        f"Sorry, @{issue.author.username} but you are not stated in maintainers section for "
+                if issue.author.lower() not in (m.lower() for m in maintainers):
+                    issue.comment(
+                        f"Sorry, @{issue.author} but you are not stated in maintainers section for "
                         f"this project. Maintainers are @" + ', @'.join(maintainers)
                         if maintainers else "Sorry, no maintainers configured."
                     )
@@ -258,7 +286,7 @@ class VersionManager(ManagerBase):
                     version_identifier, old_version = self._adjust_version_in_sources(repo, labels, issue)
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
-                    issue.add_comment(str(exc))
+                    issue.comment(str(exc))
                     issue.close()
                     raise
 
@@ -269,6 +297,15 @@ class VersionManager(ManagerBase):
                 changelog = self._compute_changelog(
                     repo, old_version, version_identifier, version_file=changelog_file
                 )
+
+                # If an issue exists, we close it as there is no change to source code.
+                if not changelog:
+                    message = f'Closing the issue as there is no changelog between the new release of {self.slug}.'
+                    _LOGGER.info(message)
+                    issue.comment(message)
+                    issue.close()
+                    return
+
                 branch_name = 'v' + version_identifier
                 repo.git.checkout('HEAD', b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
@@ -284,10 +321,10 @@ class VersionManager(ManagerBase):
                 )
 
                 _LOGGER.info(
-                    f"Opened merge request with {request.number} for new release of {self.slug} "
+                    f"Opened merge request with {request.id} for new release of {self.slug} "
                     f"in version {version_identifier}"
                 )
 
         for reported_issue in reported_issues:
-            reported_issue.add_comment("Closing as this issue is no longer relevant.")
+            reported_issue.comment("Closing as this issue is no longer relevant.")
             reported_issue.close()

@@ -9,12 +9,12 @@ pipenv = "*"
 requests = "*"
 toml = "*"
 "delegator.py" = "*"
-gitpython = "==1.0.1"
+gitpython = ">=3.1.0"
 pyyaml = "*"
-igitt = {git = "https://gitlab.com/gitmate/open-source/IGitt.git"}
 semver = "*"
 thoth-common = "*"
 thamos = "*"
+thoth-sourcemanagement = "*"
 
 [dev-packages]
 pytest = "*"

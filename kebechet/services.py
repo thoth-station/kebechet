@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Kevin Postlethwait
+# Copyright(C) 2018, 2019, 2020 Kevin Postlethwait
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import tempfile
 import logging
 import os
 
-from .enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class Service():
         }
 
     def download_kebechet_config(self):
-        """Return a temporary file containing this repos' .kebechet.yaml contents."""
+        """Return a temporary file containing this repos' .thoth.yaml contents."""
         down_url = self.get_kebechet_download_url()
         auth = self.get_auth_header()
         _LOGGER.info("Downloading from %s", down_url)

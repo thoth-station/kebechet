@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ import requests
 import toml
 
 _LOGGER = logging.getLogger(__name__)
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['push', 'merge_request']
 
 
 class PipfileRequirementsManager(ManagerBase):
@@ -72,6 +74,11 @@ class PipfileRequirementsManager(ManagerBase):
 
     def run(self, lockfile: bool = False) -> None:
         """Keep your requirements.txt in sync with Pipfile/Pipfile.lock."""
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("PipfileRequirementsManager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
+
         file_name = 'Pipfile.lock' if lockfile else 'Pipfile'
         file_url = construct_raw_file_url(self.service_url, self.slug, file_name, self.service_type)
 

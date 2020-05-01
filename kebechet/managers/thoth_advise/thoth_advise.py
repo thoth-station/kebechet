@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Kevin Postlethwait
+# Copyright(C) 2018, 2019, 2020 Kevin Postlethwait
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,12 +30,14 @@ from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
-from kebechet.source_management import Issue
-from kebechet.source_management import MergeRequest
+from thoth.sourcemanagement.sourcemanagement import Issue
+from thoth.sourcemanagement.sourcemanagement import PullRequest
 from kebechet.utils import cloned_repo
 
 _BRANCH_NAME = "kebechet_thoth"
 _LOGGER = logging.getLogger(__name__)
+# Github and Gitlab events on which the manager acts upon.
+_EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
 
 
 class ThothAdviseManager(ManagerBase):
@@ -83,7 +85,7 @@ class ThothAdviseManager(ManagerBase):
 
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
-            if mr.head_branch_name == branch_name:
+            if mr.source_branch == branch_name:
                 _LOGGER.info('Merge request already exists, updating...')
                 return
 
@@ -126,6 +128,11 @@ class ThothAdviseManager(ManagerBase):
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
+        if self.parsed_payload:
+            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
+                _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.parsed_payload.get('event'))
+                return
+
         if analysis_id is None:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
                 self.repo = repo
@@ -147,7 +154,7 @@ class ThothAdviseManager(ManagerBase):
                 res = lib.get_analysis_results(analysis_id)
                 branch_name = self._construct_branch_name()
                 branch = self.repo.git.checkout("-B", branch_name)
-                self._cached_merge_requests = self.sm.repository.merge_requests
+                self._cached_merge_requests = self.sm.repository.get_pr_list()
 
                 if res is None:
                     _LOGGER.error("Advise failed on server side, contact the maintainer")

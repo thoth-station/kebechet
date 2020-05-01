@@ -3,9 +3,25 @@ tls_verify: false
 requirements_format: pipenv
 
 runtime_environments:
-  - name: centos:7
+  - name: rhel:8
     operating_system: 
-      name: centos
-      version: "7"
+      name: rhel
+      version: "8"
     python_version: "3.6"
     recommendation_type: latest
+
+managers:
+  - name: pipfile-requirements
+  - name: update
+    configuration:
+      labels: [bot]
+  - name: info
+  - name: version
+    configuration:
+      maintainers:
+        - goern
+        - fridex
+      assignees:
+        - sesheta
+      labels: [bot]
+      changelog_file: true

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ from urllib.parse import urljoin
 
 import git
 
-from .enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
