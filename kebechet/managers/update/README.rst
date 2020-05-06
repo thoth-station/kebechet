@@ -4,6 +4,8 @@ Kebechet Update Manager
 This manager is responsible for automatic updates of dependencies in a repository based on `Pipfile` or `requirements.txt`
 file.
 
+Open an issue titled `Kebechet update` to manually trigger an update for your repository.
+
 A prerequisite for this manager is to have `Pipfile`, `requirements.in` or `requirements-dev.in` present in the repo.
 These files should state all direct dependencies (with possible required specifications).
 
