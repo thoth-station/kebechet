@@ -504,7 +504,7 @@ class UpdateManager(ManagerBase):
             commits = pr.get_all_commits()
             if len(commits) != 1:
                 pr.comment("There have been done changes in the original pull request (multiple commits found), "
-                             "aborting doing changes to the modified opened pull request")
+                            "aborting doing changes to the modified opened pull request")
                 return False
             if self.sha != commits[0]:
                 self._git_push(":pushpin: " + commit_msg, branch_name, ['Pipfile.lock'], force_push=True)
