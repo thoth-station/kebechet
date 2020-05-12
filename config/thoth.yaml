@@ -503,9 +503,9 @@ repositories:
   - slug: thoth-station/metrics-exporter
     token: "{KEBECHET_TOKEN}"
     managers:
-      - name: update
+      - name: thoth-advise
         configuration:
-          labels: [bot]
+          labels: [bot, kebechet]
       - name: info
       - name: version
         configuration:
