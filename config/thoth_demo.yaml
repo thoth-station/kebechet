@@ -1,0 +1,9 @@
+---
+repositories:
+  - slug:  thoth-station/metrics-exporter 
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: thoth-advise
+        configuration:
+          labels: [bot, kebechet]
