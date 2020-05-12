@@ -63,9 +63,9 @@ def cli(ctx=None, verbose=0):
     """CLI."""
     if ctx:
         ctx.auto_envvar_prefix = "KEBECHET"
-    
+
     _LOGGER.info("Kebechet version: %r", kebechet_version)
-    
+
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
         _LOGGER.debug("Debug mode turned on")
