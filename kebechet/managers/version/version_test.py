@@ -6,7 +6,7 @@ import typing
 from unittest.mock import patch
 
 from git import Repo
-from kebechet.enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType
 from kebechet.managers import VersionManager
 
 
