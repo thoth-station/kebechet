@@ -35,10 +35,10 @@
         },
         "appdirs": {
             "hashes": [
-                "sha256:9e5896d1372858f8dd3344faf4e5014d21849c756c8d5701f78f8a103b372d92",
-                "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
+                "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41",
+                "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"
             ],
-            "version": "==1.4.3"
+            "version": "==1.4.4"
         },
         "argo-workflows": {
             "hashes": [
@@ -228,10 +228,10 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:0c41a453b9a8e77975bfa436b8daedac00aed1c545d84410daff8272fff40fbb",
-                "sha256:e63b2210e03c4ed829063b72c4af0c4b867c2788efb3210b6b9439b488bd3afd"
+                "sha256:4942ab1ff530e740866571c0416fb5a7dc9ec53233a8f8dff63e8cd7371003d1",
+                "sha256:82d32f6601f35309c95d5917bcdf72f3ec193c7f46c79e433b8d76ccbe68e21d"
             ],
-            "version": "==1.14.1"
+            "version": "==1.14.3"
         },
         "idna": {
             "hashes": [
@@ -398,10 +398,10 @@
         },
         "ogr": {
             "hashes": [
-                "sha256:47fe5a311fed81ce3b87df037601ba32dede50187f2cfec40f13c0379c637dbe",
-                "sha256:7408829d3830f9b3a9183cc0727dc3668c1bf7c2f4ff42a76dfacee9fd0c587a"
+                "sha256:1b588dc1dfb2c1dbeb4457986462e9449d61c5656ceebbd8ee636a25dbcd5ab3",
+                "sha256:32cb86ce6b80c7b6ae105424ed516e4b262fb7a143e4ca7b1273fb4aba416a13"
             ],
-            "version": "==0.11.3"
+            "version": "==0.12.0"
         },
         "openshift": {
             "hashes": [
@@ -681,11 +681,11 @@
         },
         "thoth-sourcemanagement": {
             "hashes": [
-                "sha256:b41f43bbcbadf28ec888e225595b8f454d09d8fef43b04fdc386d3a19f575d6b",
-                "sha256:d786c942edaa1f0f257d948841d722b1ab862ca62ee402a4aafc3850c34311fc"
+                "sha256:3319187905c6744801f00b4e2f8d406ccfae6f373f36c6a4aa5525b05b5959a5",
+                "sha256:becfc2aa7ac0b53af1e31a7628bbec442369af7368b9095ca715cf3c6b26e002"
             ],
             "index": "pypi",
-            "version": "==0.2.7"
+            "version": "==0.2.9"
         },
         "toml": {
             "hashes": [
@@ -706,10 +706,10 @@
         },
         "tzlocal": {
             "hashes": [
-                "sha256:11c9f16e0a633b4b60e1eede97d8a46340d042e67b670b290ca526576e039048",
-                "sha256:949b9dd5ba4be17190a80c0268167d7e6c92c62b30026cf9764caf3e308e5590"
+                "sha256:643c97c5294aedc737780a49d9df30889321cbe1204eac2c2ec6134035a92e44",
+                "sha256:e2cb6c6b5b604af38597403e9852872d7f534962ae2954c7f35efcb1ccacf4a4"
             ],
-            "version": "==2.0.0"
+            "version": "==2.1"
         },
         "urllib3": {
             "hashes": [
@@ -769,10 +769,10 @@
         },
         "yaspin": {
             "hashes": [
-                "sha256:e88bf9c9fe4ac588e3620588aadae655dfc20f1f7460338394ef4693bdc2b800",
-                "sha256:efca3eb7162e575d3ab2e49743cd9bd1f5ec2adc7d85b9489ab145a3f6460ed4"
+                "sha256:4330b240e3cb7ad990dbdc9c72891fecb1e1668cc19f0e44440bb01ffe2b1e56",
+                "sha256:f8406d345ae046cb7330a4e581d7a959f6f7718a38002da6142b3bcaaa0367b1"
             ],
-            "version": "==0.16.0"
+            "version": "==0.17.0"
         },
         "zipp": {
             "hashes": [
@@ -786,10 +786,10 @@
     "develop": {
         "appdirs": {
             "hashes": [
-                "sha256:9e5896d1372858f8dd3344faf4e5014d21849c756c8d5701f78f8a103b372d92",
-                "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
+                "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41",
+                "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"
             ],
-            "version": "==1.4.3"
+            "version": "==1.4.4"
         },
         "astroid": {
             "hashes": [
@@ -1045,11 +1045,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:0e5b30f5cb04e887b91b1ee519fa3d89049595f428c1db76e73bd7f17b09b172",
-                "sha256:84dde37075b8805f3d1f392cc47e38a0e59518fb46a431cfdaf7cf1ce805f970"
+                "sha256:95c710d0a72d91c13fae35dce195633c929c3792f54125919847fdcdf7caa0d3",
+                "sha256:eb2b5e935f6a019317e455b6da83dd8650ac9ffd2ee73a7b657a30873d67a698"
             ],
             "index": "pypi",
-            "version": "==5.4.1"
+            "version": "==5.4.2"
         },
         "pytest-cov": {
             "hashes": [
