@@ -29,7 +29,7 @@ Manager will automatically rebase opened pull requests on top of the current mas
 Why should I pin down dependencies in my application?
 =====================================================
 
-Check `this StackOverflow thread <https://stackoverflow.com/questions/28509481>`_.
+Check `this StackOverflow thread <https://stackoverflow.com/questions/28509481>`__.
 
 Why should I use this manager instead of other solutions?
 =========================================================
