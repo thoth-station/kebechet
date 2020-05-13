@@ -145,7 +145,7 @@ class ThothAdviseManager(ManagerBase):
                     )
                     return False
 
-                lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}"))
+                lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}"), metadata_is_kebechet=True,)
             return True
         else:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
