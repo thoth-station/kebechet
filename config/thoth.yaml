@@ -649,6 +649,18 @@ repositories:
       - name: info
       - name: version
         configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+      - name: update
+        configuration:
           labels: [bot]
   
   - slug: thoth-station/source-management
@@ -666,7 +678,7 @@ repositories:
           assignees:
             - sesheta
           labels: [bot]
-          changelog_file: false
+          changelog_file: true
       - name: update
         configuration:
           labels: [bot]
