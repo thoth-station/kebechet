@@ -682,3 +682,23 @@ repositories:
       - name: update
         configuration:
           labels: [bot]
+
+  - slug: thoth-station/source-management
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - fridex
+            - goern
+            - harshad16
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
