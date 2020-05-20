@@ -683,7 +683,7 @@ repositories:
         configuration:
           labels: [bot]
 
-  - slug: thoth-station/source-management
+  - slug: thoth-station/workflow-helpers
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
