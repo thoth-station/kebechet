@@ -149,7 +149,7 @@ class ThothAdviseManager(ManagerBase):
                 lib.advise_here(
                     nowait=True,
                     origin=(f"{self.service_url}/{self.slug}"),
-                    source_type=ThothAdviserIntegrationEnum.kebechet,
+                    source_type=ThothAdviserIntegrationEnum.KEBECHET,
                 )
             return True
         else:
