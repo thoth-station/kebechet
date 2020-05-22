@@ -624,10 +624,10 @@
         },
         "six": {
             "hashes": [
-                "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a",
-                "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"
+                "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259",
+                "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"
             ],
-            "version": "==1.14.0"
+            "version": "==1.15.0"
         },
         "smmap": {
             "hashes": [
@@ -666,11 +666,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:15b0996708dbc29a2ad688ce3e545a47b95db1f7058dc9de23184d3739921c12",
-                "sha256:cf166cfc5b8197090ba1d90fddf34e37e9216c0452b4700553b3c09b0629ff2f"
+                "sha256:22d3dc2ed51a9cfbad07d813031e8d441090ab3d5d78b771177880e3736bdc8e",
+                "sha256:462679ab136f1f66cdaedae84551e831ae4ba49bd6da760a4d00cd491aa4be4d"
             ],
             "index": "pypi",
-            "version": "==0.13.4"
+            "version": "==0.13.5"
         },
         "thoth-python": {
             "hashes": [
@@ -1100,10 +1100,10 @@
         },
         "six": {
             "hashes": [
-                "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a",
-                "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"
+                "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259",
+                "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"
             ],
-            "version": "==1.14.0"
+            "version": "==1.15.0"
         },
         "termcolor": {
             "hashes": [
