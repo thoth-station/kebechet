@@ -18,8 +18,10 @@
 """Automatically issue a new PR with adjusted version for Python projects."""
 
 import os
-import logging
+import re
 import typing
+
+import logging
 
 from git import Repo
 from ogr.abstract import Issue
@@ -186,11 +188,23 @@ class VersionManager(ManagerBase):
         If version file is used, add changelog to the version file and add changes to git.
         """
         _LOGGER.debug("Computing changelog for new release from version %r to version %r", old_version, new_version)
-        if old_version not in repo.git.tag().splitlines():
-            _LOGGER.debug("Old version was not found in the git tag history, assuming initial release")
+
+        tags = repo.git.tag().splitlines()
+
+        is_tagged_version = False
+        for tag in tags:
+            if old_version == tag or re.match(f"v?{old_version}", tag):
+                old_version = tag
+                is_tagged_version = True
+                break
+
+        if not is_tagged_version:
+            _LOGGER.debug(
+                "Old version was not found in the git tag history, assuming initial release"
+            )
             # Use the initial commit if this the previous tag was not found - this
             # can be in case of the very first release.
-            old_version = repo.git.rev_list('HEAD', max_parents=0)
+            old_version = repo.git.rev_list("HEAD", max_parents=0)
 
         changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
         if version_file:

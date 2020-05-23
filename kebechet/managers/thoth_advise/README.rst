@@ -15,7 +15,7 @@ If there is any issue in your application stack, the Thamos-Advise manager will 
 
 Why should I pin down dependencies in my application?
 =====================================================
-Check _`this StackOverflow thread <https://stackoverflow.com/questions/28509481>`_.
+Check `this StackOverflow thread <https://stackoverflow.com/questions/28509481>`__.
 
 Options
 =======

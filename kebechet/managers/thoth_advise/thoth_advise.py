@@ -33,6 +33,7 @@ from kebechet.managers.manager import ManagerBase
 from thoth.sourcemanagement.sourcemanagement import Issue
 from thoth.sourcemanagement.sourcemanagement import PullRequest
 from kebechet.utils import cloned_repo
+from thoth.common import ThothAdviserIntegrationEnum
 
 _BRANCH_NAME = "kebechet_thoth"
 _LOGGER = logging.getLogger(__name__)
@@ -145,7 +146,11 @@ class ThothAdviseManager(ManagerBase):
                     )
                     return False
 
-                lib.advise_here(nowait=True, origin=(f"{self.service_url}/{self.slug}"))
+                lib.advise_here(
+                    nowait=True,
+                    origin=(f"{self.service_url}/{self.slug}"),
+                    source_type=ThothAdviserIntegrationEnum.KEBECHET,
+                )
             return True
         else:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:

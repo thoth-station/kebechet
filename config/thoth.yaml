@@ -11,6 +11,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - pacospace
@@ -30,6 +31,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -48,6 +50,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - fridex
             - goern
           assignees:
@@ -66,6 +69,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - pacospace
@@ -85,6 +89,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -103,6 +108,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - CermakM
@@ -124,6 +130,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -141,6 +148,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - cermakM
             - fridex
           assignees:
@@ -158,6 +166,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -175,6 +184,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -192,6 +202,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -218,6 +229,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - bissenbay
@@ -237,6 +249,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -254,6 +267,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -271,6 +285,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -306,6 +321,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -323,6 +339,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - fridex
             - goern
           assignees:
@@ -340,6 +357,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - pacospace
@@ -359,6 +377,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
             - pacospace
@@ -378,6 +397,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -395,6 +415,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -428,6 +449,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -460,6 +482,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - fridex
           assignees:
@@ -486,6 +509,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - fridex
             - goern
             - pacospace
@@ -504,6 +528,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - fridex
             - goern
           assignees:
@@ -529,6 +554,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - goern
             - harshad16
             - fridex
@@ -544,6 +570,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - pacospace
             - goern
             - fridex
@@ -558,6 +585,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - harshad16
             - goern
             - fridex
@@ -576,6 +604,7 @@ repositories:
       - name: version
         configuration:
           maintainers:
+            - sesheta
             - harshad16
             - goern
             - fridex
@@ -638,4 +667,56 @@ repositories:
       - name: info
       - name: version
         configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
           labels: [bot]
+          changelog_file: true
+      - name: update
+        configuration:
+          labels: [bot]
+  
+  - slug: thoth-station/source-management
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - saisankargochhayat
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/workflow-helpers
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: update
+        configuration:
+          labels: [bot]
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - fridex
+            - goern
+            - harshad16
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true

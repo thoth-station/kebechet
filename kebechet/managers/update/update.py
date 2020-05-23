@@ -54,6 +54,7 @@ _ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
 _ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
 _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 _ISSUE_UNSUPPORTED_PACKAGE = "Application cannot be managed by Kebechet due to Git package"
+_ISSUE_MANUAL_UPDATE = "Kebechet update"
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
@@ -665,10 +666,17 @@ class UpdateManager(ManagerBase):
                 comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
             )
 
+            close_manual_update_issue = partial(
+                self.sm.close_issue_if_exists,
+                _ISSUE_MANUAL_UPDATE,
+                comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
+            )
+
             if os.path.isfile('Pipfile'):
                 _LOGGER.info("Using Pipfile for dependency management")
                 close_no_management_issue()
                 result = self._do_update(labels, pipenv_used=True, req_dev=False)
+                close_manual_update_issue()
             elif os.path.isfile('requirements.in'):
                 self._create_pipenv_environment(input_file='requirements.in')
                 _LOGGER.info("Using requirements.in for dependency management")
@@ -679,6 +687,7 @@ class UpdateManager(ManagerBase):
                     _LOGGER.info("Using requirements-dev.in for dependency management")
                     close_no_management_issue()
                     result = self._do_update(labels, pipenv_used=False, req_dev=True)
+                close_manual_update_issue()
             else:
                 _LOGGER.warning("No dependency management found")
                 self.sm.open_issue_if_not_exist(
