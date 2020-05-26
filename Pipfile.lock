@@ -651,11 +651,11 @@
         },
         "thamos": {
             "hashes": [
-                "sha256:1e434dfd2a9c4ba56529c6d350c88cf1a18a6b0eb356aa55bb12ebacc66c6bd3",
-                "sha256:3136e19eacd85754a4b7163763514560cd492736784338d44249e695b723f19c"
+                "sha256:2195f73095f29270f3697a784b2a5d3da039a74b5b458d768303a69df2658c80",
+                "sha256:fcd3f97050bf3e12ee22c8c425e53ec6f9bf76a2267a7eff12059f834f3dc6a0"
             ],
             "index": "pypi",
-            "version": "==0.10.1"
+            "version": "==0.10.2"
         },
         "thoth-analyzer": {
             "hashes": [
