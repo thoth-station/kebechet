@@ -615,6 +615,18 @@ repositories:
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
       - name: update
         configuration:
           labels: [bot]
