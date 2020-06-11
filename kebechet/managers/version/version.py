@@ -41,12 +41,12 @@ _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
     "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
-    "new major release": semver.bump_major,
-    "new minor release": semver.bump_minor,
-    "new patch release": semver.bump_patch,
-    "new pre-release": semver.bump_prerelease,
-    "new build release": semver.bump_build,
-    "finalize version": semver.finalize_version,
+    "new major release": lambda current_version: semver.VersionInfo.bump_major,
+    "new minor release": lambda current_version: str(semver.VersionInfo.parse(current_version).bump_minor()),
+    "new patch release": lambda current_version: str(semver.VersionInfo.parse(current_version).bump_patch()),
+    "new pre-release": lambda current_version: str(semver.VersionInfo.parse(current_version).bump_prerelease()),
+    "new build release": lambda current_version: str(semver.VersionInfo.parse(current_version).bump_build()),
+    "finalize version": lambda current_version: str(semver.VersionInfo.parse(current_version).finalize_version()),
 }
 
 # Github and Gitlab events on which the manager acts upon.
