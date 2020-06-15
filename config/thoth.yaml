@@ -111,7 +111,6 @@ repositories:
             - sesheta
             - goern
             - fridex
-            - CermakM
             - harshad16
             - pacospace
           assignees:
@@ -149,7 +148,6 @@ repositories:
         configuration:
           maintainers:
             - sesheta
-            - cermakM
             - fridex
           assignees:
             - sesheta
