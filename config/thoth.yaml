@@ -111,7 +111,6 @@ repositories:
             - sesheta
             - goern
             - fridex
-            - CermakM
             - harshad16
             - pacospace
           assignees:
@@ -149,7 +148,6 @@ repositories:
         configuration:
           maintainers:
             - sesheta
-            - cermakM
             - fridex
           assignees:
             - sesheta
@@ -615,6 +613,18 @@ repositories:
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
       - name: update
         configuration:
           labels: [bot]
@@ -702,3 +712,43 @@ repositories:
             - sesheta
           labels: [bot]
           changelog_file: true
+
+  - slug: thoth-station/datasets
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+      - name: update
+        configuration:
+          labels: [bot]
+
+  - slug: thoth-station/solver-error-classifier
+    token: "{KEBECHET_TOKEN}"
+    managers:
+      - name: info
+      - name: version
+        configuration:
+          maintainers:
+            - sesheta
+            - harshad16
+            - goern
+            - fridex
+            - pacospace
+          assignees:
+            - sesheta
+          labels: [bot]
+          changelog_file: true
+      - name: update
+        configuration:
+          labels: [bot]
