@@ -719,7 +719,7 @@
                 "sha256:d8efa12b2bd036cf0bd92ab2cab69000358497766c7e45c3d3fe5c4b22af68b3"
             ],
             "index": "pypi",
-            "version": "==0.13.11"
+            "version": "==0.13.12"
         },
         "thoth-python": {
             "hashes": [
