@@ -140,7 +140,7 @@ class VersionManager(ManagerBase):
         try:
             with open('OWNERS', 'r') as owners_file:
                 owners = yaml.safe_load(owners_file)
-            maintainers = list(map(str, owners['maintainers']))
+            maintainers = list(map(str, owners.get('maintainers') or []))
         except (FileNotFoundError, KeyError, ValueError, yaml.ParseError):
             _LOGGER.exception("Failed to load maintainers file")
             self.sm.open_issue_if_not_exist(
