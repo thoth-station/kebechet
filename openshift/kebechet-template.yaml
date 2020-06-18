@@ -57,8 +57,8 @@ objects:
     spec:
       serviceAccountName: argo
       ttlStrategy:
-        secondsAfterSuccess: 900  # Keep kebechet for 15 minutes.
-        # secondsAfterFailure kept unset to keep failed kebechet workflows for debugging
+        secondsAfterSuccess: 7200
+        secondsAfterFailure: 7200
       podGC:
         strategy: OnWorkflowSuccess
       entrypoint: kebechet-job
