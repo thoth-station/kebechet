@@ -49,7 +49,7 @@ class _Config:
                 content = config_file.read()
 
         try:
-            self._repositories = yaml.safe_load(content).pop("repositories") or []
+            self._repositories = yaml.safe_load(content).get("repositories") or []
         except Exception as exc:
             raise ConfigurationError(
                 "Failed to parse configuration file: {str(exc)}"
@@ -60,7 +60,7 @@ class _Config:
         with open(config_path) as config_file:
             content = config_file.read()
         try:
-            return yaml.safe_load(content).pop("managers") or []
+            return yaml.safe_load(content).get("managers") or []
         except Exception as exc:
             raise ConfigurationError(
                 "Failed to parse configuration file: {str(exc)}"
@@ -72,7 +72,7 @@ class _Config:
             content = config_file.read()
 
         try:
-            return yaml.safe_load(content).pop("tls_verify") or False
+            return yaml.safe_load(content).get("tls_verify") or False
         except Exception as exc:
             raise ConfigurationError(
                 "Failed to parse configuration file: {str(exc)}"
@@ -146,7 +146,7 @@ class _Config:
                 )
                 continue
             _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
-            manager_configuration = manager.pop("configuration", {})
+            manager_configuration = manager.get("configuration") or {}
             if manager:
                 _LOGGER.warning(
                     "Ignoring option %r in manager entry for %r", manager, slug,
@@ -170,12 +170,12 @@ class _Config:
             try:
                 items = dict(entry)
                 value = (
-                    items.pop("managers"),
-                    items.pop("slug"),
-                    items.pop("service_type", None),
-                    items.pop("service_url", None),
-                    items.pop("token", None),
-                    items.pop("tls_verify", True),
+                    items.get("managers") or [],
+                    items.get("slug") or None,
+                    items.get("service_type") or None,
+                    items.get("service_url") or None,
+                    items.get("token") or None,
+                    items.get("tls_verify") or True,
                 )
 
                 if items:
@@ -300,7 +300,7 @@ class _Config:
             _LOGGER.error("No manager configuration found for id: %r", analysis_id)
             return
 
-        manager_config = manager.pop("configuration", {})
+        manager_config = manager.get("configuration") or {}
         manager_config["analysis_id"] = analysis_id
         # TODO: Fail if users add config entries not relative to given manager (open an issue)
         instance = kebechet_manager(slug, service.service, service_url, token)
@@ -361,7 +361,7 @@ class _Config:
                     continue
 
                 _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
-                manager_configuration = manager.pop("configuration", {})
+                manager_configuration = manager.get("configuration") or {}
                 if manager:
                     _LOGGER.warning(
                         "Ignoring option %r in manager entry for %r", manager, slug,
