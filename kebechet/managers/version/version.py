@@ -140,8 +140,8 @@ class VersionManager(ManagerBase):
         try:
             with open('OWNERS', 'r') as owners_file:
                 owners = yaml.safe_load(owners_file)
-            maintainers = list(map(str, owners['maintainers']))
-        except (FileNotFoundError, KeyError, ValueError, yaml.ParseError):
+            maintainers = list(map(str, owners.get('maintainers') or []))
+        except (FileNotFoundError, KeyError, ValueError, yaml.YAMLError):
             _LOGGER.exception("Failed to load maintainers file")
             self.sm.open_issue_if_not_exist(
                 _NO_MAINTAINERS_ERROR,
@@ -187,7 +187,7 @@ class VersionManager(ManagerBase):
 
         If version file is used, add changelog to the version file and add changes to git.
         """
-        _LOGGER.debug("Computing changelog for new release from version %r to version %r", old_version, new_version)
+        _LOGGER.info("Computing changelog for new release from version %r to version %r", old_version, new_version)
 
         tags = repo.git.tag().splitlines()
 
@@ -199,7 +199,7 @@ class VersionManager(ManagerBase):
                 break
 
         if not is_tagged_version:
-            _LOGGER.debug(
+            _LOGGER.info(
                 "Old version was not found in the git tag history, assuming initial release"
             )
             # Use the initial commit if this the previous tag was not found - this
@@ -218,7 +218,7 @@ class VersionManager(ManagerBase):
                 changelog_file.write('\n')
             repo.git.add('CHANGELOG.md')
 
-        _LOGGER.debug("Computed changelog has %d entries", len(changelog))
+        _LOGGER.info("Computed changelog has %d entries", len(changelog))
         return changelog
 
     @staticmethod
