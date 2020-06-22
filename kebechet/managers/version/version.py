@@ -38,6 +38,7 @@ _VERSION_PULL_REQUEST_NAME = 'Release of version {}'
 _NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to perform a release"
 _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to perform a new release"
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
+_BODY_TRUNCATED = "The changelog body was truncated, please check CHANGELOG.md for the complete changelog."
 _DIRECT_VERSION_TITLE = ' release'
 _RELEASE_TITLES = {
     "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
@@ -51,6 +52,8 @@ _RELEASE_TITLES = {
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ['issues', 'issue']
+# Maximum number of log messages in a single release. Set due to ultrahook limits.
+_MAX_CHANELOG_SIZE = 300
 
 
 class VersionError(Exception):
@@ -243,13 +246,16 @@ class VersionManager(ManagerBase):
         )
 
     @classmethod
-    def _construct_pr_body(cls, issue: Issue, changelog: str) -> str:
+    def _construct_pr_body(cls, issue: Issue, changelog: typing.List[str]) -> str:
         """Construct body of the opened pull request with version update."""
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
         body = cls._adjust_pr_body(issue)
-        body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(changelog)
+        truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
+        body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(truncated_changelog)
+        if len(changelog) > _MAX_CHANELOG_SIZE:
+            body += '\n' + _BODY_TRUNCATED
         return body
 
     def run(self, maintainers: list = None, assignees: list = None,
