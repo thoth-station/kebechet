@@ -208,14 +208,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/graph-sync-scheduler
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-
   - slug: thoth-station/package-analyzer
     token: "{KEBECHET_TOKEN}"
     managers:
