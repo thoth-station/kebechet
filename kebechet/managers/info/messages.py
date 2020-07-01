@@ -18,8 +18,7 @@
 """Body of issues automatically opened for information."""
 
 
-INFO_REPORT = \
-    """
+INFO_REPORT = """
 Information about dependency management for the current master branch with SHA {sha}.
 
 <details>

@@ -5,7 +5,7 @@ import typing
 
 from unittest.mock import patch
 
-from git import Repo
+from git import Repo  # noqa F401
 from thoth.sourcemanagement.enums import ServiceType
 from kebechet.managers import VersionManager
 
@@ -37,7 +37,7 @@ class FakeGit(object):
         return "\n".join(["0.1.0", "v0.2.0", "v1.0.0"])
 
 
-class TestVersionManager():
+class TestVersionManager:
     """Test version manager."""
 
     manager = VersionManager(
@@ -49,8 +49,8 @@ class TestVersionManager():
         [
             ("0.1.0", "0.2.0", "0.1.0"),
             ("0.2.0", "0.3.0", "v0.2.0"),
-            ("1.1.0", "1.2.0", "rev1")
-        ]
+            ("1.1.0", "1.2.0", "rev1"),
+        ],
     )
     def test__compute_changelog(self, old_version, new_version, tag):
         """Test VersionManager._compute_changelog static method."""
@@ -64,6 +64,4 @@ class TestVersionManager():
                 new_version=new_version,
                 version_file=False,
             )
-            patch_log.assert_called_with(
-                f"{tag}..HEAD", no_merges=True, format="* %s"
-            )
+            patch_log.assert_called_with(f"{tag}..HEAD", no_merges=True, format="* %s")

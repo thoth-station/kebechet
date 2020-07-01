@@ -25,11 +25,11 @@ from kebechet.utils import cloned_repo
 
 from .messages import INFO_REPORT
 
-_INFO_ISSUE_NAME = 'Kebechet info'
+_INFO_ISSUE_NAME = "Kebechet info"
 
 _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
-_EVENTS_SUPPORTED = ['issues', 'issue']
+_EVENTS_SUPPORTED = ["issues", "issue"]
 
 
 class InfoManager(ManagerBase):
@@ -38,8 +38,11 @@ class InfoManager(ManagerBase):
     def run(self) -> typing.Optional[dict]:
         """Check for info issue and close it with a report."""
         if self.parsed_payload:
-            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-                _LOGGER.info("Info manager doesn't act on %r events.", self.parsed_payload.get('event'))
+            if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
+                _LOGGER.info(
+                    "Info manager doesn't act on %r events.",
+                    self.parsed_payload.get("event"),
+                )
                 return
         issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
@@ -56,5 +59,5 @@ class InfoManager(ManagerBase):
                     slug=self.slug,
                     environment_details=self.get_environment_details(),
                     dependency_graph=self.get_dependency_graph(graceful=True),
-                )
+                ),
             )

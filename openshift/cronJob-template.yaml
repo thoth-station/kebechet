@@ -24,8 +24,6 @@ objects:
         thoth-station.ninja/template-version: 1.0.1
       labels:
         app: kebechet
-      annotations:
-        thoth-station.ninja/template-version: 1.0.1
     spec:
       schedule: "*/20 * * * *"
       suspend: false

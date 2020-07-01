@@ -1,4 +1,4 @@
-# This template uses the kebechet-job argo workflow to run kebechet on a particular webhook. 
+# This template uses the kebechet-job argo workflow to run kebechet on a particular webhook.
 apiVersion: v1
 kind: Template
 metadata:
@@ -26,7 +26,7 @@ parameters:
     description: "The webhook payload for kebecher run."
     displayName: "Webhook Payload"
     required: true
-  
+
   - name: IMAGE_STREAM_REGISTRY
     description: Registry the ImageStream to be use lives in
     displayName: ImageStream Registry
@@ -37,7 +37,7 @@ parameters:
     displayName: ImageStream Project
     required: true
     value: "thoth-infra-stage"
-    # set to 'thoth-test-core' to deploy to test. 
+    # set to 'thoth-test-core' to deploy to test.
   - name: IMAGE_STREAM_TAG
     description: Tag of the ImageStream to be use
     displayName: ImageStream Tag
@@ -76,11 +76,11 @@ objects:
       volumes:
         - name: ssh-config
           secret:
-            secretName: kebechet-secret     
+            secretName: kebechet-secret
             items:
             - key: ssh-privatekey
               path: id_rsa
-      
+
       templates:
         - name: "kebechet-job"
           archiveLocation:

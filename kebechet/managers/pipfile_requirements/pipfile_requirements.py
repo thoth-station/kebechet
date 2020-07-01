@@ -30,7 +30,7 @@ import toml
 
 _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
-_EVENTS_SUPPORTED = ['push', 'merge_request']
+_EVENTS_SUPPORTED = ["push", "merge_request"]
 
 
 class PipfileRequirementsManager(ManagerBase):
@@ -42,15 +42,17 @@ class PipfileRequirementsManager(ManagerBase):
         content = toml.loads(content)
 
         requirements = set()
-        for package_name, entry in content['packages'].items():
+        for package_name, entry in content["packages"].items():
             if not isinstance(entry, str):
                 # e.g. using git, ...
-                raise ValueError("Package {} does not use pinned version: {}".format(
-                    package_name, entry
-                ))
+                raise ValueError(
+                    "Package {} does not use pinned version: {}".format(
+                        package_name, entry
+                    )
+                )
 
-            package_version = entry if entry != '*' else ''
-            requirements.add(f'{package_name}{package_version}')
+            package_version = entry if entry != "*" else ""
+            requirements.add(f"{package_name}{package_version}")
 
         return requirements
 
@@ -63,34 +65,44 @@ class PipfileRequirementsManager(ManagerBase):
         for package_name, package_version in content.items():
             if not isinstance(package_version, str):
                 # e.g. using git, ...
-                raise ValueError("Unsupported version entry for {}: {!r}".format(
-                    package_name, package_version
-                ))
+                raise ValueError(
+                    "Unsupported version entry for {}: {!r}".format(
+                        package_name, package_version
+                    )
+                )
 
-            specifier = package_version if package_version != '*' else ''
-            requirements.add(f'{package_name}{specifier}')
+            specifier = package_version if package_version != "*" else ""
+            requirements.add(f"{package_name}{specifier}")
 
         return requirements
 
     def run(self, lockfile: bool = False) -> None:
         """Keep your requirements.txt in sync with Pipfile/Pipfile.lock."""
         if self.parsed_payload:
-            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-                _LOGGER.info("PipfileRequirementsManager doesn't act on %r events.", self.parsed_payload.get('event'))
+            if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
+                _LOGGER.info(
+                    "PipfileRequirementsManager doesn't act on %r events.",
+                    self.parsed_payload.get("event"),
+                )
                 return
 
-        file_name = 'Pipfile.lock' if lockfile else 'Pipfile'
-        file_url = construct_raw_file_url(self.service_url, self.slug, file_name, self.service_type)
+        file_name = "Pipfile.lock" if lockfile else "Pipfile"
+        file_url = construct_raw_file_url(
+            self.service_url, self.slug, file_name, self.service_type
+        )
 
         _LOGGER.debug("Downloading %r from %r", file_name, file_url)
         # TODO: propagate tls_verify for internal GitLab instances here and bellow as well
         response = requests.get(file_url)
         response.raise_for_status()
-        pipfile_content = sorted(self.get_pipfile_lock_requirements(response.text)) \
-            if lockfile else sorted(self.get_pipfile_requirements(response.text))
+        pipfile_content = (
+            sorted(self.get_pipfile_lock_requirements(response.text))
+            if lockfile
+            else sorted(self.get_pipfile_requirements(response.text))
+        )
 
         file_url = construct_raw_file_url(
-            self.service_url, self.slug, 'requirements.txt', self.service_type
+            self.service_url, self.slug, "requirements.txt", self.service_type
         )
         _LOGGER.debug("Downloading requirements.txt from %r", file_url)
         response = requests.get(file_url)
@@ -107,14 +119,16 @@ class PipfileRequirementsManager(ManagerBase):
             return
 
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
-            with open('requirements.txt', 'w') as requirements_file:
-                requirements_file.write('\n'.join(pipfile_content))
-                requirements_file.write('\n')
+            with open("requirements.txt", "w") as requirements_file:
+                requirements_file.write("\n".join(pipfile_content))
+                requirements_file.write("\n")
 
-            branch_name = 'pipfile-requirements-sync'
+            branch_name = "pipfile-requirements-sync"
             repo.git.checkout(b=branch_name)
-            repo.index.add(['requirements.txt'])
-            repo.index.commit('Update requirements.txt respecting requirements in {}'.format(
-                'Pipfile' if not lockfile else 'Pipfile.lock'
-            ))
+            repo.index.add(["requirements.txt"])
+            repo.index.commit(
+                "Update requirements.txt respecting requirements in {}".format(
+                    "Pipfile" if not lockfile else "Pipfile.lock"
+                )
+            )
             repo.remote().push(branch_name)

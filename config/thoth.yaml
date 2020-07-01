@@ -622,7 +622,7 @@ repositories:
       - name: update
         configuration:
           labels: [bot]
-  
+
   - slug: thoth-station/source-management
     token: "{KEBECHET_TOKEN}"
     managers:
