@@ -191,26 +191,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/package-analyzer
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: pipfile-requirements
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - sesheta
-            - goern
-            - fridex
-            - bissenbay
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
   - slug: thoth-station/package-extract
     token: "{KEBECHET_TOKEN}"
     managers:
