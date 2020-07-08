@@ -137,24 +137,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/cleanup-job
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - sesheta
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
   - slug: thoth-station/graph-refresh-job
     token: "{KEBECHET_TOKEN}"
     managers:
