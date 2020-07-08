@@ -34,24 +34,40 @@ from kebechet.managers.manager import ManagerBase
 
 
 _LOGGER = logging.getLogger(__name__)
-_VERSION_PULL_REQUEST_NAME = 'Release of version {}'
-_NO_VERSION_FOUND_ISSUE_NAME = f"No version identifier found in sources to perform a release"
-_MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = f"Multiple version identifiers found in sources to perform a new release"
+_VERSION_PULL_REQUEST_NAME = "Release of version {}"
+_NO_VERSION_FOUND_ISSUE_NAME = (
+    f"No version identifier found in sources to perform a release"
+)
+_MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = (
+    f"Multiple version identifiers found in sources to perform a new release"
+)
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _BODY_TRUNCATED = "The changelog body was truncated, please check CHANGELOG.md for the complete changelog."
-_DIRECT_VERSION_TITLE = ' release'
+_DIRECT_VERSION_TITLE = " release"
 _RELEASE_TITLES = {
     "new calendar release": lambda _: datetime.utcnow().strftime("%Y.%m.%d"),
-    "new major release": lambda current_version: semver.VersionInfo.parse(current_version).bump_major(),
-    "new minor release": lambda current_version: semver.VersionInfo.parse(current_version).bump_minor(),
-    "new patch release": lambda current_version: semver.VersionInfo.parse(current_version).bump_patch(),
-    "new pre-release": lambda current_version: semver.VersionInfo.parse(current_version).bump_prerelease(),
-    "new build release": lambda current_version: semver.VersionInfo.parse(current_version).bump_build(),
-    "finalize version": lambda current_version: semver.VersionInfo.parse(current_version).finalize_version(),
+    "new major release": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).bump_major(),
+    "new minor release": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).bump_minor(),
+    "new patch release": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).bump_patch(),
+    "new pre-release": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).bump_prerelease(),
+    "new build release": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).bump_build(),
+    "finalize version": lambda current_version: semver.VersionInfo.parse(
+        current_version
+    ).finalize_version(),
 }
 
 # Github and Gitlab events on which the manager acts upon.
-_EVENTS_SUPPORTED = ['issues', 'issue']
+_EVENTS_SUPPORTED = ["issues", "issue"]
 # Maximum number of log messages in a single release. Set due to ultrahook limits.
 _MAX_CHANELOG_SIZE = 300
 
@@ -63,20 +79,23 @@ class VersionError(Exception):
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
 
-    def _adjust_version_file(self, file_path: str, issue: Issue) -> typing.Optional[tuple]:
+    def _adjust_version_file(
+        self, file_path: str, issue: Issue
+    ) -> typing.Optional[tuple]:
         """Adjust version in the given file, return signalizes whether the return value indicates change in file."""
-        with open(file_path, 'r') as input_file:
+        with open(file_path, "r") as input_file:
             content = input_file.read().splitlines()
 
         changed = False
         new_version = None
         old_version = None
         for idx, line in enumerate(content):
-            if line.startswith('__version__ = '):
-                parts = line.split(' = ', maxsplit=1)
+            if line.startswith("__version__ = "):
+                parts = line.split(" = ", maxsplit=1)
                 if len(parts) != 2:
                     _LOGGER.warning(
-                        "Found '__version__' identifier but unable to parse old version, skipping: %r", line
+                        "Found '__version__' identifier but unable to parse old version, skipping: %r",
+                        line,
                     )
                     continue
 
@@ -93,33 +112,45 @@ class VersionManager(ManagerBase):
             return None
 
         # Apply changes.
-        with open(file_path, 'w') as output_file:
+        with open(file_path, "w") as output_file:
             output_file.write("\n".join(content))
             # Add new line at the of file explicitly.
             output_file.write("\n")
 
         return new_version, old_version
 
-    def _adjust_version_in_sources(self, repo: Repo, labels: list, issue: Issue) -> typing.Optional[tuple]:
+    def _adjust_version_in_sources(
+        self, repo: Repo, labels: list, issue: Issue
+    ) -> typing.Optional[tuple]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted = []
-        for root, _, files in os.walk('./'):
+        for root, _, files in os.walk("./"):
             for file_name in files:
-                if file_name in ('setup.py', '__init__.py', '__about__.py', 'version.py', 'app.py', 'wsgi.py'):
+                if file_name in (
+                    "setup.py",
+                    "__init__.py",
+                    "__about__.py",
+                    "version.py",
+                    "app.py",
+                    "wsgi.py",
+                ):
                     file_path = os.path.join(root, file_name)
                     adjusted_version = self._adjust_version_file(file_path, issue)
                     if adjusted_version:
                         repo.git.add(file_path)
-                        adjusted.append((file_path, adjusted_version[0], adjusted_version[1]))
+                        adjusted.append(
+                            (file_path, adjusted_version[0], adjusted_version[1])
+                        )
 
         if len(adjusted) == 0:
             error_msg = _NO_VERSION_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                lambda: "Automated version release cannot be performed.\nRelated: #"
+                + str(issue.id),
                 None,
-                labels
+                labels,
             )
 
         if len(adjusted) > 1:
@@ -127,9 +158,10 @@ class VersionManager(ManagerBase):
             _LOGGER.warning(error_msg)
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #" + str(issue.id),
+                lambda: "Automated version release cannot be performed.\nRelated: #"
+                + str(issue.id),
                 None,
-                labels
+                labels,
             )
 
         # Return old and new version identifier.
@@ -141,24 +173,28 @@ class VersionManager(ManagerBase):
         Maintainers can be either stated in the configuration or in the OWNERS file in the repo itself.
         """
         try:
-            with open('OWNERS', 'r') as owners_file:
+            with open("OWNERS", "r") as owners_file:
                 owners = yaml.safe_load(owners_file)
-            maintainers = list(map(str, owners.get('maintainers') or []))
+            maintainers = list(map(str, owners.get("maintainers") or []))
         except (FileNotFoundError, KeyError, ValueError, yaml.YAMLError):
             _LOGGER.exception("Failed to load maintainers file")
             self.sm.open_issue_if_not_exist(
                 _NO_MAINTAINERS_ERROR,
                 lambda: "This repository is not correctly setup for automated version releases. "
-                        "Please revisit bot configuration.",
-                labels=labels
+                "Please revisit bot configuration.",
+                labels=labels,
             )
             return []
 
-        self.sm.close_issue_if_exists(_NO_MAINTAINERS_ERROR, "No longer relevant for the current bot setup.")
+        self.sm.close_issue_if_exists(
+            _NO_MAINTAINERS_ERROR, "No longer relevant for the current bot setup."
+        )
         return maintainers
 
     @staticmethod
-    def _get_new_version(issue_title: str, current_version: str) -> typing.Optional[str]:
+    def _get_new_version(
+        issue_title: str, current_version: str
+    ) -> typing.Optional[str]:
         """Get next version based on user request."""
         issue_title = issue_title.lower()
 
@@ -167,10 +203,12 @@ class VersionManager(ManagerBase):
             try:
                 return str(handler(current_version))
             except ValueError as exc:  # Semver raises ValueError when version cannot be parsed.
-                raise VersionError(f"Wrong version specifier found in sources: {str(exc)}") from exc
+                raise VersionError(
+                    f"Wrong version specifier found in sources: {str(exc)}"
+                ) from exc
 
         if issue_title.endswith(_DIRECT_VERSION_TITLE):  # a specific release
-            parts = issue_title.split(' ')
+            parts = issue_title.split(" ")
             if len(parts) == 2:
                 return parts[0]
 
@@ -180,17 +218,25 @@ class VersionManager(ManagerBase):
     def _is_release_request(issue_title):
         """Check for possible candidate for a version bump."""
         issue_title = issue_title.lower()
-        return _RELEASE_TITLES.get(issue_title) is not None \
-            or issue_title.endswith(_DIRECT_VERSION_TITLE) and len(issue_title.split(' ')) == 2
+        return (
+            _RELEASE_TITLES.get(issue_title) is not None
+            or issue_title.endswith(_DIRECT_VERSION_TITLE)
+            and len(issue_title.split(" ")) == 2
+        )
 
     @staticmethod
-    def _compute_changelog(repo: Repo, old_version: str, new_version: str,
-                           version_file: bool = False) -> typing.List[str]:
+    def _compute_changelog(
+        repo: Repo, old_version: str, new_version: str, version_file: bool = False
+    ) -> typing.List[str]:
         """Compute changelog for the given repo.
 
         If version file is used, add changelog to the version file and add changes to git.
         """
-        _LOGGER.info("Computing changelog for new release from version %r to version %r", old_version, new_version)
+        _LOGGER.info(
+            "Computing changelog for new release from version %r to version %r",
+            old_version,
+            new_version,
+        )
 
         tags = repo.git.tag().splitlines()
 
@@ -209,17 +255,19 @@ class VersionManager(ManagerBase):
             # can be in case of the very first release.
             old_version = repo.git.rev_list("HEAD", max_parents=0)
 
-        changelog = repo.git.log(f'{old_version}..HEAD', no_merges=True, format='* %s').splitlines()
+        changelog = repo.git.log(
+            f"{old_version}..HEAD", no_merges=True, format="* %s"
+        ).splitlines()
         if version_file:
             # TODO: We should prepend changes instead of appending them.
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
-            with open('CHANGELOG.md', 'a') as changelog_file:
+            with open("CHANGELOG.md", "a") as changelog_file:
                 changelog_file.write(
                     f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
                 )
-                changelog_file.write('\n'.join(changelog))
-                changelog_file.write('\n')
-            repo.git.add('CHANGELOG.md')
+                changelog_file.write("\n".join(changelog))
+                changelog_file.write("\n")
+            repo.git.add("CHANGELOG.md")
 
         _LOGGER.info("Computed changelog has %d entries", len(changelog))
         return changelog
@@ -232,17 +280,17 @@ class VersionManager(ManagerBase):
         result = "\n".join(issue.description.splitlines())
         result = result.replace(
             "Hey, Kebechet!\n\nCreate a new patch release, please.",
-            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n"
+            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n",
         )
 
         result = result.replace(
             "Hey, Kebechet!\n\nCreate a new minor release, please.",
-            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.\n\n"
+            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.\n\n",
         )
 
         return result.replace(
             "Hey, Kebechet!\n\nCreate a new major release, please.",
-            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.\n\n"
+            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.\n\n",
         )
 
     @classmethod
@@ -253,24 +301,39 @@ class VersionManager(ManagerBase):
         # merges are perfomed as desired.
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
-        body += 'Related: #' + str(issue.id) + '\n\nChangelog:\n' + '\n'.join(truncated_changelog)
+        body += (
+            "Related: #"
+            + str(issue.id)
+            + "\n\nChangelog:\n"
+            + "\n".join(truncated_changelog)
+        )
         if len(changelog) > _MAX_CHANELOG_SIZE:
-            body += '\n' + _BODY_TRUNCATED
+            body += "\n" + _BODY_TRUNCATED
         return body
 
-    def run(self, maintainers: list = None, assignees: list = None,
-            labels: list = None, changelog_file: bool = False) -> None:
+    def run(
+        self,
+        maintainers: list = None,
+        assignees: list = None,
+        labels: list = None,
+        changelog_file: bool = False,
+    ) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         if self.parsed_payload:
-            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-                _LOGGER.info("Version Manager doesn't act on %r events.", self.parsed_payload.get('event'))
+            if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
+                _LOGGER.info(
+                    "Version Manager doesn't act on %r events.",
+                    self.parsed_payload.get("event"),
+                )
                 return
 
         reported_issues = []
         for issue in self.sm.repository.get_issue_list():
             issue_title = issue.title.strip()
 
-            if issue_title.startswith((_NO_VERSION_FOUND_ISSUE_NAME, _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME)):
+            if issue_title.startswith(
+                (_NO_VERSION_FOUND_ISSUE_NAME, _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME)
+            ):
                 # Reported issues that should be closed on success version change.
                 reported_issues.append(issue)
 
@@ -280,7 +343,8 @@ class VersionManager(ManagerBase):
 
             _LOGGER.info(
                 "Found an issue #%s which is a candidate for request of new version release: %s",
-                issue.id, issue.title
+                issue.id,
+                issue.title,
             )
 
             with cloned_repo(self.service_url, self.slug) as repo:
@@ -288,22 +352,29 @@ class VersionManager(ManagerBase):
                     try:
                         self.sm.assign(issue, assignees)
                     except Exception:
-                        _LOGGER.exception(f"Failed to assign {assignees} to issue #{issue.id}")
-                        issue.comment("Unable to assign provided assignees, please check bot configuration.")
+                        _LOGGER.exception(
+                            f"Failed to assign {assignees} to issue #{issue.id}"
+                        )
+                        issue.comment(
+                            "Unable to assign provided assignees, please check bot configuration."
+                        )
 
                 maintainers = maintainers or self._get_maintainers(labels)
                 if issue.author.lower() not in (m.lower() for m in maintainers):
                     issue.comment(
                         f"Sorry, @{issue.author} but you are not stated in maintainers section for "
-                        f"this project. Maintainers are @" + ', @'.join(maintainers)
-                        if maintainers else "Sorry, no maintainers configured."
+                        f"this project. Maintainers are @" + ", @".join(maintainers)
+                        if maintainers
+                        else "Sorry, no maintainers configured."
                     )
                     issue.close()
                     # Next issue.
                     continue
 
                 try:
-                    version_identifier, old_version = self._adjust_version_in_sources(repo, labels, issue)
+                    version_identifier, old_version = self._adjust_version_in_sources(
+                        repo, labels, issue
+                    )
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
                     issue.comment(str(exc))
@@ -320,14 +391,14 @@ class VersionManager(ManagerBase):
 
                 # If an issue exists, we close it as there is no change to source code.
                 if not changelog:
-                    message = f'Closing the issue as there is no changelog between the new release of {self.slug}.'
+                    message = f"Closing the issue as there is no changelog between the new release of {self.slug}."
                     _LOGGER.info(message)
                     issue.comment(message)
                     issue.close()
                     return
 
-                branch_name = 'v' + version_identifier
-                repo.git.checkout('HEAD', b=branch_name)
+                branch_name = "v" + version_identifier
+                repo.git.checkout("HEAD", b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
                 repo.index.commit(message)
                 # If this PR already exists, this will fail.
@@ -337,7 +408,7 @@ class VersionManager(ManagerBase):
                     message,
                     branch_name,
                     body=self._construct_pr_body(issue, changelog),
-                    labels=labels
+                    labels=labels,
                 )
 
                 _LOGGER.info(

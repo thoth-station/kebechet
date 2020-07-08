@@ -17,7 +17,7 @@
 
 """Provides abstraction of payload parsing functions."""
 
-from thoth.sourcemanagement.enums import ServiceType
+from thoth.sourcemanagement.enums import ServiceType  # noqa F401
 import logging
 from .exception import WebhookPayloadError
 from urllib.parse import urlparse
@@ -25,13 +25,13 @@ from urllib.parse import urlparse
 _LOGGER = logging.getLogger(__name__)
 
 
-class PayloadParser():
+class PayloadParser:
     """Allow Kebechet to parse webhook payload of different services."""
 
     _GITHUB = "api.github.com"
     _GITLAB = "gitlab.com"
 
-    _IGNORED_GITHUB_EVENTS = ['installation', 'integration_installation']
+    _IGNORED_GITHUB_EVENTS = ["installation", "integration_installation"]
 
     def __init__(self, payload: dict) -> None:
         """Initialize the parameters we require from the services."""
@@ -42,20 +42,20 @@ class PayloadParser():
         self.parsed_payload = None
 
         # For github webhooks
-        if 'event' in payload:
-            if payload['event'] not in self._IGNORED_GITHUB_EVENTS:
-                github_payload = payload['payload']
-                parsed_url = urlparse(github_payload['sender']['url'])
+        if "event" in payload:
+            if payload["event"] not in self._IGNORED_GITHUB_EVENTS:
+                github_payload = payload["payload"]
+                parsed_url = urlparse(github_payload["sender"]["url"])
                 if self._GITHUB in parsed_url.netloc:
-                    self.service_type = 'github'
-                    self.event = payload['event']
+                    self.service_type = "github"
+                    self.event = payload["event"]
                     self.github_parser(github_payload)
         # For gitlab webhooks
-        elif 'payload' in payload:
-            gitlab_payload = payload['payload']
-            parsed_url = urlparse(gitlab_payload['project']['web_url'])
+        elif "payload" in payload:
+            gitlab_payload = payload["payload"]
+            parsed_url = urlparse(gitlab_payload["project"]["web_url"])
             if self._GITLAB in parsed_url.netloc:
-                self.service_type = 'gitlab'
+                self.service_type = "gitlab"
                 self.gitlab_parser(gitlab_payload)
         else:
             raise WebhookPayloadError("Payload passed is not supported.")
@@ -66,17 +66,17 @@ class PayloadParser():
 
     def gitlab_parser(self, payload: dict) -> None:
         """Parse Gitlab data."""
-        self.url = payload['project']['web_url']
-        self.event = payload['object_kind']
+        self.url = payload["project"]["web_url"]
+        self.event = payload["object_kind"]
 
     def parsed_data(self) -> dict:
         """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None
         self.parsed_payload = {
-            'service_type': self.service_type,
-            'url': self.url,
-            'event': self.event,
-            'raw_payload': self.raw_payload
+            "service_type": self.service_type,
+            "url": self.url,
+            "event": self.event,
+            "raw_payload": self.raw_payload,
         }
         return self.parsed_payload

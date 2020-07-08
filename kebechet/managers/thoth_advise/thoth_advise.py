@@ -24,21 +24,21 @@ import json
 import typing
 from thamos import lib
 
-import git
+import git  # noqa F401
 
-from kebechet.exception import DependencyManagementError
-from kebechet.exception import InternalError
-from kebechet.exception import PipenvError
+from kebechet.exception import DependencyManagementError  # noqa F401
+from kebechet.exception import InternalError  # noqa F401
+from kebechet.exception import PipenvError  # noqa F401
 from kebechet.managers.manager import ManagerBase
-from thoth.sourcemanagement.sourcemanagement import Issue
-from thoth.sourcemanagement.sourcemanagement import PullRequest
+from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
+from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
 from thoth.common import ThothAdviserIntegrationEnum
 
 _BRANCH_NAME = "kebechet_thoth"
 _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
-_EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
+_EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 
 
 class ThothAdviseManager(ManagerBase):
@@ -81,16 +81,16 @@ class ThothAdviseManager(ManagerBase):
             return
 
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        _LOGGER.info('Pushing changes')
+        _LOGGER.info("Pushing changes")
         self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
 
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
             if mr.source_branch == branch_name:
-                _LOGGER.info('Merge request already exists, updating...')
+                _LOGGER.info("Merge request already exists, updating...")
                 return
 
-        _LOGGER.info('Opening merge request')
+        _LOGGER.info("Opening merge request")
         merge_request = self.sm.open_merge_request(
             commit_msg, branch_name, body, labels
         )
@@ -100,7 +100,7 @@ class ThothAdviseManager(ManagerBase):
     def _write_advise(adv_results: list):
         lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
         with open("Pipfile.lock", "w+") as f:
-            _LOGGER.info('Writing to Pipfile.lock')
+            _LOGGER.info("Writing to Pipfile.lock")
             _LOGGER.debug(f"{json.dumps(lock_info)}")
             f.write(json.dumps(lock_info))
 
@@ -120,7 +120,7 @@ class ThothAdviseManager(ManagerBase):
             )
 
         checksum = hashlib.md5(textblock.encode("utf-8")).hexdigest()[:10]
-        _LOGGER.info('Creating issue')
+        _LOGGER.info("Creating issue")
         self.sm.open_issue_if_not_exist(
             f"{checksum} - Automated kebechet thoth-advise Issue",
             lambda: textblock,
@@ -130,8 +130,11 @@ class ThothAdviseManager(ManagerBase):
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
         if self.parsed_payload:
-            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-                _LOGGER.info("ThothAdviseManager doesn't act on %r events.", self.parsed_payload.get('event'))
+            if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
+                _LOGGER.info(
+                    "ThothAdviseManager doesn't act on %r events.",
+                    self.parsed_payload.get("event"),
+                )
                 return
 
         if analysis_id is None:
@@ -142,7 +145,7 @@ class ThothAdviseManager(ManagerBase):
                     self.sm.open_issue_if_not_exist(
                         "Missing Pipfile",
                         lambda: "Check your repository to make sure Pipfile exists",
-                        labels=labels
+                        labels=labels,
                     )
                     return False
 
@@ -158,20 +161,24 @@ class ThothAdviseManager(ManagerBase):
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
                 branch_name = self._construct_branch_name()
-                branch = self.repo.git.checkout("-B", branch_name)
+                branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.sm.repository.get_pr_list()
 
                 if res is None:
-                    _LOGGER.error("Advise failed on server side, contact the maintainer")
+                    _LOGGER.error(
+                        "Advise failed on server side, contact the maintainer"
+                    )
                     return False
                 _LOGGER.debug(json.dumps(res))
 
                 if res[1] is False:
-                    _LOGGER.info('Advise succeeded')
+                    _LOGGER.info("Advise succeeded")
                     self._write_advise(res)
                     self._open_merge_request(branch_name, labels, ["Pipfile.lock"])
                     return True
                 else:
-                    _LOGGER.warning('Found error while running adviser... Creating issue')
+                    _LOGGER.warning(
+                        "Found error while running adviser... Creating issue"
+                    )
                     self._issue_advise_error(res, labels)
                     return False

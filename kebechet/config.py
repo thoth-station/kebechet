@@ -20,7 +20,6 @@
 import logging
 import os
 import yaml
-import tempfile
 
 import urllib3
 import requests
@@ -80,16 +79,21 @@ class _Config:
 
     @staticmethod
     def download_conf_from_url(url: str, service: str):
-        service = Service(service=service, url=url)
-        tempfile = service.download_kebechet_config()
+        _service_ = Service(service=service, url=url)
+        tempfile = _service_.download_kebechet_config()
         return tempfile
 
     @classmethod
     def run_webhook(cls, payload: dict):
-        payload = PayloadParser(payload)
-        parsed_payload = payload.parsed_data()
+        _payload_ = PayloadParser(payload)
+        parsed_payload = _payload_.parsed_data()
         if parsed_payload:
-            cls.run_url(parsed_payload['url'], parsed_payload['service_type'], parsed_payload, True)
+            cls.run_url(
+                parsed_payload["url"],
+                parsed_payload["service_type"],
+                parsed_payload,
+                True,
+            )
 
     @classmethod
     def run_url(cls, url: str, service: str, parsed_payload: dict, tls_verify: bool):
@@ -123,8 +127,8 @@ class _Config:
         if service_url and service_url.endswith("/"):
             service_url = service_url[:-1]
 
-        service = Service(service, url)
-        token = service.token
+        _service_ = Service(service, url)
+        token = _service_.token
         _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
@@ -149,12 +153,14 @@ class _Config:
             manager_configuration = manager.get("configuration") or {}
             if manager:
                 _LOGGER.warning(
-                    "Ignoring option %r in manager entry for %r", manager, slug,
+                    "Ignoring option %r in manager entry for %r", manager, slug
                 )
             try:
-                instance = kebechet_manager(slug, service.service, service_url, parsed_payload, token)
+                instance = kebechet_manager(
+                    slug, _service_.service, service_url, parsed_payload, token
+                )
                 instance.run(**manager_configuration)
-            except Exception as exc:
+            except Exception as exc:  # noqa F841
                 _LOGGER.exception(
                     "An error occurred during run of manager %r %r for %r, skipping",
                     manager,
@@ -275,8 +281,8 @@ class _Config:
         if service_url and service_url.endswith("/"):
             service_url = service_url[:-1]
 
-        service = Service(service, origin)
-        token = service.token
+        _service_ = Service(service, origin)
+        token = _service_.token
         _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
         for manager in managers:
@@ -303,7 +309,7 @@ class _Config:
         manager_config = manager.get("configuration") or {}
         manager_config["analysis_id"] = analysis_id
         # TODO: Fail if users add config entries not relative to given manager (open an issue)
-        instance = kebechet_manager(slug, service.service, service_url, token)
+        instance = kebechet_manager(slug, _service_.service, service_url, token)
         instance.run(**manager_config)
 
     @classmethod
@@ -364,16 +370,20 @@ class _Config:
                 manager_configuration = manager.get("configuration") or {}
                 if manager:
                     _LOGGER.warning(
-                        "Ignoring option %r in manager entry for %r", manager, slug,
+                        "Ignoring option %r in manager entry for %r", manager, slug
                     )
 
                 try:
                     instance = kebechet_manager(
                         # The service type is set by default to github.
-                        slug, ServiceType.by_name(service_type), service_url, None, token
+                        slug,
+                        ServiceType.by_name(service_type),
+                        service_url,
+                        None,
+                        token,
                     )
                     instance.run(**manager_configuration)
-                except Exception as exc:
+                except Exception as exc:  # noqa F841
                     _LOGGER.exception(
                         "An error occurred during run of manager %r %r for %r, skipping",
                         manager,

@@ -78,10 +78,10 @@ def cli_run(configuration):
     config.run(configuration)
 
 
-@cli.command('run-results')
-@click.option('-o', '--origin', envvar='KEBECHET_REPO_URL')
-@click.option('-s', '--service', envvar='KEBECHET_SERVICE_NAME')
-@click.option('-i', '--analysis_id', metavar='id', envvar='KEBECHET_ANALYSIS_ID')
+@cli.command("run-results")
+@click.option("-o", "--origin", envvar="KEBECHET_REPO_URL")
+@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
+@click.option("-i", "--analysis_id", metavar="id", envvar="KEBECHET_ANALYSIS_ID")
 def cli_run_results(origin, service, analysis_id):
     """Run Kebechet after results are received (meant to be triggered automatically)."""
     config.run_analysis(analysis_id=analysis_id, origin=origin, service=service)

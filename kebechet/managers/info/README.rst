@@ -29,4 +29,3 @@ Manager Author
 ==============
 
 Fridolin Pokorny <fridolin@redhat.com>
-
