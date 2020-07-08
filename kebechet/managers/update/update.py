@@ -482,18 +482,12 @@ class UpdateManager(ManagerBase):
                 "No dependency management found in the repo - no Pipfile nor requirements.in nor requirements-dev.in"
             )
 
-<<<<<<< HEAD
     def _get_prs(self, source_branch_name: str) -> set:
         """Get pull requests with source branch name."""
         return {mr for mr in self.sm.get_prs()
                 if mr.source_branch == source_branch_name and mr.status == PRStatus.open}
 
     def _create_initial_lock(self, labels: list, pipenv_used: bool, req_dev: bool) -> bool:
-=======
-    def _create_initial_lock(
-        self, labels: list, pipenv_used: bool, req_dev: bool
-    ) -> bool:
->>>>>>> 56321be08e78069ccfcc5c3d358622f0ff467ea8
         """Perform initial requirements lock into requirements.txt file."""
         # We use lock_func to optimize run - it will be called only if actual locking needs to be performed.
         if not pipenv_used and not os.path.isfile("requirements.txt") and not req_dev:
@@ -509,15 +503,7 @@ class UpdateManager(ManagerBase):
             return False
 
         branch_name = "kebechet-initial-lock"
-<<<<<<< HEAD
         request = self._get_prs(source_branch_name=branch_name)
-=======
-        request = {
-            mr
-            for mr in self.sm.get_prs()
-            if mr.source_branch == branch_name and mr.status == PRStatus.open
-        }
->>>>>>> 56321be08e78069ccfcc5c3d358622f0ff467ea8
 
         if req_dev and not pipenv_used:
             files = ["requirements-dev.txt"]
@@ -617,7 +603,6 @@ class UpdateManager(ManagerBase):
         self._pipenv_update_all()
         commit_msg = "Automatic dependency re-locking"
         branch_name = "kebechet-dependency-relock"
-<<<<<<< HEAD
 
         existing_prs = self._get_prs(branch_name)
         if len(existing_prs) == 1:
@@ -639,15 +624,6 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(
                 f"Found two or more pull requests for automatic relock for branch {branch_name}"
             )
-=======
-        self._git_push(":pushpin: " + commit_msg, branch_name, ["Pipfile.lock"])
-        pr_id = self.sm.open_merge_request(
-            commit_msg, branch_name, f"Fixes: #{issue.id}", labels
-        )
-        _LOGGER.info(
-            f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.id}"
-        )
->>>>>>> 56321be08e78069ccfcc5c3d358622f0ff467ea8
 
     def _delete_old_branches(self, outdated: dict) -> None:
         """Delete old kebechet branches from the remote repository."""
