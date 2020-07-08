@@ -24,8 +24,6 @@ objects:
         thoth-station.ninja/template-version: 1.0.1
       labels:
         app: kebechet
-      annotations:
-        thoth-station.ninja/template-version: 1.0.1
     data:
       kebechet-config: ${KEBECHET_CONFIGURATION_PATH}
       kebechet-verbose: ${KEBECHET_VERBOSE}

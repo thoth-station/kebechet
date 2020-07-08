@@ -28,7 +28,7 @@ from thoth.sourcemanagement.enums import ServiceType
 _LOGGER = logging.getLogger(__name__)
 
 
-class Service():
+class Service:
     """Allows for abstraction of multiple different service with easy support of my by changing `services`."""
 
     @staticmethod

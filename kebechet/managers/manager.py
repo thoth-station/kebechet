@@ -36,9 +36,9 @@ _LOGGER = logging.getLogger(__name__)
 def _init_service_url(service_type: ServiceType = None, service_url: str = None) -> str:
     """Needed for the cron job to initialize the service_url if not provided."""
     if service_type == ServiceType.GITHUB:
-        service_url = service_url or 'https://github.com'
+        service_url = service_url or "https://github.com"
     elif service_type == ServiceType.GITLAB:
-        service_url = service_url or 'https://gitlab.com'
+        service_url = service_url or "https://gitlab.com"
     else:
         raise NotImplementedError
 
@@ -48,8 +48,14 @@ def _init_service_url(service_type: ServiceType = None, service_url: str = None)
 class ManagerBase:
     """A base class for manager instances holding common and useful utilities."""
 
-    def __init__(self, slug, service_type: ServiceType = None, service_url: str = None, parsed_payload: dict = None,
-                 token: str = None):
+    def __init__(
+        self,
+        slug,
+        service_type: ServiceType = None,
+        service_url: str = None,
+        parsed_payload: dict = None,
+        token: str = None,
+    ):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
         # This needs to be called before instantiation of service url, if not provided.
@@ -60,7 +66,7 @@ class ManagerBase:
         self.parsed_payload = None
         if parsed_payload:
             self.parsed_payload = parsed_payload
-        self.owner, self.repo_name = self.slug.split('/', maxsplit=1)
+        self.owner, self.repo_name = self.slug.split("/", maxsplit=1)
         self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
         self._repo = None
 
@@ -79,21 +85,25 @@ class ManagerBase:
     def get_environment_details(cls, as_dict=False) -> str:
         """Get details for environment in which Kebechet runs."""
         try:
-            pipenv_version = cls.run_pipenv('pipenv --version')
+            pipenv_version = cls.run_pipenv("pipenv --version")
         except PipenvError as exc:
             pipenv_version = f"Failed to obtain pipenv version:\n{exc.stderr}"
 
-        return f"""
+        return (
+            f"""
 Kebechet version: {kebechet.__version__}
 Python version: {platform.python_version()}
 Platform: {platform.platform()}
 pipenv version: {pipenv_version}
-""" if not as_dict else {
-            'kebechet_version': kebechet.__version__,
-            'python_version': platform.python_version(),
-            'platform': platform.platform(),
-            'pipenv_version': pipenv_version
-        }
+"""
+            if not as_dict
+            else {
+                "kebechet_version": kebechet.__version__,
+                "python_version": platform.python_version(),
+                "platform": platform.platform(),
+                "pipenv_version": pipenv_version,
+            }
+        )
 
     @staticmethod
     def run_pipenv(cmd: str):
@@ -110,8 +120,8 @@ pipenv version: {pipenv_version}
     def get_dependency_graph(cls, graceful: bool = False):
         """Get dependency graph of the project."""
         try:
-            cls.run_pipenv('pipenv install --dev --skip-lock')
-            return cls.run_pipenv('pipenv graph')
+            cls.run_pipenv("pipenv install --dev --skip-lock")
+            return cls.run_pipenv("pipenv graph")
         except PipenvError as exc:
             if not graceful:
                 raise

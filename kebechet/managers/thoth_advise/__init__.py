@@ -17,4 +17,4 @@
 
 """Update dependencies stated in Pipfile and Pipfile.lock."""
 
-from .thoth_advise import ThothAdviseManager
+from .thoth_advise import ThothAdviseManager  # noqa F401

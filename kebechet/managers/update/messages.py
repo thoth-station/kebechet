@@ -18,8 +18,7 @@
 """Body of issues and pull requests automatically opened."""
 
 # A base information for update that failed with all the relevant information.
-PIPENV_REPORT = \
-    """
+PIPENV_REPORT = """
 ##### Command
 
 ```
@@ -65,13 +64,15 @@ PIPENV_REPORT = \
 """
 
 # Issued when updating all dependencies fails.
-ISSUE_PIPENV_UPDATE_ALL = \
+ISSUE_PIPENV_UPDATE_ALL = (
     """
 Automatic dependency update failed for the current master with SHA {sha}.
 
 The automatic dependency management cannot continue. Please fix errors reported bellow.
 
-""" + PIPENV_REPORT + """
+"""
+    + PIPENV_REPORT
+    + """
 
 ##### Notes
 
@@ -80,24 +81,25 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 Once this issue is resolved, the issue will be automatically closed by bot.
 
 """
+)
 
 # A refresh comment when master branch changed when updating all dependencies (issue was already created).
-ISSUE_COMMENT_UPDATE_ALL = \
+ISSUE_COMMENT_UPDATE_ALL = (
     """
 Automatic dependency update still failing for the current master with SHA {sha}.
-""" + PIPENV_REPORT
+"""
+    + PIPENV_REPORT
+)
 
 
 # A close comment when update all works again.
-ISSUE_CLOSE_COMMENT = \
-    """
+ISSUE_CLOSE_COMMENT = """
 Closing this issue as it is no longer relevant for the current master with SHA {sha}.
 """
 
 
 # Issue created when the environment cannot be replicated.
-ISSUE_REPLICATE_ENV = \
-    """
+ISSUE_REPLICATE_ENV = """
 Unable to replicate environment provided in [Pipfile.lock]({piplock_url}).
 Linked SHA - {sha}
 
@@ -139,8 +141,7 @@ Most likely the deployment build will fail.
 For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
 """
 
-ISSUE_NO_DEPENDENCY_MANAGEMENT = \
-    """No dependency management found for this repository. If you want to keep your dependencies managed, \
+ISSUE_NO_DEPENDENCY_MANAGEMENT = """No dependency management found for this repository. If you want to keep your dependencies managed, \
 please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
 To generate a `Pipfile`, use:"
@@ -154,8 +155,7 @@ Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed
 """
 
 
-ISSUE_INITIAL_LOCK = \
-    """Failed to perform initial lock of your dependencies based on your [{file}]({url}}).
+ISSUE_INITIAL_LOCK = """Failed to perform initial lock of your dependencies based on your [{file}]({url}}).
        Linked SHA - {sha}
 
 See attached report below to inspect this issue.
@@ -194,8 +194,7 @@ See attached report below to inspect this issue.
 """
 
 
-ISSUE_UNSUPPORTED_PACKAGE = \
-  """Kebechet cannot support maintaining this application as it contain's Git version of packages.
+ISSUE_UNSUPPORTED_PACKAGE = """Kebechet cannot support maintaining this application as it contain's Git version of packages.
 
   The package causing the issue is - {package}
   Linked SHA - {sha}

@@ -111,7 +111,6 @@ repositories:
             - sesheta
             - goern
             - fridex
-            - CermakM
             - harshad16
             - pacospace
           assignees:
@@ -132,24 +131,6 @@ repositories:
           maintainers:
             - sesheta
             - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/build-analyzers
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - sesheta
-            - cermakM
             - fridex
           assignees:
             - sesheta
@@ -210,14 +191,6 @@ repositories:
           labels: [bot]
           changelog_file: true
 
-  - slug: thoth-station/graph-sync-scheduler
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-
   - slug: thoth-station/package-analyzer
     token: "{KEBECHET_TOKEN}"
     managers:
@@ -258,24 +231,6 @@ repositories:
           changelog_file: true
 
   - slug: thoth-station/package-releases-job
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
-      - name: info
-      - name: version
-        configuration:
-          maintainers:
-            - sesheta
-            - goern
-            - fridex
-          assignees:
-            - sesheta
-          labels: [bot]
-          changelog_file: true
-
-  - slug: thoth-station/result-api
     token: "{KEBECHET_TOKEN}"
     managers:
       - name: update
@@ -445,13 +400,6 @@ repositories:
         configuration:
           labels: [bot]
       - name: info
-
-  - slug: thoth-station/workload-operator
-    token: "{KEBECHET_TOKEN}"
-    managers:
-      - name: update
-        configuration:
-          labels: [bot]
 
   - slug: thoth-station/invectio
     token: "{KEBECHET_TOKEN}"
@@ -674,7 +622,7 @@ repositories:
       - name: update
         configuration:
           labels: [bot]
-  
+
   - slug: thoth-station/source-management
     token: "{KEBECHET_TOKEN}"
     managers:

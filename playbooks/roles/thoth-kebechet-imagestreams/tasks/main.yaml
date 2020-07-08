@@ -16,7 +16,7 @@
   - name: create ImageStream
     command: oc create --namespace {{ KEBECHET_INFRA_NAMESPACE  }}  --filename=../openshift/imageStream-template.yaml
     ignore_errors: true
-    
+
   - name: create BuildConfig
     command: oc create --namespace {{ KEBECHET_INFRA_NAMESPACE  }}  --filename ../openshift/buildConfig-template.yaml
     ignore_errors: true

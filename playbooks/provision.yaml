@@ -10,7 +10,7 @@
   vars:
     OCP_URL: "{{ lookup('env','OCP_URL') }}"
     OCP_TOKEN: "{{ lookup('env','OCP_TOKEN') }}"
-    
+
     KEBECHET_APPLICATION_NAMESPACE: "{{ lookup('env','KEBECHET_APPLICATION_NAMESPACE') }}"
     KEBECHET_INFRA_NAMESPACE: "{{ lookup('env','KEBECHET_INFRA_NAMESPACE') }}"
     SENTRY_DSN: ""

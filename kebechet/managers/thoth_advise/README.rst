@@ -33,7 +33,7 @@ NOTE: This configuration file should be in the root directory of your repository
   host: {THOTH_SERVICE_HOST}
   tls_verify: true
   requirements_format: pipenv
-                
+
   runtime_environments:
   - name: '{os_name}:{os_version}'
     operating_system:
@@ -58,4 +58,3 @@ Manager Author
 ==============
 
 Kevin Postlethwait <kpostlet@redhat.com>
-

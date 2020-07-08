@@ -20,19 +20,17 @@
 import hashlib
 import os
 import logging
-import json
-import typing
 import pprint
 
 from thamos import lib
-import git
+import git  # noqa F401
 
-from kebechet.exception import DependencyManagementError
-from kebechet.exception import InternalError
-from kebechet.exception import PipenvError
+from kebechet.exception import DependencyManagementError  # noqa F401
+from kebechet.exception import InternalError  # noqa F401
+from kebechet.exception import PipenvError  # noqa F401
 from kebechet.managers.manager import ManagerBase
-from thoth.sourcemanagement.sourcemanagement import Issue
-from thoth.sourcemanagement.sourcemanagement import PullRequest
+from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
+from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
 
 
@@ -40,7 +38,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _BRANCH_NAME = "kebechet_thoth"
 # Github and Gitlab events on which the manager acts upon.
-_EVENTS_SUPPORTED = ['push', 'issues', 'issue', 'merge_request']
+_EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 
 
 class ThothProvenanceManager(ManagerBase):
@@ -76,34 +74,45 @@ class ThothProvenanceManager(ManagerBase):
     def run(self, labels: list, analysis_id=None):
         """Run the provenance check bot."""
         if self.parsed_payload:
-            if self.parsed_payload.get('event') not in _EVENTS_SUPPORTED:
-                _LOGGER.info("ThothProvenanceManager doesn't act on %r events.", self.parsed_payload.get('event'))
+            if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
+                _LOGGER.info(
+                    "ThothProvenanceManager doesn't act on %r events.",
+                    self.parsed_payload.get("event"),
+                )
                 return
 
         if not analysis_id:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
                 self.repo = repo
                 if not (os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock")):
-                    _LOGGER.warning("Pipfile or Pipfile.lock is missing from repo, opening issue")
+                    _LOGGER.warning(
+                        "Pipfile or Pipfile.lock is missing from repo, opening issue"
+                    )
                     self.sm.open_issue_if_not_exist(
                         "Missing pipenv files",
                         lambda: "Check your repository to make sure Pipfile and Pipfile.lock exist.",
-                        labels=labels
+                        labels=labels,
                     )
                     return False
                 _LOGGER.info((self.service_url + self.slug))
-                lib.provenance_check_here(nowait=True, origin=f"{self.service_url}/{self.slug}")
+                lib.provenance_check_here(
+                    nowait=True, origin=f"{self.service_url}/{self.slug}"
+                )
             return True
         else:
             with cloned_repo(self.service_url, self.slug, depth=1) as repo:
                 res = lib.get_analysis_results(analysis_id)
                 if res is None:
-                    _LOGGER.error("Provenance check failed on server side, contact the maintainer")
+                    _LOGGER.error(
+                        "Provenance check failed on server side, contact the maintainer"
+                    )
                     return False
                 if res[1] is False:
                     _LOGGER.info("Provenance check found problems, creating issue...")
                     self._issue_provenance_error(res, labels)
                     return False
                 else:
-                    _LOGGER.info("Provenance check found no problems, carry on coding :)")
+                    _LOGGER.info(
+                        "Provenance check found no problems, carry on coding :)"
+                    )
                     return True
