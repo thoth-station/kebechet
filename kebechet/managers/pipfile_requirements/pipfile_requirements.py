@@ -37,9 +37,9 @@ class PipfileRequirementsManager(ManagerBase):
     """Keep requirements.txt in sync with Pipfile or Pipfile.lock."""
 
     @staticmethod
-    def get_pipfile_requirements(content: str) -> typing.Set[str]:
+    def get_pipfile_requirements(content_str: str) -> typing.Set[str]:
         """Parse Pipfile file and gather requirements, respect version specifications listed."""
-        content = toml.loads(content)
+        content = toml.loads(content_str)
 
         requirements = set()
         for package_name, entry in content["packages"].items():
@@ -57,9 +57,9 @@ class PipfileRequirementsManager(ManagerBase):
         return requirements
 
     @staticmethod
-    def get_pipfile_lock_requirements(content: str) -> typing.Set[str]:
+    def get_pipfile_lock_requirements(content_str: str) -> typing.Set[str]:
         """Parse Pipfile.lock and gather pinned down requirements."""
-        content = json.loads(content)
+        content = json.loads(content_str)
 
         requirements = set()
         for package_name, package_version in content.items():
@@ -76,7 +76,7 @@ class PipfileRequirementsManager(ManagerBase):
 
         return requirements
 
-    def run(self, lockfile: bool = False) -> None:
+    def run(self, lockfile: bool = False) -> None:  # type: ignore
         """Keep your requirements.txt in sync with Pipfile/Pipfile.lock."""
         if self.parsed_payload:
             if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:

@@ -286,7 +286,7 @@ class UpdateManager(ManagerBase):
         dependency: str,
         old_version: str,
         new_version: str,
-        labels: list,
+        labels: typing.Optional[list],
         files: list,
         merge_request: PullRequest,
     ) -> typing.Optional[int]:
@@ -336,7 +336,7 @@ class UpdateManager(ManagerBase):
             return None, True
         elif len(response) == 1:
             response = list(response)[0]
-            commits = response.get_all_commits()
+            commits = response.get_all_commits()  # type: ignore
             if len(commits) != 1:
                 _LOGGER.info(
                     "Update of package {package_name} to version {new_package_version} will not be issued,"
@@ -344,7 +344,7 @@ class UpdateManager(ManagerBase):
                 )
                 return response, False
 
-            pr_number = response.id
+            pr_number = response.id  # type: ignore
             if self.sha != commits[0]:
                 _LOGGER.debug(
                     f"Found already existing  pull request #{pr_number} for old master "
@@ -446,7 +446,7 @@ class UpdateManager(ManagerBase):
                 ["Pipfile.lock"],
                 merge_request,
             )
-            return old_version, package_version, merge_request.id
+            return old_version, package_version, merge_request.id  # type: ignore
 
         # For either requirements.txt  or requirements-dev.text scenario we need to propagate all changes
         # (updates of transitive dependencies) into requirements.txt or requirements-dev file
@@ -460,7 +460,7 @@ class UpdateManager(ManagerBase):
             [output_file],
             merge_request,
         )
-        return old_version, package_version, merge_request.id
+        return old_version, package_version, merge_request.id  # type: ignore
 
     @classmethod
     def _replicate_old_environment(cls) -> None:
@@ -520,10 +520,12 @@ class UpdateManager(ManagerBase):
             request = self.sm.open_merge_request(
                 commit_msg, branch_name, body="", labels=labels
             )
-            _LOGGER.info(f"Initial dependency lock present in PR #{request.id}")
+            _LOGGER.info(
+                f"Initial dependency lock present in PR #{request.id}"  # type: ignore
+            )
         elif len(request) == 1:
             request = list(request)[0]
-            commits = request.get_all_commits()
+            commits = request.get_all_commits()  # type: ignore
 
             if len(commits) != 1:
                 _LOGGER.info(
@@ -535,12 +537,12 @@ class UpdateManager(ManagerBase):
             if self.sha != commits[0]:
                 lock_func()
                 self._git_push(commit_msg, branch_name, files, force_push=True)
-                request.comment(
+                request.comment(  # type: ignore
                     f"Pull request has been rebased on top of the current master with SHA {self.sha}"
                 )
             else:
                 _LOGGER.info(
-                    f"Pull request #{request.id} is up to date for the current master branch"
+                    f"Pull request #{request.id} is up to date for the current master branch"  # type: ignore
                 )
         else:
             raise DependencyManagementError(
@@ -555,6 +557,7 @@ class UpdateManager(ManagerBase):
         _LOGGER.info("Updating all dependencies to their latest version")
         cls.run_pipenv("pipenv update --dev")
         cls.run_pipenv("pipenv lock")
+        return None
 
     def _add_refresh_comment(
         self, exc: PipenvError, issue: Issue
@@ -562,7 +565,7 @@ class UpdateManager(ManagerBase):
         """Create a refresh comment to an issue if the given master has some changes."""
         if self.sha in issue.description:
             _LOGGER.debug("No need to update refresh comment, the issue is up to date")
-            return
+            return None
 
         for issue_comment in issue.get_comments():
             if self.sha in issue_comment.body:
@@ -579,6 +582,7 @@ class UpdateManager(ManagerBase):
                 dependency_graph=self.get_dependency_graph(graceful=True),
                 **exc.__dict__,
             )
+        return None
 
     def _relock_all(self, exc: PipenvError, labels: list) -> None:
         """Re-lock all dependencies given the Pipfile."""
@@ -799,7 +803,7 @@ class UpdateManager(ManagerBase):
                     "Update Manager doesn't act on %r events.",
                     self.parsed_payload.get("event"),
                 )
-                return
+                return None
 
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ["PIPENV_VENV_IN_PROJECT"] = "1"

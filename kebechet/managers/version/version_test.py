@@ -1,7 +1,7 @@
 """Tests for version manager."""
 
 import pytest
-import typing
+import typing  # noqa F401
 
 from unittest.mock import patch
 
@@ -32,7 +32,7 @@ class FakeGit(object):
         return "\n".join(["rev1", "rev2", "rev3", "rev4", "rev5"][: (maxparents + 1)])
 
     @staticmethod
-    def tag(*args, **kwargs) -> typing.List[str]:
+    def tag(*args, **kwargs) -> str:
         """Return Fake repository tags."""
         return "\n".join(["0.1.0", "v0.2.0", "v1.0.0"])
 

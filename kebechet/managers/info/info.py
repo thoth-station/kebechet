@@ -35,7 +35,7 @@ _EVENTS_SUPPORTED = ["issues", "issue"]
 class InfoManager(ManagerBase):
     """Manager for submitting information about running Kebechet instance."""
 
-    def run(self) -> typing.Optional[dict]:
+    def run(self) -> typing.Optional[dict]:  # type: ignore
         """Check for info issue and close it with a report."""
         if self.parsed_payload:
             if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
@@ -43,11 +43,11 @@ class InfoManager(ManagerBase):
                     "Info manager doesn't act on %r events.",
                     self.parsed_payload.get("event"),
                 )
-                return
+                return None
         issue = self.sm.get_issue(_INFO_ISSUE_NAME)
         if not issue:
             _LOGGER.info("No issue to report to, exiting")
-            return
+            return None
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
         with cloned_repo(self.service_url, self.slug, depth=1) as repo:
@@ -61,3 +61,4 @@ class InfoManager(ManagerBase):
                     dependency_graph=self.get_dependency_graph(graceful=True),
                 ),
             )
+        return None
