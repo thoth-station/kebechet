@@ -20,7 +20,6 @@
 import logging
 import os
 import yaml
-
 import urllib3
 import requests
 
@@ -174,7 +173,7 @@ class _Config:
 
         temp_file.close()
 
-    def iter_entries(self) -> tuple:
+    def iter_entries(self) -> tuple:  # type: ignore
         """Iterate over repositories listed."""
         for entry in self._repositories or []:
             try:
