@@ -289,6 +289,9 @@ class _Config:
         token = _service_.token
         _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
+        kebechet_manager: typing.Union[
+            typing.Type[ThothAdviseManager], typing.Type[ThothProvenanceManager]
+        ]
         for manager in managers:
             manager_name = manager.pop("name")
             if analysis_id.startswith("adviser") and manager_name == "thoth-advise":
