@@ -1,7 +1,6 @@
 """Tests for version manager."""
 
 import pytest
-import typing  # noqa F401
 
 from unittest.mock import patch
 
