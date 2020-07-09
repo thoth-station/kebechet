@@ -22,6 +22,7 @@ import os
 import yaml
 import urllib3
 import requests
+import typing
 
 from .exception import ConfigurationError
 from thoth.sourcemanagement.enums import ServiceType
@@ -173,7 +174,7 @@ class _Config:
 
         temp_file.close()
 
-    def iter_entries(self) -> tuple:  # type: ignore
+    def iter_entries(self) -> typing.Iterable[typing.Tuple]:
         """Iterate over repositories listed."""
         for entry in self._repositories or []:
             try:
