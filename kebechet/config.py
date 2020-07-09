@@ -301,7 +301,7 @@ class _Config:
                 analysis_id.startswith("provenance")
                 and manager_name == "thoth-provenance"
             ):
-                kebechet_manager = ThothProvenanceManager  # type: ignore
+                kebechet_manager = ThothProvenanceManager
                 break
             else:
                 _LOGGER.debug(
