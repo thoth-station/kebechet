@@ -20,9 +20,9 @@
 import logging
 import os
 import yaml
-
 import urllib3
 import requests
+import typing
 
 from .exception import ConfigurationError
 from thoth.sourcemanagement.enums import ServiceType
@@ -87,7 +87,11 @@ class _Config:
     def run_webhook(cls, payload: dict):
         _payload_ = PayloadParser(payload)
         parsed_payload = _payload_.parsed_data()
-        if parsed_payload:
+        if (
+            parsed_payload
+            and parsed_payload["url"] is not None
+            and parsed_payload["service_type"] is not None
+        ):
             cls.run_url(
                 parsed_payload["url"],
                 parsed_payload["service_type"],
@@ -170,7 +174,7 @@ class _Config:
 
         temp_file.close()
 
-    def iter_entries(self) -> tuple:
+    def iter_entries(self) -> typing.Iterable[typing.Tuple]:
         """Iterate over repositories listed."""
         for entry in self._repositories or []:
             try:
@@ -222,37 +226,37 @@ class _Config:
             kwargs.pop("verify", None)
             return original_post(*args, **kwargs, verify=verify)
 
-        requests.Session.post = post
+        requests.Session.post = post  # type: ignore
 
         def delete(*args, **kwargs):
             kwargs.pop("verify", None)
             return original_delete(*args, **kwargs, verify=verify)
 
-        requests.Session.delete = delete
+        requests.Session.delete = delete  # type: ignore
 
         def put(*args, **kwargs):
             kwargs.pop("verify", None)
             return original_put(*args, **kwargs, verify=verify)
 
-        requests.Session.put = put
+        requests.Session.put = put  # type: ignore
 
         def get(*args, **kwargs):
             kwargs.pop("verify", None)
             return original_get(*args, **kwargs, verify=verify)
 
-        requests.Session.get = get
+        requests.Session.get = get  # type: ignore
 
         def head(*args, **kwargs):
             kwargs.pop("verify", None)
             return original_head(*args, **kwargs, verify=verify)
 
-        requests.Session.head = head
+        requests.Session.head = head  # type: ignore
 
         def patch(*args, **kwargs):
             kwargs.pop("verify", None)
             return original_patch(*args, **kwargs, verify=verify)
 
-        requests.Session.patch = patch
+        requests.Session.patch = patch  # type: ignore
 
     @classmethod
     def run_analysis(cls, analysis_id: str, origin: str, service: str) -> None:
@@ -285,6 +289,9 @@ class _Config:
         token = _service_.token
         _LOGGER.debug("Using token %r%r", token[:3], "*" * len(token[3:]))
 
+        kebechet_manager: typing.Union[
+            typing.Type[ThothAdviseManager], typing.Type[ThothProvenanceManager]
+        ]
         for manager in managers:
             manager_name = manager.pop("name")
             if analysis_id.startswith("adviser") and manager_name == "thoth-advise":

@@ -82,7 +82,9 @@ class ManagerBase:
         self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
 
     @classmethod
-    def get_environment_details(cls, as_dict=False) -> str:
+    def get_environment_details(
+        cls, as_dict=False
+    ) -> typing.Union[str, typing.Dict[str, str]]:
         """Get details for environment in which Kebechet runs."""
         try:
             pipenv_version = cls.run_pipenv("pipenv --version")
