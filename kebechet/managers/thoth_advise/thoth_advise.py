@@ -78,7 +78,7 @@ class ThothAdviseManager(ManagerBase):
         diff = self.repo.git.diff("master", files)
         if diff == "":
             _LOGGER.info("No changes necessary, exiting...")
-            return
+            return None
 
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
         _LOGGER.info("Pushing changes")
@@ -88,7 +88,7 @@ class ThothAdviseManager(ManagerBase):
         for mr in self._cached_merge_requests:
             if mr.source_branch == branch_name:
                 _LOGGER.info("Merge request already exists, updating...")
-                return
+                return None
 
         _LOGGER.info("Opening merge request")
         merge_request = self.sm.open_merge_request(

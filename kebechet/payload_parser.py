@@ -21,6 +21,7 @@ from thoth.sourcemanagement.enums import ServiceType  # noqa F401
 import logging
 from .exception import WebhookPayloadError
 from urllib.parse import urlparse
+from typing import Optional, Any, Dict
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class PayloadParser:
         self.service_type = None
         self.url = None
         self.event = None
-        self.parsed_payload = None
+        self.parsed_payload: Optional[dict] = None
 
         # For github webhooks
         if "event" in payload:
@@ -69,7 +70,7 @@ class PayloadParser:
         self.url = payload["project"]["web_url"]
         self.event = payload["object_kind"]
 
-    def parsed_data(self) -> dict:
+    def parsed_data(self) -> Optional[Dict[str, Optional[Any]]]:
         """Return the parsed data if its of a supported service."""
         if not self.service_type:
             return None

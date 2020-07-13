@@ -1,0 +1,14 @@
+include *.lock
+include *.md
+include *.sh
+include *.txt
+include *.yaml
+include Dockerfile
+include OWNERS
+include Pipfile
+include kebechet-cli
+recursive-include config *.yaml
+recursive-include kebechet *.rst
+recursive-include openshift *.yaml
+recursive-include playbooks *.yaml
+recursive-include workflows *.yaml

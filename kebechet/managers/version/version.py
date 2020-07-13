@@ -120,7 +120,7 @@ class VersionManager(ManagerBase):
         return new_version, old_version
 
     def _adjust_version_in_sources(
-        self, repo: Repo, labels: list, issue: Issue
+        self, repo: Repo, labels: typing.Optional[list], issue: Issue
     ) -> typing.Optional[tuple]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted = []
@@ -311,7 +311,7 @@ class VersionManager(ManagerBase):
             body += "\n" + _BODY_TRUNCATED
         return body
 
-    def run(
+    def run(  # type: ignore
         self,
         maintainers: list = None,
         assignees: list = None,
@@ -372,7 +372,7 @@ class VersionManager(ManagerBase):
                     continue
 
                 try:
-                    version_identifier, old_version = self._adjust_version_in_sources(
+                    version_identifier, old_version = self._adjust_version_in_sources(  # type: ignore
                         repo, labels, issue
                     )
                 except VersionError as exc:
