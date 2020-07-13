@@ -484,10 +484,15 @@ class UpdateManager(ManagerBase):
 
     def _get_prs(self, source_branch_name: str) -> set:
         """Get pull requests with source branch name."""
-        return {mr for mr in self.sm.get_prs()
-                if mr.source_branch == source_branch_name and mr.status == PRStatus.open}
+        return {
+            mr
+            for mr in self.sm.get_prs()
+            if mr.source_branch == source_branch_name and mr.status == PRStatus.open
+        }
 
-    def _create_initial_lock(self, labels: list, pipenv_used: bool, req_dev: bool) -> bool:
+    def _create_initial_lock(
+        self, labels: list, pipenv_used: bool, req_dev: bool
+    ) -> bool:
         """Perform initial requirements lock into requirements.txt file."""
         # We use lock_func to optimize run - it will be called only if actual locking needs to be performed.
         if not pipenv_used and not os.path.isfile("requirements.txt") and not req_dev:
@@ -613,17 +618,30 @@ class UpdateManager(ManagerBase):
             pr = list(existing_prs)[0]
             commits = pr.get_all_commits()
             if len(commits) != 1:
-                pr.comment("There have been done changes in the original pull request (multiple commits found), "
-                           "aborting doing changes to the modified opened pull request")
-                return False
+                pr.comment(
+                    "There have been done changes in the original pull request (multiple commits found), "
+                    "aborting doing changes to the modified opened pull request"
+                )
+                return None
             if self.sha != commits[0]:
-                self._git_push(":pushpin: " + commit_msg, branch_name, ['Pipfile.lock'], force_push=True)
-                pr.comment(f"Pull request has been rebased on top of the current master with SHA {self.sha}")
+                self._git_push(
+                    ":pushpin: " + commit_msg,
+                    branch_name,
+                    ["Pipfile.lock"],
+                    force_push=True,
+                )
+                pr.comment(
+                    f"Pull request has been rebased on top of the current master with SHA {self.sha}"
+                )
         elif len(existing_prs) == 0:
             # Default case
-            self._git_push(":pushpin: " + commit_msg, branch_name, ['Pipfile.lock'])
-            pr_id = self.sm.open_merge_request(commit_msg, branch_name, f"Fixes: #{issue.id}", labels)
-            _LOGGER.info(f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.id}")
+            self._git_push(":pushpin: " + commit_msg, branch_name, ["Pipfile.lock"])
+            pr_id = self.sm.open_merge_request(
+                commit_msg, branch_name, f"Fixes: #{issue.id}", labels
+            )
+            _LOGGER.info(
+                f"Issued automatic dependency re-locking in PR #{pr_id} to fix issue #{issue.id}"
+            )
         else:
             raise DependencyManagementError(
                 f"Found two or more pull requests for automatic relock for branch {branch_name}"
