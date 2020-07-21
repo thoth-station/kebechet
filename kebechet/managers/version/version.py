@@ -301,15 +301,13 @@ class VersionManager(ManagerBase):
         # merges are perfomed as desired.
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
-        # We add backticks to ensure markdown formatting doesn't change the commit message.
-        formatted_changelog = [
-            "`" + commit_message + "`" for commit_message in truncated_changelog
-        ]
         body += (
             "Related: #"
             + str(issue.id)
+            + "```"
             + "\n\nChangelog:\n"
-            + "\n".join(formatted_changelog)
+            + "\n".join(truncated_changelog)
+            + "```"
         )
         if len(changelog) > _MAX_CHANELOG_SIZE:
             body += "\n" + _BODY_TRUNCATED
