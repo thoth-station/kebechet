@@ -304,8 +304,10 @@ class VersionManager(ManagerBase):
         body += (
             "Related: #"
             + str(issue.id)
+            + "```"
             + "\n\nChangelog:\n"
             + "\n".join(truncated_changelog)
+            + "```"
         )
         if len(changelog) > _MAX_CHANELOG_SIZE:
             body += "\n" + _BODY_TRUNCATED
