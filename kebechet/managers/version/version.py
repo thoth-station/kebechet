@@ -263,7 +263,7 @@ class VersionManager(ManagerBase):
             # can be in case of the very first release.
             old_version = repo.git.rev_list("HEAD", max_parents=0)
 
-        _LOGGER.info("Smart Log : " + str(changelog_smart))
+        _LOGGER.info("Smart Log : %s", str(changelog_smart))
 
         if changelog_smart:
             _LOGGER.info("Classifier : %s", changelog_classifier)
