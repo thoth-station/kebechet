@@ -266,7 +266,7 @@ class VersionManager(ManagerBase):
         _LOGGER.info("Smart Log : " + str(changelog_smart))
 
         if changelog_smart:
-            _LOGGER.info("Classifier : %s" changelog_classifier)
+            _LOGGER.info("Classifier : %s", changelog_classifier)
             _LOGGER.info("Format : %s", changelog_format)
             changelog = repo.git.log(
                 f"{old_version}..HEAD", no_merges=True, format="%s"
