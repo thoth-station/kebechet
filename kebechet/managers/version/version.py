@@ -266,8 +266,8 @@ class VersionManager(ManagerBase):
         _LOGGER.info("Smart Log : " + str(changelog_smart))
 
         if changelog_smart:
-            _LOGGER.info("Classifier : " + changelog_classifier)
-            _LOGGER.info("Format : " + changelog_format)
+            _LOGGER.info("Classifier : %s" changelog_classifier)
+            _LOGGER.info("Format : %s", changelog_format)
             changelog = repo.git.log(
                 f"{old_version}..HEAD", no_merges=True, format="%s"
             ).splitlines()
@@ -412,16 +412,22 @@ class VersionManager(ManagerBase):
                 if not version_identifier:
                     _LOGGER.error("Giving up with automated release")
                     return
+                
 
-                changelog = self._compute_changelog(
-                    repo,
-                    old_version,
-                    version_identifier,
-                    changelog_smart,
-                    changelog_classifier,
-                    changelog_format,
-                    version_file=changelog_file,
-                )
+                try:
+                    changelog = self._compute_changelog(
+                        repo,
+                        old_version,
+                        version_identifier,
+                        changelog_smart,
+                        changelog_classifier,
+                        changelog_format,
+                        version_file=changelog_file,
+                    )
+                except ThothGlyphException as exc:
+                    _LOGGER.exception("Failed to generate smart release log")
+                    issue.comment(str(exc))
+                    issue.close()
 
                 # If an issue exists, we close it as there is no change to source code.
                 if not changelog:
