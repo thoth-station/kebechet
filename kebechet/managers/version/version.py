@@ -412,7 +412,6 @@ class VersionManager(ManagerBase):
                 if not version_identifier:
                     _LOGGER.error("Giving up with automated release")
                     return
-                
 
                 try:
                     changelog = self._compute_changelog(
