@@ -427,6 +427,7 @@ class VersionManager(ManagerBase):
                     _LOGGER.exception("Failed to generate smart release log")
                     issue.comment(str(exc))
                     issue.close()
+                    return
 
                 # If an issue exists, we close it as there is no change to source code.
                 if not changelog:
