@@ -34,6 +34,7 @@ from kebechet.managers.manager import ManagerBase
 from thoth.glyph import generate_log
 from thoth.glyph import MLModel
 from thoth.glyph import Format
+from thoth.glyph import ThothGlyphException
 
 _LOGGER = logging.getLogger(__name__)
 _VERSION_PULL_REQUEST_NAME = "Release of version {}"
