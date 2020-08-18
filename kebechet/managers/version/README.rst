@@ -53,6 +53,11 @@ An example configuration:
               # you can provide OWNERS YAML file in your repository with the same configuration
               # present (maintainers key with a list of maintainers).
               - fridex
+            assignees:
+              # A list of users to assign the opened pull request.
+              - sesheta
+            # Add release information to CHANGELOG.md file automatically.
+            changelog_file: true
 
 An example of this version manager in action can be found `here <https://github.com/thoth-station/kebechet/issues/98>`_.
 
