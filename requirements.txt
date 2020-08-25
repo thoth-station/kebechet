@@ -10,3 +10,4 @@ semver
 sentry-sdk
 thoth-common
 thoth-sourcemanagement
+thoth-glyph

@@ -61,6 +61,18 @@ An example configuration:
 
 An example of this version manager in action can be found `here <https://github.com/thoth-station/kebechet/issues/98>`_.
 
+Generating Smart Release Logs
+=======
+
+Optionally, Changelogs using Machine Learning and NLP can be generated through `Glyph <https://github.com/thoth-station/glyph>`_
+
+.. code-block:: yaml
+
+          configuration:
+            changelog_smart: <true/false> (boolean to choose amongst smart or regular changelogs)
+            changelog_classifier: <NAME OF ML CLASSIFIER> See Glyph's README for list of supported classifiers
+            changelog_format: <NAME OF CHANGELOG FORMAT> See Glyph's README for list of supported formatters
+
 Manager Author
 ==============
 

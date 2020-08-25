@@ -31,7 +31,10 @@ from datetime import datetime
 
 from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
-
+from thoth.glyph import generate_log
+from thoth.glyph import MLModel
+from thoth.glyph import Format
+from thoth.glyph import ThothGlyphException
 
 _LOGGER = logging.getLogger(__name__)
 _VERSION_PULL_REQUEST_NAME = "Release of version {}"
@@ -226,7 +229,13 @@ class VersionManager(ManagerBase):
 
     @staticmethod
     def _compute_changelog(
-        repo: Repo, old_version: str, new_version: str, version_file: bool = False
+        repo: Repo,
+        old_version: str,
+        new_version: str,
+        changelog_smart: bool,
+        changelog_classifier: str,
+        changelog_format: str,
+        version_file: bool = False,
     ) -> typing.List[str]:
         """Compute changelog for the given repo.
 
@@ -255,9 +264,24 @@ class VersionManager(ManagerBase):
             # can be in case of the very first release.
             old_version = repo.git.rev_list("HEAD", max_parents=0)
 
-        changelog = repo.git.log(
-            f"{old_version}..HEAD", no_merges=True, format="* %s"
-        ).splitlines()
+        _LOGGER.info("Smart Log : %s", str(changelog_smart))
+
+        if changelog_smart:
+            _LOGGER.info("Classifier : %s", changelog_classifier)
+            _LOGGER.info("Format : %s", changelog_format)
+            changelog = repo.git.log(
+                f"{old_version}..HEAD", no_merges=True, format="%s"
+            ).splitlines()
+            changelog = generate_log(
+                changelog,
+                Format.by_name(changelog_format),
+                MLModel.by_name(changelog_classifier),
+            )
+        else:
+            changelog = repo.git.log(
+                f"{old_version}..HEAD", no_merges=True, format="* %s"
+            ).splitlines()
+
         if version_file:
             # TODO: We should prepend changes instead of appending them.
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
@@ -319,6 +343,9 @@ class VersionManager(ManagerBase):
         assignees: list = None,
         labels: list = None,
         changelog_file: bool = False,
+        changelog_smart: bool = False,
+        changelog_classifier: str = MLModel.DEFAULT.name,
+        changelog_format: str = Format.DEFAULT.name,
     ) -> None:
         """Check issues for new issue request, if a request exists, issue a new PR with adjusted version in sources."""
         if self.parsed_payload:
@@ -387,9 +414,21 @@ class VersionManager(ManagerBase):
                     _LOGGER.error("Giving up with automated release")
                     return
 
-                changelog = self._compute_changelog(
-                    repo, old_version, version_identifier, version_file=changelog_file
-                )
+                try:
+                    changelog = self._compute_changelog(
+                        repo,
+                        old_version,
+                        version_identifier,
+                        changelog_smart,
+                        changelog_classifier,
+                        changelog_format,
+                        version_file=changelog_file,
+                    )
+                except ThothGlyphException as exc:
+                    _LOGGER.exception("Failed to generate smart release log")
+                    issue.comment(str(exc))
+                    issue.close()
+                    return
 
                 # If an issue exists, we close it as there is no change to source code.
                 if not changelog:
