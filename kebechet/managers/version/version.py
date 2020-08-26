@@ -42,8 +42,10 @@ _NO_VERSION_FOUND_ISSUE_NAME = (
     f"No version identifier found in sources to perform a release"
 )
 _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = (
-    f"Multiple version identifiers found in sources to perform a new release"
+    f"Multiple version identifiers found in sources to perform a new release."
 )
+_MULTIPLE_VERSIONS_FOUND_ISSUE_BODY = f"Please have only one version string, to facilitate automated releases.\
+         Multiple version strings found in these files - "
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _BODY_TRUNCATED = "The changelog body was truncated, please check CHANGELOG.md for the complete changelog."
 _DIRECT_VERSION_TITLE = " release"
@@ -158,11 +160,17 @@ class VersionManager(ManagerBase):
 
         if len(adjusted) > 1:
             error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
+            file_locations = [loc for loc, _, _ in adjusted]
             _LOGGER.warning(error_msg)
+            _issue_body = (
+                _MULTIPLE_VERSIONS_FOUND_ISSUE_BODY
+                + "\n`"
+                + ", ".join(file_locations)
+                + "`"
+            )
             self.sm.open_issue_if_not_exist(
                 error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #"
-                + str(issue.id),
+                lambda: _issue_body + "\nRelated: #" + str(issue.id),
                 None,
                 labels,
             )
