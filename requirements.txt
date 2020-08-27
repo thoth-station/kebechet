@@ -1,6 +1,6 @@
 click
 daiquiri
-pipenv
+pipenv==2020.8.13
 toml
 delegator.py
 pyyaml

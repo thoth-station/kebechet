@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 click = "*"
-pipenv = "==2018.11.26"
+pipenv = "==2020.8.13"
 requests = "*"
 toml = "*"
 "delegator.py" = "*"
