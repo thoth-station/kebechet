@@ -1529,3 +1529,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Automatic update of dependency pyyaml from 3.12 to 3.13
 * Automatic update of dependency pytest from 3.6.2 to 3.6.3
 * Automatic update of dependency pipenv from 2018.5.18 to 2018.7.1
+
+## Release 1.0.4 (2020-08-31T08:27:38)
+### Features
+* Add GitHub's PR template
+* Skip empty new lines in update manager
+* Update requirements.txt
+### Improvements
+* Revert "Updated to pipenv 2020.8.13 and locked"
