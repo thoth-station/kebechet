@@ -258,7 +258,9 @@ class UpdateManager(ManagerBase):
             content = requirements_file.read()
 
         for line in content.splitlines():
-            if line.strip().startswith(("#", "-")):
+            line = line.strip()
+
+            if line.startswith(("#", "-")) or not line:
                 continue
 
             package_and_version = line.split("==", maxsplit=1)
