@@ -39,7 +39,7 @@ Notes
 To issue an update to Git repository, Kebechet creates branches in the provided repository.
 
 Deploying Kebechet
-=================
+==================
 
 To deploy kebechet on OpenShift cluster. Use the following Ansible command with required parameters:
 
