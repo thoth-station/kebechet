@@ -215,7 +215,7 @@ class VersionManager(ManagerBase):
                 return str(handler(current_version))
             except ValueError as exc:  # Semver raises ValueError when version cannot be parsed.
                 raise VersionError(
-                    f"Wrong version specifier found in sources: {str(exc)}"
+                    f"Wrong version specifier found in sources: `{current_version}`"
                 ) from exc
 
         if issue_title.endswith(_DIRECT_VERSION_TITLE):  # a specific release
