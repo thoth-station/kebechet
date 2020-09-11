@@ -769,11 +769,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:08f5942d54e85cce69067f6e4b3f07f079ef273b2b09ae8df711d8228ec56b2b",
-                "sha256:7ee03535ccc369d822817c9ce62c7b3ffee37632fd10425d07f646012d7ee60d"
+                "sha256:81fb4a92cdac08ef300db5c779875a79ac2dc739e009bb74b5a9dda7cbd8ce6a",
+                "sha256:ff3f75cf8b53eed46b382e8663c6b264231d89bf5b05ab8dd6f6d82dd6eeafe5"
             ],
             "index": "pypi",
-            "version": "==0.16.1"
+            "version": "==0.18.2"
         },
         "thoth-glyph": {
             "hashes": [
