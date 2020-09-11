@@ -1537,3 +1537,16 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Update requirements.txt
 ### Improvements
 * Revert "Updated to pipenv 2020.8.13 and locked"
+
+## Release 1.0.5 (2020-09-11T17:33:31)
+### Features
+* Update .thoth.yaml
+* Fix reStructuredText issues
+### Bug Fixes
+* Fix formatting when wrong version identifier is found
+### Automatic Updates
+* :pushpin: Automatic update of dependency gitpython from 3.1.7 to 3.1.8
+* :pushpin: Automatic update of dependency thoth-glyph from 0.1.0 to 0.1.1
+* :pushpin: Automatic update of dependency sentry-sdk from 0.17.0 to 0.17.4
+* :pushpin: Automatic update of dependency thamos from 0.11.1 to 0.12.2
+* :pushpin: Automatic update of dependency thoth-common from 0.16.1 to 0.18.2
