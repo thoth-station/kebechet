@@ -32,9 +32,9 @@ from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
-from thoth.sourcemanagement.sourcemanagement import Issue
-from thoth.sourcemanagement.sourcemanagement import PullRequest
-from thoth.sourcemanagement.sourcemanagement import PRStatus
+from thoth.sourcemanagement import Issue
+from thoth.sourcemanagement import PullRequest
+from thoth.sourcemanagement import PRStatus
 from kebechet.utils import cloned_repo
 
 from .messages import ISSUE_CLOSE_COMMENT
