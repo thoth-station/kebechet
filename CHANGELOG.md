@@ -1550,3 +1550,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 * :pushpin: Automatic update of dependency sentry-sdk from 0.17.0 to 0.17.4
 * :pushpin: Automatic update of dependency thamos from 0.11.1 to 0.12.2
 * :pushpin: Automatic update of dependency thoth-common from 0.16.1 to 0.18.2
+
+## Release 1.0.6 (2020-09-18T10:59:54)
+### Features
+* Update versions
