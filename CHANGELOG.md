@@ -1560,3 +1560,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Updated dependencies
 ### Bug Fixes
 * fixed imports
+
+## Release 1.0.8 (2020-09-22T15:13:49)
+### Features
+* Updated glyph to 0.13
