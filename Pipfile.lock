@@ -78,10 +78,10 @@
         },
         "cached-property": {
             "hashes": [
-                "sha256:3a026f1a54135677e7da5ce819b0c690f156f37976f3e30c5430740725203d7f",
-                "sha256:9217a59f14a5682da7c4b8829deadbfc194ac22e9908ccf7c8820234e80a1504"
+                "sha256:9fa5755838eecbb2d234c3aa390bd80fbd3ac6b6869109bfc1b499f7bd89a130",
+                "sha256:df4f613cf7ad9a588cc381aaf4a512d26265ecebd5eb9e1ba12f1319eb85a6a0"
             ],
-            "version": "==1.5.1"
+            "version": "==1.5.2"
         },
         "cachetools": {
             "hashes": [
@@ -764,11 +764,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:1a086486ff9da15791f294f6e9915eb3747d161ef64dee2d038a4d0b4a369b24",
-                "sha256:45486deb031cea6bbb25a540d7adb4dd48cd8a1cc31e6a5ce9fb4f792a572e9a"
+                "sha256:96a0e494b243a81065ec7ab73457d16719fb955ed9e469c8e4577ba737bc836e",
+                "sha256:a698993f3abbe06e88e8a3c8b61c8a79c12f62e503f1a23eda30c3921f0525a9"
             ],
             "index": "pypi",
-            "version": "==0.17.6"
+            "version": "==0.17.7"
         },
         "six": {
             "hashes": [
@@ -815,11 +815,11 @@
         },
         "thoth-glyph": {
             "hashes": [
-                "sha256:23a07b3946c499bb3ad5e7fd0aea63a6ca18e8f66e777e7947612ff12f86c5bb",
-                "sha256:d64db16973f65ec2872fe1fb68a5f9a5ebec7178d13f74ca0c751eb94dc07fca"
+                "sha256:69c44a22f12f619edfe83291eb0dd0dc91ee4a86fa420476ffe953089973d1f6",
+                "sha256:98136fea8b0b80dce58f3856706586d71d5f4962b11e4fc8d58da3bd0c66e60e"
             ],
             "index": "pypi",
-            "version": "==0.1.2"
+            "version": "==0.1.3"
         },
         "thoth-python": {
             "hashes": [
