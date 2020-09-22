@@ -1,4 +1,4 @@
-FROM docker.io/library/fedora:32
+FROM registry.fedoraproject.org/fedora:32
 
 # Env variable USER specific the kebechet as committer while git branch and git commit creation.
 # Adjust cache location due to permissions when run in the cluster.
