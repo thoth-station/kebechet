@@ -41,29 +41,6 @@ To issue an update to Git repository, Kebechet creates branches in the provided 
 Deploying Kebechet
 ==================
 
-To deploy kebechet on OpenShift cluster. Use the following Ansible command with required parameters:
+To deploy kebechet on an OpenShift cluster use kustomize and the 'Thoth Application manifest files'_. 
 
-.. code-block:: console
-
-  ansible-playbook \
-    --extra-vars=OCP_URL=<openshift_cluster_url> \
-    --extra-vars=OCP_TOKEN=<openshift_cluster_token> \
-    --extra-vars=KEBECHET_INFRA_NAMESPACE=<openshift_cluster_namespace> \
-    --extra-vars=KEBECHET_APPLICATION_NAMESPACE=<openshift_cluster_namespace> \
-    --extra-vars=KEBECHET_CONFIGURATION_PATH=<config.yaml> \
-    --extra-vars=KEBECHET_TOKEN=<oauth_token> \
-    --extra-vars=KEBECHET_SSH_PRIVATE_KEY_PATH=<git_ssh_private_key_path> \
-    playbooks/provision.yaml
-
-
-* ``KEBECHET_SSH_PRIVATE_KEY_PATH``: The path where the GitHub ssh private key is stored should be provided. (Example: $HOME/.ssh/id_rsa). If the field is undefined then the script will create the ssh keys for you and then you can set up the given public key to GitHub repository.
-
-* ``KEBECHET_TOKEN``: To raise a pull request bot requires user rights and premissions. The GitHub OAuth tokens are to be set for raising pull request whenever updates are encounter by the Kebechet.
-
-* ``KEBECHET_CONFIGURATION_PATH``: Path to the YAML configuration file to be used for Kebechet to check for dependency updates.
-
-* ``KEBECHET_INFRA_NAMESPACE``: The OpenShift namespace can be used for the infrastructural purposes, all the images stream are stored in the ``KEBECHET_INFRA_NAMESPACE``.
-
-* ``KEBECHET_APPLICATION_NAMESPACE``: The OpenShift namespace can be used for the application purposes, all the templates, builds, secrets, configmap and jobs are stored in the ``KEBECHET_APPLICATION_NAMESPACE``.
-
-* ``OCP_URL`` and ``OCP_TOKEN``: The OpenShift credentials used to login to.
+.. _'Thoth Application manifest files': https://github.com/thoth-station/thoth-application/tree/master/kebechet
