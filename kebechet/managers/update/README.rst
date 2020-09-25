@@ -72,7 +72,15 @@ An example configuration:
               # Labels for opened issues and pull requests.
               - bot
 
-You can see this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.
+You can see this manager in action in these various scenarios:
+
+- `Automatic dependency update <https://github.com/thoth-station/kebechet/pull/46>`_
+
+- `Initial dependency lock <https://github.com/thoth-station/kebechet/pull/85>`_
+
+- `Dependency update failure report <https://github.com/thoth-station/solver/issues/38>`_
+
+- `Manual dependeny update request <https://github.com/thoth-station/mi/issues/227>`_
 
 Manager Author
 ==============
