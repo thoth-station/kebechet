@@ -80,7 +80,7 @@ You can see this manager in action in these various scenarios:
 
 - `Dependency update failure report <https://github.com/thoth-station/solver/issues/38>`_
 
-- `Manual dependeny update request <https://github.com/thoth-station/mi/issues/227>`_
+- `Manual dependency update request <https://github.com/thoth-station/mi/issues/227>`_
 
 Manager Author
 ==============
