@@ -44,6 +44,7 @@ from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
 from .messages import ISSUE_UNSUPPORTED_PACKAGE
+from .messages import ISSUE_DUPLICATE_PACKAGES
 from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ _ISSUE_NO_DEPENDENCY_NAME = "No dependency management found"
 _ISSUE_UNSUPPORTED_PACKAGE = (
     "Application cannot be managed by Kebechet due to Git package"
 )
+_ISSUE_DUPLICATE_PACKAGES = "Duplicate packages found in Pipfile"
 _ISSUE_MANUAL_UPDATE = "Kebechet update"
 
 # Github and Gitlab events on which the manager acts upon.
@@ -208,6 +210,26 @@ class UpdateManager(ManagerBase):
                     source anymore. Related SHA - {self.sha}",
         )
         return result
+
+    def _create_duplicate_package_issue(self, package_names: set) -> None:
+        """Create an issue as Kebechet doesn't support duplicate packages being stated in Pipfile."""
+        _LOGGER.info("Duplicate keys found in Pipfile.")
+        pip_url = construct_raw_file_url(
+            self.service_url, self.slug, "Pipfile", self.service_type
+        )
+        piplock_url = construct_raw_file_url(
+            self.service_url, self.slug, "Pipfile.lock", self.service_type
+        )
+        self.sm.open_issue_if_not_exist(
+            _ISSUE_DUPLICATE_PACKAGES,
+            lambda: ISSUE_DUPLICATE_PACKAGES.format(
+                sha=self.sha,
+                packages=package_names,
+                pip_url=pip_url,
+                piplock_url=piplock_url,
+                environment_details=self.get_environment_details(),
+            ),
+        )
 
     def _create_unsupported_package_issue(self, package_name):
         """Create an issue as Kebechet doesn't support packages with git as source."""
@@ -715,6 +737,22 @@ class UpdateManager(ManagerBase):
 
         if pipenv_used:
             old_environment = self._get_all_packages_versions()
+
+            default, develop = self._get_direct_dependencies()
+            # Raise errors if packages are repeated.
+            common_packages = set(default) & set(develop)
+            if common_packages:
+                self._create_duplicate_package_issue(common_packages)
+                raise DependencyManagementError(
+                    "Duplicate packages among packages and dev-packages in Pipfile"
+                )
+            # Close no common-packages were found issues -
+            self.sm.close_issue_if_exists(
+                _ISSUE_DUPLICATE_PACKAGES,
+                f"Issue closed as no duplicate packages found among packages and dev-packages \
+                    in Pipfile anymore. Related SHA - {self.sha}",
+            )
+
             old_direct_dependencies_version = self._get_direct_dependencies_version()
             try:
                 self._pipenv_update_all()
@@ -757,7 +795,6 @@ class UpdateManager(ManagerBase):
 
         outdated = self._get_all_outdated(old_direct_dependencies_version)
         _LOGGER.info(f"Outdated: {outdated}")
-
         # Undo changes made to Pipfile.lock by _pipenv_update_all.
         self.repo.head.reset(index=True, working_tree=True)
 

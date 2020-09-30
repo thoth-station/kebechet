@@ -209,3 +209,22 @@ ISSUE_UNSUPPORTED_PACKAGE = """Kebechet cannot support maintaining this applicat
   ```
   </details>
   """
+
+
+ISSUE_DUPLICATE_PACKAGES = """Kebechet cannot support maintaining this application as it contain's duplicate packages\
+   among Pipfile's packages and dev-packages. Please remove the packages that exist under duplicate packages that exist\
+    under dev-packages in Pipfile, and Kebechet would close this issue in the next run.
+
+  The package/packages causing the issue are - {packages}
+  Linked SHA - {sha}
+
+  For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
+
+  <details>
+    <summary>Environment details</summary>
+
+  ```
+  {environment_details}
+  ```
+  </details>
+  """
