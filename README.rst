@@ -41,6 +41,6 @@ To issue an update to Git repository, Kebechet creates branches in the provided 
 Deploying Kebechet
 ==================
 
-To deploy kebechet on an OpenShift cluster use kustomize and the 'Thoth Application manifest files'_. 
+To deploy kebechet on an OpenShift cluster use kustomize and the 'Thoth Application manifest files'_.
 
 .. _'Thoth Application manifest files': https://github.com/thoth-station/thoth-application/tree/master/kebechet
