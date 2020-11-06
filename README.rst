@@ -42,4 +42,9 @@ Deploying Kebechet
 ==================
 
 To deploy Kebechet on an OpenShift cluster use kustomize and the `Thoth Application template files <https://github.com/thoth-station/thoth-application/tree/master/kebechet>`_.
-Please ensure all the input parameters are correctly set for each of the templates. In the current implementation for an successful run, its important kebechet has access to the Github token and the SSH key it needs to commit code changes.
+Please ensure all the input parameters are correctly set for each of the templates.
+
+If Kebechet finds the env variables, `GITHUB_APP_ID` and `GITHUB_PRIVATE_KEY_PATH`, it is going to authenticate as a Github Application.
+
+Otherwise its going to fallback to look for an OAuth token to authenticate for an successful run.
+In both cases the SSH key is needed to commit code changes.
