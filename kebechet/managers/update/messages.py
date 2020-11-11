@@ -144,7 +144,7 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 ISSUE_NO_DEPENDENCY_MANAGEMENT = """No dependency management found for this repository. If you want to keep your dependencies managed, \
 please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
-To generate a `Pipfile`, use:"
+To generate a `Pipfile`, use:
 ```
 $ pipenv install --skip-lock --code ./
 $ git add Pipfile
