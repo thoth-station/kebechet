@@ -1572,3 +1572,19 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Make pre-commit happy
 ### Improvements
 * Fixed version test
+
+## Release 1.0.10 (2020-11-12T19:06:36)
+### Features
+* Remove unnecessary quotes (#589)
+* Enabled github app authentication (#587)
+* precommit happy
+* Link formatted
+* added a clickable link to readme
+* Added reminder to add to thoth stroage
+* Add manual request example
+### Bug Fixes
+* Updated source-management and fixed version test (#590)
+* Precommit fixes
+### Improvements
+* :sparkles: :pencil: updated the readme, now we deploy via kustomize rather than ansible
+* Fix typo
