@@ -21,6 +21,7 @@ import logging
 import platform
 import typing
 import git
+import os
 
 import delegator
 import kebechet
@@ -67,7 +68,16 @@ class ManagerBase:
         if parsed_payload:
             self.parsed_payload = parsed_payload
         self.owner, self.repo_name = self.slug.split("/", maxsplit=1)
-        self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
+        self.installation = False
+        if os.getenv("GITHUB_PRIVATE_KEY_PATH") and os.getenv("GITHUB_APP_ID"):
+            self.installation = True  # Authenticate as github app.
+        self.sm = SourceManagement(
+            service_type=self.service_type,
+            service_url=self.service_url,
+            token=token,
+            slug=slug,
+            installation=self.installation,
+        )
         self._repo = None
 
     @property
