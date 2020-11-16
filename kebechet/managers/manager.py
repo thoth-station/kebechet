@@ -17,14 +17,18 @@
 
 """Common and useful utilities for managers."""
 
+from kebechet.utils import APP_NAME
 import logging
 import platform
 import typing
 import git
 import os
+from typing import Any
 
 import delegator
 import kebechet
+import functools
+import datetime
 
 from kebechet.exception import PipenvError
 from thoth.sourcemanagement.enums import ServiceType
@@ -79,6 +83,7 @@ class ManagerBase:
             installation=self.installation,
         )
         self._repo = None
+        self.token, self.token_expire_time = self.sm.get_access_token()
 
     @property
     def repo(self):
@@ -89,7 +94,25 @@ class ManagerBase:
     def repo(self, repo: git.Repo):
         """Set repository information and all derived information needed."""
         self._repo = repo
-        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
+
+    def refresh_repo_url(decorated: Any):  # noqa: N805
+        """Check if access token as expired and refresh repo url if necessary."""  # noqa: D202
+        # noqa: D202
+        @functools.wraps(decorated)
+        def wrapper(manager, *args, **kwargs):
+            if manager.installation:  # We check if installation is being used.
+                if datetime.datetime.now() > manager.token_expire_time:
+                    manager.token, manager.token_expire_time = (
+                        manager.get_access_token()
+                    )
+                    service_host = "github.com"  # For now only github apps.
+                    manager._repo.create_remote(
+                        "origin",
+                        url=f"https://{APP_NAME}:{manager.token}@{service_host}/{manager.slug}",
+                    )
+                return decorated(manager, *args, **kwargs)
+
+        return wrapper
 
     @classmethod
     def get_environment_details(

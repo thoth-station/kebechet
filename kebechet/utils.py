@@ -23,12 +23,14 @@ import logging
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
+from .managers import ManagerBase
 
 import git
 
 from thoth.sourcemanagement.enums import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
+APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
 
 
 @contextmanager
@@ -43,7 +45,7 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(service_url: str, slug: str, **clone_kwargs):
+def cloned_repo(manager: ManagerBase, service_url: str, slug: str, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     if service_url.startswith("https://"):
         service_url = service_url[len("https://") :]
@@ -53,7 +55,12 @@ def cloned_repo(service_url: str, slug: str, **clone_kwargs):
         # This is mostly internal error - we require service URL to have protocol explicitly set
         raise NotImplementedError
 
-    repo_url = f"git@{service_url}:{slug}.git"
+    if manager.installation:
+        access_token = manager.token
+        repo_url = f"https://{APP_NAME}:{access_token}@{service_url}/{slug}"
+    else:
+        repo_url = f"git@{service_url}:{slug}.git"
+
     with TemporaryDirectory() as repo_path, cwd(repo_path):
         _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
         repo = git.Repo.clone_from(repo_url, repo_path, branch="master", **clone_kwargs)

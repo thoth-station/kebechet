@@ -6,6 +6,7 @@ from .version import VersionManager  # noqa F401
 from .pipfile_requirements import PipfileRequirementsManager
 from .thoth_advise import ThothAdviseManager
 from .thoth_provenance import ThothProvenanceManager
+from .manager import ManagerBase  # noqa F401
 
 REGISTERED_MANAGERS = {
     "update": UpdateManager,

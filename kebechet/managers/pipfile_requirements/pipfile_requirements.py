@@ -118,7 +118,7 @@ class PipfileRequirementsManager(ManagerBase):
             # TODO: delete branch if already exists
             return
 
-        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+        with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
             with open("requirements.txt", "w") as requirements_file:
                 requirements_file.write("\n".join(pipfile_content))
                 requirements_file.write("\n")
