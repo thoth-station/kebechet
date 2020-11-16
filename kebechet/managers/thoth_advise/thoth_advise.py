@@ -29,7 +29,7 @@ import git  # noqa F401
 from kebechet.exception import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
-from kebechet.managers.manager import ManagerBase
+from kebechet.managers.manager import ManagerBase, refresh_repo_url
 from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
 from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
@@ -59,6 +59,7 @@ class ThothAdviseManager(ManagerBase):
         """Construct branch name for the updated dependency."""
         return f"{_BRANCH_NAME}-{self.sha[:10]}"
 
+    @refresh_repo_url
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
