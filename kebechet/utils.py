@@ -23,7 +23,7 @@ import logging
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
-from .managers import ManagerBase
+from typing import Any
 
 import git
 
@@ -45,7 +45,7 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(manager: ManagerBase, service_url: str, slug: str, **clone_kwargs):
+def cloned_repo(manager: Any, service_url: str, slug: str, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     if service_url.startswith("https://"):
         service_url = service_url[len("https://") :]
