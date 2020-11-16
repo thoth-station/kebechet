@@ -101,7 +101,8 @@ class ManagerBase:
             installation=self.installation,
         )
         self._repo = None
-        self.token, self.token_expire_time = self.sm.get_access_token()
+        if self.installation:
+            self.token, self.token_expire_time = self.sm.get_access_token()
 
     @property
     def repo(self):
