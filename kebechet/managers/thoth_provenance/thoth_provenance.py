@@ -82,7 +82,7 @@ class ThothProvenanceManager(ManagerBase):
                 return
 
         if not analysis_id:
-            with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 self.repo = repo
                 if not (os.path.isfile("Pipfile") and os.path.isfile("Pipfile.lock")):
                     _LOGGER.warning(
@@ -100,7 +100,7 @@ class ThothProvenanceManager(ManagerBase):
                 )
             return True
         else:
-            with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 res = lib.get_analysis_results(analysis_id)
                 if res is None:
                     _LOGGER.error(

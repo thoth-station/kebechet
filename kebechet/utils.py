@@ -45,8 +45,10 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(manager: Any, service_url: str, slug: str, **clone_kwargs):
+def cloned_repo(manager: Any, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
+    service_url = manager.service_url
+    slug = manager.slug
     if service_url.startswith("https://"):
         service_url = service_url[len("https://") :]
     elif service_url.startswith("http://"):

@@ -384,7 +384,7 @@ class VersionManager(ManagerBase):
                 issue.title,
             )
 
-            with cloned_repo(self, self.service_url, self.slug) as repo:
+            with cloned_repo(self) as repo:
                 if assignees:
                     try:
                         self.sm.assign(issue, assignees)

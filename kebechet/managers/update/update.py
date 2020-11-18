@@ -842,7 +842,7 @@ class UpdateManager(ManagerBase):
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ["PIPENV_VENV_IN_PROJECT"] = "1"
 
-        with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
+        with cloned_repo(self, depth=1) as repo:
             # Make repo available in the instance.
             self.repo = repo
 

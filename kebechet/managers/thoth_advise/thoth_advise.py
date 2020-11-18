@@ -139,7 +139,7 @@ class ThothAdviseManager(ManagerBase):
                 return
 
         if analysis_id is None:
-            with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 self.repo = repo
                 if not os.path.isfile("Pipfile"):
                     _LOGGER.warning("Pipfile not found in repo... Creating issue")
@@ -157,7 +157,7 @@ class ThothAdviseManager(ManagerBase):
                 )
             return True
         else:
-            with cloned_repo(self, self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
