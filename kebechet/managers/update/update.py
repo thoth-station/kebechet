@@ -31,7 +31,7 @@ import git
 from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
-from kebechet.managers.manager import ManagerBase
+from kebechet.managers.manager import ManagerBase, refresh_repo_url
 from thoth.sourcemanagement import Issue
 from thoth.sourcemanagement import PullRequest
 from thoth.sourcemanagement import PRStatus
@@ -366,6 +366,7 @@ class UpdateManager(ManagerBase):
                 f"branch name {branch_name!r} opened."
             )
 
+    @refresh_repo_url
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
@@ -841,7 +842,7 @@ class UpdateManager(ManagerBase):
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ["PIPENV_VENV_IN_PROJECT"] = "1"
 
-        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+        with cloned_repo(self, depth=1) as repo:
             # Make repo available in the instance.
             self.repo = repo
 

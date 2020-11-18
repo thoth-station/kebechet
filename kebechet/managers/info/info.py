@@ -50,7 +50,7 @@ class InfoManager(ManagerBase):
             return None
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
-        with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+        with cloned_repo(self, depth=1) as repo:
             # We could optimize this as the get_issue() does API calls as well. Keep it this simple now.
             self.sm.close_issue_if_exists(
                 _INFO_ISSUE_NAME,

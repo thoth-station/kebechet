@@ -29,7 +29,7 @@ import git  # noqa F401
 from kebechet.exception import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
-from kebechet.managers.manager import ManagerBase
+from kebechet.managers.manager import ManagerBase, refresh_repo_url
 from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
 from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
@@ -59,6 +59,7 @@ class ThothAdviseManager(ManagerBase):
         """Construct branch name for the updated dependency."""
         return f"{_BRANCH_NAME}-{self.sha[:10]}"
 
+    @refresh_repo_url
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
@@ -138,7 +139,7 @@ class ThothAdviseManager(ManagerBase):
                 return
 
         if analysis_id is None:
-            with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 self.repo = repo
                 if not os.path.isfile("Pipfile"):
                     _LOGGER.warning("Pipfile not found in repo... Creating issue")
@@ -156,7 +157,7 @@ class ThothAdviseManager(ManagerBase):
                 )
             return True
         else:
-            with cloned_repo(self.service_url, self.slug, depth=1) as repo:
+            with cloned_repo(self, depth=1) as repo:
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
