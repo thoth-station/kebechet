@@ -23,11 +23,14 @@ import logging
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
-from typing import Any
-
+from typing import TYPE_CHECKING
 import git
 
 from thoth.sourcemanagement.enums import ServiceType
+
+if TYPE_CHECKING:
+    from .manager import ManagerBase
+
 
 _LOGGER = logging.getLogger(__name__)
 APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
@@ -45,7 +48,7 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(manager: Any, **clone_kwargs):
+def cloned_repo(manager: "ManagerBase", **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     service_url = manager.service_url
     slug = manager.slug
