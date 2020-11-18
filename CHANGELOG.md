@@ -1588,3 +1588,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 ### Improvements
 * :sparkles: :pencil: updated the readme, now we deploy via kustomize rather than ansible
 * Fix typo
+
+## Release 1.1.0 (2020-11-18T18:13:51)
+### Features
+* :honeybee: upgrade pip for kebechet container image (#593)
+### Improvements
+* Added modifications to use gitpython (#594)
