@@ -51,7 +51,7 @@ def _init_service_url(service_type: ServiceType = None, service_url: str = None)
 
 
 def refresh_repo_url(decorated: Any):  # noqa: N805
-    """Check if access token as expired and refresh repo url if necessary."""  # noqa: D202
+    """Check if access token has expired and refresh repo url if necessary."""  # noqa: D202
     # noqa: D202
     @functools.wraps(decorated)
     def wrapper(manager, *args, **kwargs):
