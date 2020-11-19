@@ -209,3 +209,12 @@ ISSUE_UNSUPPORTED_PACKAGE = """Kebechet cannot support maintaining this applicat
   ```
   </details>
   """
+
+UPDATE_MESSAGE_BODY = """Kebechet has updated the depedencies to the latest version :rocket:
+The direct dependencies updated in the pull request are -
+Package Name | Old Version | Updated Version | Is Dev
+--- | --- | --- | ---
+{package_name_rows}
+
+Kebechet Version: {kebechet_version}
+"""

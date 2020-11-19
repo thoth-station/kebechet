@@ -17,6 +17,7 @@
 
 """Dependency update management logic."""
 
+import kebechet
 import os
 import logging
 import toml
@@ -44,6 +45,7 @@ from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
 from .messages import ISSUE_PIPENV_UPDATE_ALL
 from .messages import ISSUE_REPLICATE_ENV
 from .messages import ISSUE_UNSUPPORTED_PACKAGE
+from .messages import UPDATE_MESSAGE_BODY
 from kebechet.utils import construct_raw_file_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,6 +59,8 @@ _ISSUE_UNSUPPORTED_PACKAGE = (
     "Application cannot be managed by Kebechet due to Git package"
 )
 _ISSUE_MANUAL_UPDATE = "Kebechet update"
+
+_UPDATE_BRANCH_NAME = "kebechet-automatic-update"
 
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
@@ -285,46 +289,37 @@ class UpdateManager(ManagerBase):
 
     def _open_merge_request_update(
         self,
-        dependency: str,
-        old_version: str,
-        new_version: str,
+        body: str,
         labels: typing.Optional[list],
         files: list,
         merge_request: PullRequest,
     ) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
-        branch_name = self._construct_branch_name(dependency, new_version)
-        commit_msg = f"Automatic update of dependency {dependency} from {old_version} to {new_version}"
+        branch_name = _UPDATE_BRANCH_NAME
+        commit_msg = f"Automatic update of dependencies by kebechet."
 
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
+        self._git_push(":arrow_up: " + commit_msg, branch_name, files, force_push=True)
 
         if not merge_request:
-            _LOGGER.info(
-                f"Creating a pull request to update {dependency} from version {old_version} to {new_version}"
-            )
-            body = (
-                f"Dependency {dependency} was used in version {old_version}, "
-                f"but the current latest version is {new_version}."
-            )
+            _LOGGER.info(f"Creating a new pull request to update dependencies.")
             merge_request = self.sm.open_merge_request(
                 commit_msg, branch_name, body, labels
             )
             return merge_request
 
         _LOGGER.info(
-            f"Pull request #{merge_request.id} to update {dependency} from "
-            f"version {old_version} to {new_version} updated"
+            f"Pull request #{merge_request.id} to update dependencies has been updated."
         )
         merge_request.comment(
             f"Pull request has been rebased on top of the current master with SHA {self.sha}"
         )
         return merge_request
 
-    def _should_update(self, package_name, new_package_version) -> tuple:
+    def _should_update(self) -> tuple:
         """Check whether the given update was already proposed as a pull request."""
-        branch_name = self._construct_branch_name(package_name, new_package_version)
+        branch_name = _UPDATE_BRANCH_NAME
         response = {
             mr
             for mr in self._cached_merge_requests
@@ -332,16 +327,14 @@ class UpdateManager(ManagerBase):
         }
 
         if len(response) == 0:
-            _LOGGER.debug(
-                f"No pull request was found for update of {package_name} to version {new_package_version}"
-            )
+            _LOGGER.debug(f"No pull request was found for automatic update.")
             return None, True
         elif len(response) == 1:
             response = list(response)[0]
             commits = response.get_all_commits()  # type: ignore
             if len(commits) != 1:
                 _LOGGER.info(
-                    "Update of package {package_name} to version {new_package_version} will not be issued,"
+                    "Automatic update will not be issued,"
                     "the pull request as additional commits (by a maintaner?)"
                 )
                 return response, False
@@ -414,56 +407,34 @@ class UpdateManager(ManagerBase):
 
     def _create_update(
         self,
-        dependency: str,
-        package_version: str,
-        old_version: str,
+        body: str,
         is_dev: bool = False,
         labels: list = None,
         old_environment: dict = None,
         merge_request: PullRequest = None,
         pipenv_used: bool = True,
         req_dev: bool = False,
-    ) -> typing.Union[tuple, None]:
+    ) -> str:
         """Create an update for the given dependency when dependencies are managed by Pipenv.
 
         The old environment is set to a non None value only if we are operating on requirements.{in,txt}. It keeps
         information of packages that were present in the old environment so we can selectively change versions in the
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
-        cmd = f"pipenv install {dependency}=={package_version} --keep-outdated"
-        if is_dev:
-            cmd += " --dev"
-        self.run_pipenv(cmd)
-        if pipenv_used:
-            # Discard changes by pipenv made in Pipfile (dependency lock) as it affects hashes computed for
-            # Pipfile.lock. We don't do `pipenv update` as in some cases pipenv does not update dependencies at all.
-            self.repo.git.checkout("--", "Pipfile")
-        self.run_pipenv("pipenv lock --keep-outdated")
-
         if not old_environment:
             merge_request = self._open_merge_request_update(
-                dependency,
-                old_version,
-                package_version,
-                labels,
-                ["Pipfile.lock"],
-                merge_request,
+                body, labels, ["Pipfile.lock"], merge_request
             )
-            return old_version, package_version, merge_request.id  # type: ignore
+            return merge_request.id  # type: ignore
 
         # For either requirements.txt  or requirements-dev.text scenario we need to propagate all changes
         # (updates of transitive dependencies) into requirements.txt or requirements-dev file
         output_file = "requirements-dev.txt" if req_dev else "requirements.txt"
         self._pipenv_lock_requirements(output_file)
         merge_request = self._open_merge_request_update(
-            dependency,
-            old_version,
-            package_version,
-            labels,
-            [output_file],
-            merge_request,
+            body, labels, [output_file], merge_request
         )
-        return old_version, package_version, merge_request.id  # type: ignore
+        return merge_request.id  # type: ignore
 
     @classmethod
     def _replicate_old_environment(cls) -> None:
@@ -671,6 +642,22 @@ class UpdateManager(ManagerBase):
             except Exception:
                 _LOGGER.exception(f"Failed to delete inactive branch {branch_name}")
 
+    def _generate_update_body(self, outdated: dict) -> str:
+        kebechet_version = kebechet.__version__
+        package_name_rows = ""
+        for package in outdated.keys():
+            details = outdated[package]
+            old_version, new_version, is_dev = (
+                details.get("old_version"),
+                details.get("new_version"),
+                details.get("dev"),
+            )
+            package_name_rows += f"**{package}**|{old_version}|{new_version}|{is_dev}\n"
+        body = UPDATE_MESSAGE_BODY.format(
+            package_name_rows=package_name_rows, kebechet_version=kebechet_version
+        )
+        return body
+
     def _do_update(
         self, labels: list, pipenv_used: bool = False, req_dev: bool = False
     ) -> dict:
@@ -759,51 +746,22 @@ class UpdateManager(ManagerBase):
         outdated = self._get_all_outdated(old_direct_dependencies_version)
         _LOGGER.info(f"Outdated: {outdated}")
 
-        # Undo changes made to Pipfile.lock by _pipenv_update_all.
-        self.repo.head.reset(index=True, working_tree=True)
+        # Undo changes made to Pipfile.lock by _pipenv_update_all. # Disabled for now.
+        # self.repo.head.reset(index=True, working_tree=True)
 
         result = {}
         if outdated:
             # Do API calls only once, cache results.
             self._cached_merge_requests = self.sm.get_prs()
-
-        for package_name in outdated.keys():
-            # As an optimization, first check if the given PR is already present.
-            new_version = outdated[package_name]["new_version"]
-            old_version = outdated[package_name]["old_version"]
-
-            merge_request, should_update = self._should_update(
-                package_name, new_version
-            )
+            body = self._generate_update_body(outdated)
+            merge_request, should_update = self._should_update()
             if not should_update:
                 _LOGGER.info(
-                    f"Skipping update creation for {package_name} from version {old_version} to "
-                    f"{new_version} as the given update already exists in PR #{merge_request.id}"
+                    f"Skipping update creation as the given update already exists in PR #{merge_request.id}"
                 )
-                continue
-
             try:
-                self._replicate_old_environment()
-            except PipenvError as exc:
-                # There has been an error in locking dependencies. This can be due to a missing dependency or simply
-                # currently locked dependencies are not correct. Try to issue a pull request that would fix
-                # that. We know that update all works, use update.
-                _LOGGER.warning(
-                    "Failed to replicate old environment, re-locking all dependencies"
-                )
-                self._relock_all(exc, labels)
-                return {}
-
-            is_dev = outdated[package_name]["dev"]
-            try:
-                _LOGGER.info(
-                    f"Creating update of dependency {package_name} in repo {self.slug} (devel: {is_dev})"
-                )
                 versions = self._create_update(
-                    package_name,
-                    new_version,
-                    old_version,
-                    is_dev=is_dev,
+                    body=body,
                     labels=labels,
                     old_environment=old_environment if not pipenv_used else None,
                     merge_request=merge_request,
@@ -811,22 +769,11 @@ class UpdateManager(ManagerBase):
                     req_dev=req_dev,
                 )
                 if versions:
-                    result[package_name] = versions
+                    result["merge request id"] = versions  # return the merge request id
             except Exception as exc:
                 _LOGGER.exception(
-                    f"Failed to create update for dependency {package_name}: {str(exc)}"
+                    f"Failed to create update for current master {self.sha}: {str(exc)}"
                 )
-            finally:
-                self.repo.head.reset(index=True, working_tree=True)
-                self.repo.git.checkout("master")
-
-        # We know that locking was done correctly - if the issue is still open, close it. The issue
-        # should be automatically closed by merging the generated PR.
-        self.sm.close_issue_if_exists(
-            _ISSUE_REPLICATE_ENV_NAME, comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha)
-        )
-
-        self._delete_old_branches(outdated)
         return result
 
     def run(self, labels: list) -> typing.Optional[dict]:
