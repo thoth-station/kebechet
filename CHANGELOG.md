@@ -1594,3 +1594,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 * :honeybee: upgrade pip for kebechet container image (#593)
 ### Improvements
 * Added modifications to use gitpython (#594)
+
+## Release 1.1.1 (2020-11-19T20:26:20)
+### Features
+* Update manager non-atomic updates (#597)
