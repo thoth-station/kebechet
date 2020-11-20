@@ -334,7 +334,7 @@ class VersionManager(ManagerBase):
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
         body += (
-            "Related: #"
+            "Closes: #"
             + str(issue.id)
             + "\n\n```"
             + "\n\nChangelog:\n"
