@@ -2,10 +2,8 @@ check:
   - thoth-precommit
   - thoth-build
 build:
-  base-image: "registry.access.redhat.com/ubi8"
   build-stratergy: Dockerfile # Allowed values: Source, Dockerfile, Containerfile (default: Source)
   dockerfile-path: Dockerfile
-  custom_tag: latest # custom tag to be push to registry
   registry: "quay.io"
   registry-org: "thoth-station"
   registry-project: "kebechet-job"
