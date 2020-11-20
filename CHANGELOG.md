@@ -1598,3 +1598,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 ## Release 1.1.1 (2020-11-19T20:26:20)
 ### Features
 * Update manager non-atomic updates (#597)
+
+## Release 1.1.2 (2020-11-20T17:54:27)
+### Features
+* Updated to pipenv 2020 (#602)
