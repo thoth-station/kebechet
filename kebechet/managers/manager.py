@@ -17,13 +17,18 @@
 
 """Common and useful utilities for managers."""
 
+from kebechet.utils import APP_NAME
 import logging
 import platform
 import typing
 import git
+import os
+from typing import Any
 
 import delegator
 import kebechet
+import functools
+import datetime
 
 from kebechet.exception import PipenvError
 from thoth.sourcemanagement.enums import ServiceType
@@ -43,6 +48,24 @@ def _init_service_url(service_type: ServiceType = None, service_url: str = None)
         raise NotImplementedError
 
     return service_url
+
+
+def refresh_repo_url(decorated: Any):  # noqa: N805
+    """Check if access token has expired and refresh repo url if necessary."""  # noqa: D202
+    # noqa: D202
+    @functools.wraps(decorated)
+    def wrapper(manager, *args, **kwargs):
+        if manager.installation:  # We check if installation is being used.
+            if datetime.datetime.now() > manager.token_expire_time:
+                manager.token, manager.token_expire_time = manager.get_access_token()
+                service_host = "github.com"  # For now only github apps.
+                manager._repo.create_remote(
+                    "origin",
+                    url=f"https://{APP_NAME}:{manager.token}@{service_host}/{manager.slug}",
+                )
+            return decorated(manager, *args, **kwargs)
+
+    return wrapper
 
 
 class ManagerBase:
@@ -67,8 +90,19 @@ class ManagerBase:
         if parsed_payload:
             self.parsed_payload = parsed_payload
         self.owner, self.repo_name = self.slug.split("/", maxsplit=1)
-        self.sm = SourceManagement(self.service_type, self.service_url, token, slug)
+        self.installation = False
+        if os.getenv("GITHUB_PRIVATE_KEY_PATH") and os.getenv("GITHUB_APP_ID"):
+            self.installation = True  # Authenticate as github app.
+        self.sm = SourceManagement(
+            service_type=self.service_type,
+            service_url=self.service_url,
+            token=token,
+            slug=slug,
+            installation=self.installation,
+        )
         self._repo = None
+        if self.installation:
+            self.token, self.token_expire_time = self.sm.get_access_token()
 
     @property
     def repo(self):
@@ -79,7 +113,6 @@ class ManagerBase:
     def repo(self, repo: git.Repo):
         """Set repository information and all derived information needed."""
         self._repo = repo
-        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
 
     @classmethod
     def get_environment_details(

@@ -1564,3 +1564,41 @@ Starting with this release we have a Zuul-CI pipeline that:
 ## Release 1.0.8 (2020-09-22T15:13:49)
 ### Features
 * Updated glyph to 0.13
+
+## Release 1.0.9 (2020-09-23T16:20:11)
+### Features
+* Updated glyph
+* updated github templates
+* Make pre-commit happy
+### Improvements
+* Fixed version test
+
+## Release 1.0.10 (2020-11-12T19:06:36)
+### Features
+* Remove unnecessary quotes (#589)
+* Enabled github app authentication (#587)
+* precommit happy
+* Link formatted
+* added a clickable link to readme
+* Added reminder to add to thoth stroage
+* Add manual request example
+### Bug Fixes
+* Updated source-management and fixed version test (#590)
+* Precommit fixes
+### Improvements
+* :sparkles: :pencil: updated the readme, now we deploy via kustomize rather than ansible
+* Fix typo
+
+## Release 1.1.0 (2020-11-18T18:13:51)
+### Features
+* :honeybee: upgrade pip for kebechet container image (#593)
+### Improvements
+* Added modifications to use gitpython (#594)
+
+## Release 1.1.1 (2020-11-19T20:26:20)
+### Features
+* Update manager non-atomic updates (#597)
+
+## Release 1.1.2 (2020-11-20T17:54:27)
+### Features
+* Updated to pipenv 2020 (#602)

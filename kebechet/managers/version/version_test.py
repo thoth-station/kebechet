@@ -40,7 +40,9 @@ class TestVersionManager:
     """Test version manager."""
 
     manager = VersionManager(
-        slug="fake-user/fake-repo", service_type=ServiceType.GITHUB
+        slug="fake-user/fake-repo",
+        service_type=ServiceType.GITHUB,
+        token="test-token-xxx",
     )
 
     @pytest.mark.parametrize(
@@ -62,5 +64,8 @@ class TestVersionManager:
                 old_version=old_version,
                 new_version=new_version,
                 version_file=False,
+                changelog_smart=False,
+                changelog_classifier=None,
+                changelog_format=None,
             )
             patch_log.assert_called_with(f"{tag}..HEAD", no_merges=True, format="* %s")

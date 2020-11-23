@@ -18,7 +18,8 @@ WORKDIR /home/user
 RUN \
     dnf install -y --setopt=tsflags=nodocs git libgit2-devel python38 python36 python3-pip gcc redhat-rpm-config python3-devel which gcc-c++ &&\
 #    pip3 install git+https://github.com/thoth-station/kebechet &&\
-    pip3 install pipenv==2018.11.26 &&\
+    pip3 install --upgrade pip &&\
+    pip3 install pipenv==2020.11.15 &&\
     mkdir -p /home/user/.ssh ${PIPENV_CACHE_DIR} &&\
     chmod a+wrx -R /etc/passwd /home/user
 

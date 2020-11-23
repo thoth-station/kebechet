@@ -63,7 +63,7 @@ class Service:
             raise ValueError(f"{service} is not supported at this time")
         self.service = self._SERVICES[service]["service_type"]
         _LOGGER.info("%s service detected", service)
-        self.token = os.environ[self._SERVICES[service]["token"]]
+        self.token = os.getenv(self._SERVICES[service]["token"])
         self.branch = branch
         self.url = url
         self.service_info = self._SERVICES[service]

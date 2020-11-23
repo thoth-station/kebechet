@@ -36,3 +36,6 @@ If you wish to operate on repository source code, you can request to clone it:
             repo.git.push()
 
 The last thing you need to do, is to register your manager to `REGISTERED_MANAGERS` constant (you can find it in `kebechet/managers/__init__.py` file) so Kebechet knows about your manager. Manager can be referenced by its name in lowercase (class name without the "manager" suffix).
+
+Kebechet works as a part of Thoth Ecosystem, please raise an issue or add the new manager to the `KebechetGithubAppInstallations
+<https://github.com/thoth-station/storages/blob/15ed39ef6c8d7bf58037046f3bab2465c5c4bb22/thoth/storages/graph/models.py#L1434>`_ table.

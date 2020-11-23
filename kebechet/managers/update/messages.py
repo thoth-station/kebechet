@@ -144,7 +144,7 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 ISSUE_NO_DEPENDENCY_MANAGEMENT = """No dependency management found for this repository. If you want to keep your dependencies managed, \
 please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
-To generate a `Pipfile`, use:"
+To generate a `Pipfile`, use:
 ```
 $ pipenv install --skip-lock --code ./
 $ git add Pipfile
@@ -209,3 +209,12 @@ ISSUE_UNSUPPORTED_PACKAGE = """Kebechet cannot support maintaining this applicat
   ```
   </details>
   """
+
+UPDATE_MESSAGE_BODY = """Kebechet has updated the depedencies to the latest version :rocket:
+The direct dependencies updated in the pull request are -
+Package Name | Old Version | Updated Version | Is Dev
+--- | --- | --- | ---
+{package_name_rows}
+
+Kebechet Version: {kebechet_version}
+"""
