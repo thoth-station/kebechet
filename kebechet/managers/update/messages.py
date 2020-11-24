@@ -216,5 +216,6 @@ Package Name | Old Version | Updated Version | Is Dev
 --- | --- | --- | ---
 {package_name_rows}
 
-This Pull Request is based on a [Project Thoth GitHub App](https://github.com/marketplace/khebhut), and [Kebechet](https://github.com/thoth-station/kebechet) v{kebechet_version}
+This Pull Request is based on a [Project Thoth GitHub App](https://github.com/marketplace/khebhut),
+and [Kebechet](https://github.com/thoth-station/kebechet) v{kebechet_version}
 """
