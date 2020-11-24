@@ -1602,3 +1602,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 ## Release 1.1.2 (2020-11-20T17:54:27)
 ### Features
 * Updated to pipenv 2020 (#602)
+
+## Release 1.1.3 (2020-11-24T18:20:49)
+### Features
+* Req was using pipenv 2018 (#615)
+* :arrow_up: Automatic update of dependencies by kebechet. (#613)
+* Add Sai to project owners (#611)
