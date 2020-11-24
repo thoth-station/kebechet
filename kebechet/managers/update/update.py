@@ -187,7 +187,7 @@ class UpdateManager(ManagerBase):
             if "git" in package_info:
                 self._create_unsupported_package_issue(package_name)
                 raise DependencyManagementError(
-                    f"Failed to find version in package that uses git source."
+                    "Failed to find version in package that uses git source."
                 )
             result[package_name.lower()] = {
                 "dev": False,
@@ -295,14 +295,14 @@ class UpdateManager(ManagerBase):
     ) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
         branch_name = _UPDATE_BRANCH_NAME
-        commit_msg = f"Automatic update of dependencies by kebechet."
+        commit_msg = "Automatic update of dependencies by kebechet."
 
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
         self._git_push(":arrow_up: " + commit_msg, branch_name, files, force_push=True)
 
         if not merge_request:
-            _LOGGER.info(f"Creating a new pull request to update dependencies.")
+            _LOGGER.info("Creating a new pull request to update dependencies.")
             merge_request = self.sm.open_merge_request(
                 commit_msg, branch_name, body, labels
             )
@@ -326,7 +326,7 @@ class UpdateManager(ManagerBase):
         }
 
         if len(response) == 0:
-            _LOGGER.debug(f"No pull request was found for automatic update.")
+            _LOGGER.debug("No pull request was found for automatic update.")
             return None, True
         elif len(response) == 1:
             response = list(response)[0]
