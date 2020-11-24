@@ -1608,3 +1608,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Req was using pipenv 2018 (#615)
 * :arrow_up: Automatic update of dependencies by kebechet. (#613)
 * Add Sai to project owners (#611)
+
+## Release 1.1.4 (2020-11-24T20:47:19)
+### Bug Fixes
+* The release PR should close the issue (#606)
