@@ -89,7 +89,6 @@ class UpdateManager(ManagerBase):
     def repo(self, repo: git.Repo):
         """Set repository information and all derived information needed."""
         self._repo = repo
-        self.slug = repo.remote().url.split(":", maxsplit=1)[1][: -len(".git")]
 
     @property
     def sha(self):
