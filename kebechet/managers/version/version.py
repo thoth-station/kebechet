@@ -35,6 +35,7 @@ from thoth.glyph import generate_log
 from thoth.glyph import MLModel
 from thoth.glyph import Format
 from thoth.glyph import ThothGlyphException
+from .messages import RELEASE_TAG_MISSING_WARNING
 
 _LOGGER = logging.getLogger(__name__)
 _VERSION_PULL_REQUEST_NAME = "Release of version {}"
@@ -75,6 +76,8 @@ _RELEASE_TITLES = {
 _EVENTS_SUPPORTED = ["issues", "issue"]
 # Maximum number of log messages in a single release. Set due to ultrahook limits.
 _MAX_CHANELOG_SIZE = 300
+# Previous release tag present
+_PREV_RELEASE_TAG = False
 
 
 class VersionError(Exception):
@@ -254,17 +257,16 @@ class VersionManager(ManagerBase):
             old_version,
             new_version,
         )
-
+        global _PREV_RELEASE_TAG
         tags = repo.git.tag().splitlines()
 
-        is_tagged_version = False
         for tag in tags:
             if old_version == tag or re.match(f"v?{old_version}", tag):
                 old_version = tag
-                is_tagged_version = True
+                _PREV_RELEASE_TAG = True
                 break
 
-        if not is_tagged_version:
+        if not _PREV_RELEASE_TAG:
             _LOGGER.info(
                 "Old version was not found in the git tag history, assuming initial release"
             )
@@ -331,8 +333,11 @@ class VersionManager(ManagerBase):
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
+        global _PREV_RELEASE_TAG
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
+        if not _PREV_RELEASE_TAG:
+            body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
             "Closes: #"
             + str(issue.id)
