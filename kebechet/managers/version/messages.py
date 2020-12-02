@@ -22,7 +22,7 @@ RELEASE_TAG_MISSING_WARNING = """
 **WARNING NOTE**
 The release version mentioned in the source-code couldn't be found in git tags, \
     hence the release is created from the start.
-If that is not the right behavior -
+If that is not the right behavior:
 
 - Close this pull request & release issue.
 - Fix the version string in source-code to reflect the latest git-tag, or create \
