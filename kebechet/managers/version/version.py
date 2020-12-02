@@ -35,6 +35,7 @@ from thoth.glyph import generate_log
 from thoth.glyph import MLModel
 from thoth.glyph import Format
 from thoth.glyph import ThothGlyphException
+from .messages import RELEASE_TAG_MISSING_WARNING
 
 _LOGGER = logging.getLogger(__name__)
 _VERSION_PULL_REQUEST_NAME = "Release of version {}"
@@ -83,6 +84,9 @@ class VersionError(Exception):
 
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
+
+    # Previous release tag present
+    _PREV_RELEASE_TAG = False
 
     def _adjust_version_file(
         self, file_path: str, issue: Issue
@@ -235,8 +239,9 @@ class VersionManager(ManagerBase):
             and len(issue_title.split(" ")) == 2
         )
 
-    @staticmethod
+    @classmethod
     def _compute_changelog(
+        cls,
         repo: Repo,
         old_version: str,
         new_version: str,
@@ -254,17 +259,15 @@ class VersionManager(ManagerBase):
             old_version,
             new_version,
         )
-
         tags = repo.git.tag().splitlines()
 
-        is_tagged_version = False
         for tag in tags:
             if old_version == tag or re.match(f"v?{old_version}", tag):
                 old_version = tag
-                is_tagged_version = True
+                cls._PREV_RELEASE_TAG = True
                 break
 
-        if not is_tagged_version:
+        if not cls._PREV_RELEASE_TAG:
             _LOGGER.info(
                 "Old version was not found in the git tag history, assuming initial release"
             )
@@ -333,6 +336,8 @@ class VersionManager(ManagerBase):
         # merges are perfomed as desired.
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
+        if not cls._PREV_RELEASE_TAG:
+            body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
             "Closes: #"
             + str(issue.id)
