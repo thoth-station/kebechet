@@ -76,8 +76,6 @@ _RELEASE_TITLES = {
 _EVENTS_SUPPORTED = ["issues", "issue"]
 # Maximum number of log messages in a single release. Set due to ultrahook limits.
 _MAX_CHANELOG_SIZE = 300
-# Previous release tag present
-_PREV_RELEASE_TAG = False
 
 
 class VersionError(Exception):
@@ -86,6 +84,9 @@ class VersionError(Exception):
 
 class VersionManager(ManagerBase):
     """Automatic version management for Python projects."""
+
+    # Previous release tag present
+    _PREV_RELEASE_TAG = False
 
     def _adjust_version_file(
         self, file_path: str, issue: Issue
@@ -238,8 +239,9 @@ class VersionManager(ManagerBase):
             and len(issue_title.split(" ")) == 2
         )
 
-    @staticmethod
+    @classmethod
     def _compute_changelog(
+        cls,
         repo: Repo,
         old_version: str,
         new_version: str,
@@ -257,16 +259,15 @@ class VersionManager(ManagerBase):
             old_version,
             new_version,
         )
-        global _PREV_RELEASE_TAG
         tags = repo.git.tag().splitlines()
 
         for tag in tags:
             if old_version == tag or re.match(f"v?{old_version}", tag):
                 old_version = tag
-                _PREV_RELEASE_TAG = True
+                cls._PREV_RELEASE_TAG = True
                 break
 
-        if not _PREV_RELEASE_TAG:
+        if not cls._PREV_RELEASE_TAG:
             _LOGGER.info(
                 "Old version was not found in the git tag history, assuming initial release"
             )
@@ -333,10 +334,9 @@ class VersionManager(ManagerBase):
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
-        global _PREV_RELEASE_TAG
         body = cls._adjust_pr_body(issue)
         truncated_changelog = changelog[:_MAX_CHANELOG_SIZE]
-        if not _PREV_RELEASE_TAG:
+        if not cls._PREV_RELEASE_TAG:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
             "Closes: #"
