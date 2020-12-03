@@ -315,17 +315,17 @@ class VersionManager(ManagerBase):
         result = "\n".join(issue.description.splitlines())
         result = result.replace(
             "Hey, Kebechet!\n\nCreate a new patch release, please.",
-            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.\n\n",
+            f"Hey, @{issue.author}!\n\nOpening this PR to fix the last release.",
         )
 
         result = result.replace(
             "Hey, Kebechet!\n\nCreate a new minor release, please.",
-            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.\n\n",
+            f"Hey, @{issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.",
         )
 
         return result.replace(
             "Hey, Kebechet!\n\nCreate a new major release, please.",
-            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.\n\n",
+            f"Hey, @{issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.",
         )
 
     @classmethod
@@ -339,7 +339,7 @@ class VersionManager(ManagerBase):
         if not cls._PREV_RELEASE_TAG:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
-            "Closes: #"
+            "\n\nCloses: #"
             + str(issue.id)
             + "\n\n```"
             + "\n\nChangelog:\n"
