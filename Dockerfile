@@ -15,7 +15,7 @@ WORKDIR /home/user
 # ADD github /home/user/.ssh/id_rsa
 
 RUN \
-    dnf install -y --setopt=tsflags=nodocs git python38 python3-pip gcc redhat-rpm-config python3-devel which gcc-c++ &&\
+    dnf install -y --setopt=tsflags=nodocs git python38 python3-pip gcc redhat-rpm-config python3-devel python38-devel which gcc-c++ &&\
 #    pip3 install git+https://github.com/thoth-station/kebechet &&\
     pip3 install --upgrade pip &&\
     pip3 install pipenv==2020.11.15 &&\
