@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4baa0d7279995805343d687870a27a5267b2703a17cf10c1dedaf89b29f80d79"
+            "sha256": "a6932ad6d3a23787b2a7e32c8a26a8c5f53e6fda3bd498735515c2c24ee3c561"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -971,7 +971,7 @@
                 "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c",
                 "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"
             ],
-            "markers": "python_version < '3.8'",
+            "index": "pypi",
             "version": "==3.7.4.3"
         },
         "tzlocal": {
@@ -1174,7 +1174,7 @@
                 "sha256:cedb2f9e1f990918ea061f28a0f0077a07702e3819602d3507e2ff98c8d20636",
                 "sha256:e8caf961e1b1a945db76f1b5fa9c91498d15f545ac0ababbe575cfab185d3bd8"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==5.3"
         },
         "dependency-management": {
@@ -1211,7 +1211,7 @@
                 "sha256:dcab1d98b469a12a1a624ead220584391648790275560e1a43e54c5dceae65e7",
                 "sha256:dcaeec1b5f0eca77faea2a35ab790b4f3680ff75590bfcb7145986905aab2f58"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4.0'",
+            "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==5.6.4"
         },
         "lazy-object-proxy": {
