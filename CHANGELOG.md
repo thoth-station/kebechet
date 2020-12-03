@@ -1622,3 +1622,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Slug wrongly set (#627)
 ### Improvements
 * newline adjustment for consistency of body for kinda issues (#631)
+
+## Release 1.2.1 (2020-12-03T21:47:41)
+### Features
+* port to python38 (#621)
