@@ -1612,3 +1612,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 ## Release 1.1.4 (2020-11-24T20:47:19)
 ### Bug Fixes
 * The release PR should close the issue (#606)
+
+## Release 1.2.0 (2020-12-03T20:32:37)
+### Features
+* statisfy the need of python38-devel libraries (#635)
+* Fixed wrong function accessed (#633)
+* :arrow_up: Automatic update of dependencies by kebechet. (#630)
+* Added warning if release tag is missing. (#628)
+* Slug wrongly set (#627)
+### Improvements
+* newline adjustment for consistency of body for kinda issues (#631)
