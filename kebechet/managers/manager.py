@@ -57,7 +57,7 @@ def refresh_repo_url(decorated: Any):  # noqa: N805
     def wrapper(manager, *args, **kwargs):
         if manager.installation:  # We check if installation is being used.
             if datetime.datetime.now() > manager.token_expire_time:
-                manager.token, manager.token_expire_time = manager.get_access_token()
+                manager.token, manager.token_expire_time = manager.sm.get_access_token()
                 service_host = "github.com"  # For now only github apps.
                 manager._repo.create_remote(
                     "origin",
