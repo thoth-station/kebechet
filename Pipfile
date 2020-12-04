@@ -18,6 +18,7 @@ sentry-sdk = "*"
 thoth-glyph = "*"
 GitPython = ">=3.1.0"
 PyYAML = "*"
+typing-extensions = "*"
 
 [dev-packages]
 pytest = "*"
