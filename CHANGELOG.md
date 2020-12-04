@@ -1626,3 +1626,10 @@ Starting with this release we have a Zuul-CI pipeline that:
 ## Release 1.2.1 (2020-12-03T21:47:41)
 ### Features
 * port to python38 (#621)
+
+## Release 1.2.2 (2020-12-04T14:28:28)
+### Features
+* Update OWNERS
+* Missing typing extensions (#645)
+### Bug Fixes
+* Relock to fix typing_extensions relock (#646)
