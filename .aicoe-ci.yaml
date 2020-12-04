@@ -11,5 +11,5 @@ build:
 deploy:
   project-org: "thoth-station"
   project-name: "thoth-application"
-  image-name: "kebechet-job"
+  image-name: "kebechet"
   overlay-contextpath: "kebechet/overlays/test/imagestreamtag.yaml"
