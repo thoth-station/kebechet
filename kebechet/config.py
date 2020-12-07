@@ -153,7 +153,7 @@ class _Config:
                     "Unable to find requested manager %r, skipping", manager_name
                 )
                 continue
-            _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
+            _LOGGER.info("Running manager %r for %r", manager_name, slug)
             manager_configuration = manager.get("configuration") or {}
             if manager:
                 _LOGGER.warning(
@@ -373,7 +373,7 @@ class _Config:
                     )
                     continue
 
-                _LOGGER.info(f"Running manager %r for %r", manager_name, slug)
+                _LOGGER.info("Running manager %r for %r", manager_name, slug)
                 manager_configuration = manager.get("configuration") or {}
                 if manager:
                     _LOGGER.warning(

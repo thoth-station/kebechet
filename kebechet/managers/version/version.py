@@ -40,12 +40,12 @@ from .messages import RELEASE_TAG_MISSING_WARNING
 _LOGGER = logging.getLogger(__name__)
 _VERSION_PULL_REQUEST_NAME = "Release of version {}"
 _NO_VERSION_FOUND_ISSUE_NAME = (
-    f"No version identifier found in sources to perform a release"
+    "No version identifier found in sources to perform a release"
 )
 _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME = (
-    f"Multiple version identifiers found in sources to perform a new release."
+    "Multiple version identifiers found in sources to perform a new release."
 )
-_MULTIPLE_VERSIONS_FOUND_ISSUE_BODY = f"Please have only one version string, to facilitate automated releases.\
+_MULTIPLE_VERSIONS_FOUND_ISSUE_BODY = "Please have only one version string, to facilitate automated releases.\
          Multiple version strings found in these files - "
 _NO_MAINTAINERS_ERROR = "No release maintainers stated for this repository"
 _BODY_TRUNCATED = "The changelog body was truncated, please check CHANGELOG.md for the complete changelog."
