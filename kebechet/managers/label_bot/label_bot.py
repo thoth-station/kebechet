@@ -14,6 +14,15 @@ _EVENTS_SUPPORTED = ["issues", "issue"]
 
 _GITHUB_LABEL_BOT_API = os.getenv("LABELBOT_URL")
 _MINIMUM_CONFIDENCE = 0.5
+_ISSUES_TO_IGNORE = [
+    "Kebechet",
+    "new patch release",
+    "new minor release",
+    "new major release",
+    "new calendar release",
+    "new pre-release",
+    "new build release",
+]
 
 
 class ThothLabelBotManager(ManagerBase):
@@ -52,6 +61,13 @@ class ThothLabelBotManager(ManagerBase):
             if not issue:
                 _LOGGER.info("Issue not found, exiting")
                 return None
+
+            # TODO: Read from thoth.yaml so that user could add more issues to ignore.
+            for issue_to_ignore in _ISSUES_TO_IGNORE:
+                if issue_title.startswith(issue_to_ignore):
+                    _LOGGER.info("Ignored as it is a BOT related issue.")
+                    return None
+
             _LOGGER.info(f"Found issue {issue_title}, predicting label.")
             url = _GITHUB_LABEL_BOT_API + "/predict"  # type: ignore
             headers = {"Content-type": "application/json", "Accept": "text/plain"}
