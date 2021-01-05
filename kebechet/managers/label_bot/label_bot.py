@@ -59,7 +59,7 @@ class ThothLabelBotManager(ManagerBase):
             issue_title = payload.get("issue").get("title")
             issue = self.sm.get_issue(issue_title)
             if not issue:
-                _LOGGER.info("Issue not found, exiting")
+                _LOGGER.warning("An event for issue %r received but the issue was not found", issue_title)
                 return None
 
             # TODO: Read from thoth.yaml so that user could add more issues to ignore.
