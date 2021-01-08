@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+# Kebechet
+# Copyright(C) 2020, 2021 Sai Sankar Gochhayat
+#
+# This program is free software: you can redistribute it and / or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 """AI powered labels for all your issues."""
 
 import logging
@@ -15,7 +32,7 @@ _EVENTS_SUPPORTED = ["issues", "issue"]
 _GITHUB_LABEL_BOT_API = os.getenv("LABELBOT_URL")
 _MINIMUM_CONFIDENCE = 0.5
 _ISSUES_TO_IGNORE = [
-    "Kebechet",
+    "kebechet",
     "new patch release",
     "new minor release",
     "new major release",
@@ -64,7 +81,7 @@ class ThothLabelBotManager(ManagerBase):
 
             # TODO: Read from thoth.yaml so that user could add more issues to ignore.
             for issue_to_ignore in _ISSUES_TO_IGNORE:
-                if issue_title.startswith(issue_to_ignore):
+                if issue_title.lower().strip().startswith(issue_to_ignore):
                     _LOGGER.info("Ignored as it is a BOT related issue.")
                     return None
 
@@ -85,6 +102,10 @@ class ThothLabelBotManager(ManagerBase):
                     issue.add_label(label)
                 # Ignore if the none of the label meet the minimum confidence criteria.
             else:
-                _LOGGER.warning("Github Label BOT API is not working.")
+                response_dict = response.json()
+                _LOGGER.warning(
+                    f"Github Label BOT API is not working. \n Response status \
+                        code - {response.status_code} \n Response - {response_dict}"
+                )
 
         return None
