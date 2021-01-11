@@ -1633,3 +1633,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 * Missing typing extensions (#645)
 ### Bug Fixes
 * Relock to fix typing_extensions relock (#646)
+
+## Release 1.2.3 (2021-01-11T17:45:28)
+### Features
+* :arrow_up: Automatic update of dependencies by kebechet. (#660)
+* :arrow_up: Automatic update of dependencies by kebechet. (#658)
+* :arrow_up: Automatic update of dependencies by kebechet. (#655)
+* add a little more linky footer to PRs (#607)
+* :arrow_up: Automatic update of dependencies by kebechet. (#651)
+### Bug Fixes
+* fix the name of the imagestream to-be looked up (#650)
