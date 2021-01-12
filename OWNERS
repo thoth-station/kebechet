@@ -9,7 +9,6 @@ approvers:
 reviewers:
   - kpostoffice
   - harshad16
-  - bissenbay
 
 labels:
   - sig/cyborgs
