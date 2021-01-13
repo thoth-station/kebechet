@@ -106,7 +106,7 @@ class ThothLabelBotManager(ManagerBase):
                 # Ignore if the none of the label meet the minimum confidence criteria.
             else:
                 response_dict = response.json()
-                _LOGGER.warning(
+                _LOGGER.error(
                     f"Github Label BOT API is not working. \n Response status \
                         code - {response.status_code} \n Response - {response_dict}"
                 )
