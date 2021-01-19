@@ -62,6 +62,9 @@ _ISSUE_MANUAL_UPDATE = "Kebechet update"
 
 _UPDATE_BRANCH_NAME = "kebechet-automatic-update"
 
+_UPDATE_MERGE_REQUEST_TITLE = "Automatic update of dependencies by Kebechet"
+_UPDATE_COMMIT_MSG = ":arrow_up: " + _UPDATE_MERGE_REQUEST_TITLE
+
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 
@@ -294,17 +297,14 @@ class UpdateManager(ManagerBase):
         merge_request: PullRequest,
     ) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
-        branch_name = _UPDATE_BRANCH_NAME
-        commit_msg = "Automatic update of dependencies by kebechet."
-
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        self._git_push(":arrow_up: " + commit_msg, branch_name, files, force_push=True)
+        self._git_push(_UPDATE_COMMIT_MSG, _UPDATE_BRANCH_NAME, files, force_push=True)
 
         if not merge_request:
             _LOGGER.info("Creating a new pull request to update dependencies.")
             merge_request = self.sm.open_merge_request(
-                commit_msg, branch_name, body, labels
+                _UPDATE_MERGE_REQUEST_TITLE, _UPDATE_BRANCH_NAME, body, labels
             )
             return merge_request
 
@@ -773,6 +773,12 @@ class UpdateManager(ManagerBase):
                 _LOGGER.exception(
                     f"Failed to create update for current master {self.sha}: {str(exc)}"
                 )
+        else:
+            self.sm.close_issue_if_exists(
+                _UPDATE_MERGE_REQUEST_TITLE,
+                f"No longer relevant based on the state of the current branch {self.sha}",
+            )
+
         return result
 
     def run(self, labels: list) -> typing.Optional[dict]:
