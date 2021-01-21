@@ -399,10 +399,7 @@ class UpdateManager(ManagerBase):
         """Perform pipenv lock into requirements.txt or requirements-dev.txt file."""
         result = cls.run_pipenv("pipenv lock -r ")
         with open(output_file, "w") as requirements_file:
-            # Remove markers from requirements file.
-            for line in result.splitlines():
-                parts = line.split(" ; ", maxsplit=1)
-                requirements_file.write(parts[0])
+            requirements_file.write(result)
 
     def _create_update(
         self,
