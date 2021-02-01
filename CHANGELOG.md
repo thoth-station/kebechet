@@ -1643,3 +1643,22 @@ Starting with this release we have a Zuul-CI pipeline that:
 * :arrow_up: Automatic update of dependencies by kebechet. (#651)
 ### Bug Fixes
 * fix the name of the imagestream to-be looked up (#650)
+
+## Release 1.2.4 (2021-02-01T08:10:16)
+### Features
+* :arrow_up: Automatic update of dependencies by kebechet. (#687)
+* write outputs of pipenv lock -r to output file (#686)
+* :arrow_up: Automatic update of dependencies by kebechet. (#685)
+* :arrow_up: Automatic update of dependencies by kebechet. (#684)
+* :arrow_up: Automatic update of dependencies by kebechet. (#682)
+* Automatically close update merge request if no longer relevant (#661)
+* :arrow_up: Automatic update of dependencies by kebechet. (#677)
+* :arrow_up: Automatic update of dependencies by kebechet. (#668)
+* Fixed log message (#673)
+* :sparkles: add a little more linky footer to PRs
+* Thoth Labelmanager (#656)
+* :arrow_up: Automatic update of dependencies by kebechet. (#666)
+### Bug Fixes
+* :bug: fix some flake8 complains
+### Improvements
+* removed bissenbay, thanks for your contributions!
