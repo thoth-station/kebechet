@@ -287,11 +287,11 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:0b0e026b412a0ad096e753907559e4bdb180d9ba9f68dd9036164db4fdc4ad2e",
-                "sha256:ce752cc51c31f479dbf9928435ef4b07514b20261b021c7383bee4bda646acb8"
+                "sha256:008e23ed080674f69f9d2d7d80db4c2591b9bb307d136cea7b3bc129771d211d",
+                "sha256:514e39f4190ca972200ba33876da5a8857c5665f2b4ccc36c8b8ee21228aae80"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
-            "version": "==1.24.0"
+            "version": "==1.25.0"
         },
         "idna": {
             "hashes": [
@@ -923,11 +923,11 @@
         },
         "thamos": {
             "hashes": [
-                "sha256:2f2a6c77809c7d85e8d461dcff16914fda77a28d729f2fc214a148aec376be67",
-                "sha256:e0df2c224067ae07392a640af9d458b03beb25e0727bf2ce00e6312170b04366"
+                "sha256:338e34b98896cd594ff477656cf0a9ace57701c7b1b0b72b15933cffbb9edf38",
+                "sha256:c086827a3f3a01fc92ba0d06d3a946e82ed392577dc3111927789762bf3267cc"
             ],
             "index": "pypi",
-            "version": "==1.7.0"
+            "version": "==1.10.0"
         },
         "thoth-analyzer": {
             "hashes": [
@@ -938,11 +938,11 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:16b46922a3d8741a4c4518f8a6ffeec63c45343d42dd7c2efa88239cec41198f",
-                "sha256:7b1768af4f83b254371d87f97411da64673e4a76d6017b05c6541e91f1a62579"
+                "sha256:8fdea966ed760d980fcfd66e48b135c8fc1d370ee1619e412f7a965489bac46f",
+                "sha256:94d88c60bace108513c65a06c62508d5c9b472f16842c21c49ed182310393350"
             ],
             "index": "pypi",
-            "version": "==0.22.0"
+            "version": "==0.22.1"
         },
         "thoth-glyph": {
             "hashes": [
