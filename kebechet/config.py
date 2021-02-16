@@ -100,7 +100,14 @@ class _Config:
             )
 
     @classmethod
-    def run_url(cls, url: str, service: str, parsed_payload: dict, tls_verify: bool):
+    def run_url(
+        cls,
+        url: str,
+        service: str,
+        parsed_payload: dict,
+        tls_verify: bool,
+        kebechet_metadata: dict = None,
+    ):
         temp_file = cls.download_conf_from_url(url, service)
         _LOGGER.debug("Filename = %s", temp_file.name)
 
@@ -161,7 +168,12 @@ class _Config:
                 )
             try:
                 instance = kebechet_manager(
-                    slug, _service_.service, service_url, parsed_payload, token
+                    slug,
+                    _service_.service,
+                    service_url,
+                    parsed_payload,
+                    token,
+                    kebechet_metadata,
                 )
                 instance.run(**manager_configuration)
             except Exception as exc:  # noqa F841

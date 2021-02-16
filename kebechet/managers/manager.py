@@ -78,6 +78,7 @@ class ManagerBase:
         service_url: str = None,
         parsed_payload: dict = None,
         token: str = None,
+        metadata: dict = None,
     ):
         """Initialize manager instance for talking to services."""
         self.service_type = service_type or ServiceType.GITHUB
@@ -103,6 +104,8 @@ class ManagerBase:
         self._repo = None
         if self.installation:
             self.token, self.token_expire_time = self.sm.get_access_token()
+
+        self.metadata = metadata
 
     @property
     def repo(self):
