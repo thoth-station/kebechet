@@ -1,5 +1,4 @@
 check:
-  - thoth-precommit
   - thoth-build
 build:
   build-stratergy: Dockerfile # Allowed values: Source, Dockerfile, Containerfile (default: Source)
