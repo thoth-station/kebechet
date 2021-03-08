@@ -106,7 +106,6 @@ class ThothAdviseManager(ManagerBase):
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
 
-        # TODO: add justification based on metadata if keb metadata is present
         kebechet_metadata = metadata.get(
             "kebechet_metadata"
         )  # type: typing.Optional[dict]
