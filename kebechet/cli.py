@@ -90,9 +90,14 @@ def cli_run_results(origin, service, analysis_id):
 @cli.command("run-url")
 @click.option("-u", "--url", envvar="KEBECHET_REPO_URL")
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
-def cli_run_url(url, service):
+@click.option("-m", "--metadata", envvar="KEBECHET_METADATA")
+def cli_run_url(url, service, metadata=None):
     """Run Kebechet by providing url to a git repository service."""
-    config.run_url(url=url, service=service, parsed_payload=None, tls_verify=True)
+    if metadata is not None:
+        meta = json.loads(metadata)
+    config.run_url(
+        url=url, service=service, parsed_payload=None, tls_verify=True, metadata=meta
+    )
 
 
 @cli.command("run-webhook")

@@ -219,6 +219,7 @@ class ThothAdviseManager(ManagerBase):
                     nowait=True,
                     origin=(f"{self.service_url}/{self.slug}"),
                     source_type=ThothAdviserIntegrationEnum.KEBECHET,
+                    kebechet_metadata=self.metadata,
                 )
             return True
         else:
