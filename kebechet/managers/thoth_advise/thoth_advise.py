@@ -34,11 +34,43 @@ from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
 from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
 from thoth.common import ThothAdviserIntegrationEnum
+from thoth.common.enums import InternalTriggerEnum
+
+from .messages import (
+    DEFAULT_PR_BODY,
+    MISSING_PACKAGE_PR_BODY,
+    MISSING_PACKAGE_VERSION_PR_BODY,
+    NEW_RELEASE_PR_BODY,
+    NEW_CVE_PR_BODY,
+    HASH_MISMATCH_PR_BODY,
+)
+from .messages import (
+    MISSING_PACKAGE_ISSUE_BODY,
+    HASH_MISMATCH_ISSUE_BODY,
+    NEW_CVE_ISSUE_BODY,
+    MISSING_PACKAGE_VERSION_ISSUE_BODY,
+)
 
 _BRANCH_NAME = "kebechet_thoth"
 _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
+
+
+_INTERNAL_TRIGGER_PR_BODY_LOOKUP = {
+    InternalTriggerEnum.CVE.value: NEW_CVE_PR_BODY,
+    InternalTriggerEnum.HASH_MISMATCH.value: HASH_MISMATCH_PR_BODY,
+    InternalTriggerEnum.MISSING_PACKAGE.value: MISSING_PACKAGE_PR_BODY,
+    InternalTriggerEnum.MISSING_VERSION.value: MISSING_PACKAGE_VERSION_PR_BODY,
+    InternalTriggerEnum.NEW_RELEASE.value: NEW_RELEASE_PR_BODY,
+}
+
+_INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP = {
+    InternalTriggerEnum.CVE.value: NEW_CVE_ISSUE_BODY,
+    InternalTriggerEnum.HASH_MISMATCH.value: HASH_MISMATCH_ISSUE_BODY,
+    InternalTriggerEnum.MISSING_PACKAGE.value: MISSING_PACKAGE_ISSUE_BODY,
+    InternalTriggerEnum.MISSING_VERSION.value: MISSING_PACKAGE_VERSION_ISSUE_BODY,
+}
 
 
 class ThothAdviseManager(ManagerBase):
@@ -69,11 +101,26 @@ class ThothAdviseManager(ManagerBase):
         self.repo.remote().push(branch_name, force=force_push)
 
     def _open_merge_request(
-        self, branch_name: str, labels: list, files: list
+        self, branch_name: str, labels: list, files: list, metadata: dict
     ) -> typing.Optional[int]:
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
-        body = "Pipfile.lock updated by kebechet-thoth manager"
+
+        kebechet_metadata = metadata.get(
+            "kebechet_metadata"
+        )  # type: typing.Optional[dict]
+        if kebechet_metadata is not None and kebechet_metadata.get(
+            "message_justification"
+        ):
+            body = _INTERNAL_TRIGGER_PR_BODY_LOOKUP[
+                kebechet_metadata.get("message_justification")
+            ].format(
+                package=kebechet_metadata.get("package_name"),
+                version=kebechet_metadata.get("package_version"),
+                index=kebechet_metadata.get("package_index"),
+            )
+        else:
+            body = DEFAULT_PR_BODY
 
         # Delete branch if it didn't change Pipfile.lock
         diff = self.repo.git.diff("master", files)
@@ -114,10 +161,28 @@ class ThothAdviseManager(ManagerBase):
             justification = error["justification"]
             type_ = error["type"]
             _LOGGER.info(f"Error type: {type_}")
+
+            kebechet_metadata = adv_results[0]["metadata"].get("kebechet_metadata")
+
+            if (
+                kebechet_metadata is not None
+                and kebechet_metadata.get("message_justification") is not None
+            ):
+                internal_trigger_info = _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP[
+                    kebechet_metadata["message_justification"]
+                ].format(
+                    package=kebechet_metadata.get("package_name"),
+                    version=kebechet_metadata.get("package_version"),
+                    index=kebechet_metadata.get("package_index"),
+                )
+            else:
+                internal_trigger_info = ""
+
             textblock = (
                 textblock
                 + f"## Error type: {type_}\n"
                 + f"**Justification**: {justification}\n"
+                + internal_trigger_info
             )
 
         checksum = hashlib.md5(textblock.encode("utf-8")).hexdigest()[:10]
@@ -176,7 +241,9 @@ class ThothAdviseManager(ManagerBase):
                 if res[1] is False:
                     _LOGGER.info("Advise succeeded")
                     self._write_advise(res)
-                    self._open_merge_request(branch_name, labels, ["Pipfile.lock"])
+                    self._open_merge_request(
+                        branch_name, labels, ["Pipfile.lock"], res[0].get("metadata")
+                    )
                     return True
                 else:
                     _LOGGER.warning(
