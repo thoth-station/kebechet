@@ -802,11 +802,15 @@ class UpdateManager(ManagerBase):
             )
 
             update_issue = self.sm.get_issue(_UPDATE_MERGE_REQUEST_TITLE)
-            if update_issue is not None and update_issue.status == 2:  # Means "open" in OGR.
+            if (
+                update_issue is not None and update_issue.status == 2
+            ):  # Means "open" in OGR.
                 try:
                     self.sm.delete_branch(_UPDATE_BRANCH_NAME)
                 except Exception:
-                    _LOGGER.exception(f"Failed to delete branch {_UPDATE_BRANCH_NAME}, trying to continue")
+                    _LOGGER.exception(
+                        f"Failed to delete branch {_UPDATE_BRANCH_NAME}, trying to continue"
+                    )
 
             close_manual_update_issue = partial(
                 self.sm.close_issue_if_exists,
