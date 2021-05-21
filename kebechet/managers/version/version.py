@@ -72,6 +72,7 @@ _RELEASE_TITLES = {
     ).finalize_version(),
 }
 
+
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["issues", "issue"]
 # Maximum number of log messages in a single release. Set due to ultrahook limits.
@@ -154,13 +155,13 @@ class VersionManager(ManagerBase):
         if len(adjusted) == 0:
             error_msg = _NO_VERSION_FOUND_ISSUE_NAME
             _LOGGER.warning(error_msg)
-            self.sm.open_issue_if_not_exist(
-                error_msg,
-                lambda: "Automated version release cannot be performed.\nRelated: #"
-                + str(issue.id),
-                None,
-                labels,
-            )
+            i = self.get_issue_by_title(error_msg)
+            if i is None:
+                self.project.create_issue(
+                    title=error_msg,
+                    body=f"Automated version release cannot be performed.\nRelated: #{issue.id}",
+                    labels=labels,
+                )
 
         if len(adjusted) > 1:
             error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
@@ -172,12 +173,13 @@ class VersionManager(ManagerBase):
                 + ", ".join(file_locations)
                 + "`"
             )
-            self.sm.open_issue_if_not_exist(
-                error_msg,
-                lambda: _issue_body + "\nRelated: #" + str(issue.id),
-                None,
-                labels,
-            )
+            i = self.get_issue_by_title(error_msg)
+            if i is None:
+                self.project.create_issue(
+                    title=error_msg,
+                    body=f"{_issue_body}\nRelated: #{issue.id}",
+                    labels=labels,
+                )
 
         # Return old and new version identifier.
         return adjusted[0][1], adjusted[0][2]
@@ -193,15 +195,18 @@ class VersionManager(ManagerBase):
             maintainers = list(map(str, owners.get("maintainers") or []))
         except (FileNotFoundError, KeyError, ValueError, yaml.YAMLError):
             _LOGGER.exception("Failed to load maintainers file")
-            self.sm.open_issue_if_not_exist(
-                _NO_MAINTAINERS_ERROR,
-                lambda: "This repository is not correctly setup for automated version releases. "
-                "Please revisit bot configuration.",
-                labels=labels,
-            )
+            issue = self.get_issue_by_title(_NO_MAINTAINERS_ERROR)
+            if issue is None:
+                self.project.create_issue(
+                    title=_NO_MAINTAINERS_ERROR,
+                    body="This repository is not correctly setup for automated version releases.",
+                    labels=labels,
+                )
+            else:
+                issue.comment("Please revisit bot configuration.")
             return []
 
-        self.sm.close_issue_if_exists(
+        self.close_issue_and_comment(
             _NO_MAINTAINERS_ERROR, "No longer relevant for the current bot setup."
         )
         return maintainers
@@ -370,7 +375,7 @@ class VersionManager(ManagerBase):
                 return
 
         reported_issues = []
-        for issue in self.sm.repository.get_issue_list():
+        for issue in self.project.get_issue_list():
             issue_title = issue.title.strip()
 
             if issue_title.startswith(
@@ -392,7 +397,7 @@ class VersionManager(ManagerBase):
             with cloned_repo(self) as repo:
                 if assignees:
                     try:
-                        self.sm.assign(issue, assignees)
+                        self.add_assignees(issue=issue, assignees=assignees)
                     except Exception:
                         _LOGGER.exception(
                             f"Failed to assign {assignees} to issue #{issue.id}"
@@ -458,15 +463,17 @@ class VersionManager(ManagerBase):
                 # If this PR already exists, this will fail.
                 repo.remote().push(branch_name)
 
-                request = self.sm.open_merge_request(
-                    message,
-                    branch_name,
-                    body=self._construct_pr_body(issue, changelog),
-                    labels=labels,
+                pr = self.project.create_pr(
+                    title=message,
+                    body=self._construct_pr_body,
+                    target_branch=self.project.default_branch,
+                    source_branch=branch_name,
                 )
 
+                pr.add_label(*labels)
+
                 _LOGGER.info(
-                    f"Opened merge request with {request.id} for new release of {self.slug} "
+                    f"Opened merge request with {pr.id} for new release of {self.slug} "
                     f"in version {version_identifier}"
                 )
 

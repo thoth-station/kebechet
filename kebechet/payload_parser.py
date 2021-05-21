@@ -17,7 +17,6 @@
 
 """Provides abstraction of payload parsing functions."""
 
-from thoth.sourcemanagement.enums import ServiceType  # noqa F401
 import logging
 from .exception import WebhookPayloadError
 from urllib.parse import urlparse
@@ -48,7 +47,7 @@ class PayloadParser:
                 github_payload = payload["payload"]
                 parsed_url = urlparse(github_payload["sender"]["url"])
                 if self._GITHUB in parsed_url.netloc:
-                    self.service_type = "github"
+                    self.service_type = "GITHUB"
                     self.event = payload["event"]
                     self.github_parser(github_payload)
         # For gitlab webhooks
@@ -56,7 +55,7 @@ class PayloadParser:
             gitlab_payload = payload["payload"]
             parsed_url = urlparse(gitlab_payload["project"]["web_url"])
             if self._GITLAB in parsed_url.netloc:
-                self.service_type = "gitlab"
+                self.service_type = "GITLAB"
                 self.gitlab_parser(gitlab_payload)
         else:
             raise WebhookPayloadError("Payload passed is not supported.")

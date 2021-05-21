@@ -20,13 +20,17 @@
 
 import os
 import logging
+import tempfile
+from ogr.services.base import BaseGitService
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 import git
 
-from thoth.sourcemanagement.enums import ServiceType
+from ogr.services.github import GithubService
+from ogr.services.gitlab import GitlabService
+from ogr.services.pagure import PagureService
 
 if TYPE_CHECKING:
     from .manager import ManagerBase
@@ -84,17 +88,61 @@ def construct_raw_file_url(
     service_url: str,
     slug: str,
     file_name: str,
-    service_type: ServiceType,
+    service_type: str,
     branch: str = None,
 ) -> str:
     """Get URL to a raw file - useful for downloads of content."""
     branch = branch or "master"
-    if service_type == ServiceType.GITHUB:
+    if service_type == "GITHUB":
         # TODO self hosted GitHub?
         url = f"https://raw.githubusercontent.com/{slug}/{branch}/{file_name}"
-    elif service_type == ServiceType.GITLAB:
+    elif service_type == "GITLAB":
         url = urljoin(service_url, f"{slug}/raw/{branch}/{file_name}")
     else:
         raise NotImplementedError
 
     return url
+
+
+@contextmanager
+def download_kebechet_config(
+    service: BaseGitService, namespace: str, project: str, branch: Optional[str] = None
+):
+    """Get file containing contents of .thoth.yaml from a remote repository."""
+    ogr_project = service.get_project(namespace=namespace, repo=project)
+    if branch is None:
+        branch = ogr_project.default_branch()
+
+    content = ogr_project.get_file_content(".thoth.yaml", ref=branch)
+
+    with tempfile.TemporaryFile() as f:
+        f.write(content)
+        f.seek(0)
+        _LOGGER.info(content)
+        yield f
+
+
+def create_ogr_service(
+    service_type: str,
+    service_url: Optional[str] = None,
+    token: Optional[str] = None,
+    github_app_id: Optional[str] = None,
+    github_private_key_path: Optional[str] = None,
+):
+    """Create a new OGR service for interacting with remote GitForges."""
+    if service_type == "GITHUB":
+        ogr_service = GithubService(
+            token=token,
+            github_app_id=os.getenv("GITHUB_APP_ID"),
+            github_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
+        )
+    elif service_type == "GITLAB":
+        ogr_service = GitlabService(token=token, instance_url=service_url)
+    elif service_type == "PAGURE":
+        ogr_service = PagureService(
+            token=token,
+            instance_url=service_url,
+        )
+    else:
+        raise NotImplementedError(f"Kebechet cannot act on {service_type}")
+    return ogr_service

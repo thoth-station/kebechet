@@ -21,6 +21,7 @@ import hashlib
 import os
 import logging
 import pprint
+from typing import Optional
 
 from thamos import lib
 import git  # noqa F401
@@ -29,8 +30,6 @@ from kebechet.exception import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
 from kebechet.managers.manager import ManagerBase
-from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
-from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
 
 
@@ -65,13 +64,16 @@ class ThothProvenanceManager(ManagerBase):
 
         checksum = hashlib.md5(text_block.encode("utf-8")).hexdigest()[:10]
 
-        self.sm.open_issue_if_not_exist(
-            f"{checksum} - {len(error_info)}: Automated kebechet thoth-provenance Issue",
-            lambda: text_block,
-            labels=labels,
+        issue_title = (
+            f"{checksum} - {len(error_info)}: Automated kebechet thoth-provenance Issue"
         )
 
-    def run(self, labels: list, analysis_id=None):
+        issue = self.get_issue_by_title(issue_title)
+
+        if issue is None:
+            self.project.create_issue(title=issue_title, body=text_block, labels=labels)
+
+    def run(self, labels: list, analysis_id: Optional[str] = None):
         """Run the provenance check bot."""
         if self.parsed_payload:
             if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
@@ -88,11 +90,13 @@ class ThothProvenanceManager(ManagerBase):
                     _LOGGER.warning(
                         "Pipfile or Pipfile.lock is missing from repo, opening issue"
                     )
-                    self.sm.open_issue_if_not_exist(
-                        "Missing pipenv files",
-                        lambda: "Check your repository to make sure Pipfile and Pipfile.lock exist.",
-                        labels=labels,
-                    )
+                    issue = self.get_issue_by_title("Missing pipenv files")
+                    if issue is None:
+                        self.project.create_issue(
+                            title="Missing pipenv files",
+                            body="Check your repository to make sure Pipfile and Pipfile.lock exist.",
+                            labels=labels,
+                        )
                     return False
                 _LOGGER.info((self.service_url + self.slug))
                 lib.provenance_check_here(
@@ -100,6 +104,10 @@ class ThothProvenanceManager(ManagerBase):
                 )
             return True
         else:
+            if not analysis_id.startswith("provenance"):
+                _LOGGER.debug("Analysis id isn't provenance, manager terminating...")
+                return False
+
             with cloned_repo(self, depth=1) as repo:
                 res = lib.get_analysis_results(analysis_id)
                 if res is None:

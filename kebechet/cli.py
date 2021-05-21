@@ -20,6 +20,7 @@
 
 import logging
 import os
+from typing import Optional
 
 import click
 import json
@@ -27,7 +28,7 @@ from thoth.common import init_logging
 from kebechet.exception import WebhookPayloadError
 
 from kebechet import __version__ as kebechet_version
-from kebechet.config import config
+from kebechet.kebechet_runners import run, run_url, run_webhook, run_analysis
 
 init_logging(logging_env_var_start="KEBECHET_LOG_")
 
@@ -72,37 +73,51 @@ def cli(ctx=None, verbose=0):
 
 
 @cli.command("run")
-@click.argument("configuration", metavar="config", envvar="KEBECHET_CONFIGURATION_PATH")
-def cli_run(configuration):
+@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME", required=True)
+@click.option("-n", "--namespace", envvar="KEBECHET_PROJECT_NAMESPACE", required=True)
+@click.option("-p", "--project", envvar="KEBECHET_PROJECT_NAME", required=True)
+@click.option("-u", "--service-url", envvar="KEBECHET_SERVICE_URL")
+def cli_run(
+    service: str, namespace: str, project: str, service_url: Optional[str] = None
+):
     """Run Kebechet using provided YAML configuration file."""
-    config.run(configuration)
-
-
-@cli.command("run-results")
-@click.option("-o", "--origin", envvar="KEBECHET_REPO_URL")
-@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
-@click.option("-i", "--analysis_id", metavar="id", envvar="KEBECHET_ANALYSIS_ID")
-def cli_run_results(origin, service, analysis_id):
-    """Run Kebechet after results are received (meant to be triggered automatically)."""
-    config.run_analysis(analysis_id=analysis_id, origin=origin, service=service)
-
-
-@cli.command("run-url")
-@click.option("-u", "--url", envvar="KEBECHET_REPO_URL")
-@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
-@click.option("-m", "--metadata", envvar="KEBECHET_METADATA")
-def cli_run_url(url, service, metadata=None):
-    """Run Kebechet by providing url to a git repository service."""
-    if metadata is not None:
-        meta = json.loads(metadata)
-    config.run_url(
-        url=url, service=service, parsed_payload=None, tls_verify=True, metadata=meta
+    run(
+        service_type=service,
+        namespace=namespace,
+        project=project,
+        service_url=service_url,
     )
 
 
+@cli.command("run-results")
+@click.option("-o", "--origin", envvar="KEBECHET_REPO_URL", required=True)
+@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME", required=True)
+@click.option(
+    "-i", "--analysis_id", metavar="id", envvar="KEBECHET_ANALYSIS_ID", required=True
+)
+def cli_run_results(origin: str, service: str, analysis_id: str):
+    """Run Kebechet after results are received (meant to be triggered automatically)."""
+    run_analysis(analysis_id=analysis_id, origin=origin, service=service)
+
+
+@cli.command("run-url")
+@click.option(
+    "-u",
+    "--url",
+    envvar="KEBECHET_REPO_URL",
+)
+@click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
+@click.option("-m", "--metadata", envvar="KEBECHET_METADATA")
+def cli_run_url(url: str, service: str, metadata: Optional[str] = None):
+    """Run Kebechet by providing url to a git repository service."""
+    if metadata is not None:
+        meta = json.loads(metadata)
+    run_url(url=url, service=service, kebechet_metadata=meta)
+
+
 @cli.command("run-webhook")
-@click.argument("web_payload", nargs=1, envvar="KEBECHET_PAYLOAD")
-def cli_run_webhook(web_payload):
+@click.argument("web_payload", nargs=1, envvar="KEBECHET_PAYLOAD", required=True)
+def cli_run_webhook(web_payload: str):
     """Run Kebechet by providing a webhook payload."""
     payload = None
     if os.path.isfile(web_payload):
@@ -113,7 +128,7 @@ def cli_run_webhook(web_payload):
         payload = json.loads(web_payload)
     if not payload:
         raise WebhookPayloadError("Webhook payload is empty or cannot be parsed.")
-    config.run_webhook(payload=payload)
+    run_webhook(payload=payload)
 
 
 if __name__ == "__main__":

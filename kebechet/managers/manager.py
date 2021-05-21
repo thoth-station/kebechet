@@ -17,55 +17,24 @@
 
 """Common and useful utilities for managers."""
 
-from kebechet.utils import APP_NAME
 import logging
 import platform
 import typing
 import git
 import os
-from typing import Any
+from typing import List, Optional
 
 import delegator
 import kebechet
-import functools
-import datetime
 
 from kebechet.exception import PipenvError
-from thoth.sourcemanagement.enums import ServiceType
-from thoth.sourcemanagement.sourcemanagement import SourceManagement
-
+from ogr.services.base import BaseGitService
+from ogr.services.github import GithubService
+from ogr.services.gitlab import GitlabService
+from ogr.services.pagure import PagureService
+from ogr.abstract import Issue, PullRequest
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def _init_service_url(service_type: ServiceType = None, service_url: str = None) -> str:
-    """Needed for the cron job to initialize the service_url if not provided."""
-    if service_type == ServiceType.GITHUB:
-        service_url = service_url or "https://github.com"
-    elif service_type == ServiceType.GITLAB:
-        service_url = service_url or "https://gitlab.com"
-    else:
-        raise NotImplementedError
-
-    return service_url
-
-
-def refresh_repo_url(decorated: Any):  # noqa: N805
-    """Check if access token has expired and refresh repo url if necessary."""  # noqa: D202
-    # noqa: D202
-    @functools.wraps(decorated)
-    def wrapper(manager, *args, **kwargs):
-        if manager.installation:  # We check if installation is being used.
-            if datetime.datetime.now() > manager.token_expire_time:
-                manager.token, manager.token_expire_time = manager.sm.get_access_token()
-                service_host = "github.com"  # For now only github apps.
-                manager._repo.create_remote(
-                    "origin",
-                    url=f"https://{APP_NAME}:{manager.token}@{service_host}/{manager.slug}",
-                )
-            return decorated(manager, *args, **kwargs)
-
-    return wrapper
 
 
 class ManagerBase:
@@ -73,19 +42,17 @@ class ManagerBase:
 
     def __init__(
         self,
-        slug,
-        service_type: ServiceType = None,
-        service_url: str = None,
+        slug: str,
+        service: BaseGitService,
+        service_type: str,
         parsed_payload: dict = None,
         token: str = None,
         metadata: dict = None,
     ):
         """Initialize manager instance for talking to services."""
-        self.service_type = service_type or ServiceType.GITHUB
-        # This needs to be called before instantiation of service url, if not provided.
-        self.service_url = _init_service_url(service_type, service_url)
-        # Allow token expansion from env vars.
+        self.service_url: str = service.instance_url
         self.slug = slug
+        self.service_type = service_type
         # Parsed payload structure can be accessed in payload_parser.py
         self.parsed_payload = None
         if parsed_payload:
@@ -94,16 +61,14 @@ class ManagerBase:
         self.installation = False
         if os.getenv("GITHUB_PRIVATE_KEY_PATH") and os.getenv("GITHUB_APP_ID"):
             self.installation = True  # Authenticate as github app.
-        self.sm = SourceManagement(
-            service_type=self.service_type,
-            service_url=self.service_url,
-            token=token,
-            slug=slug,
-            installation=self.installation,
+
+        self.service = service
+
+        self.project = service.get_project(
+            namespace=slug.split()[0], repo=slug.split()[1]
         )
+
         self._repo = None
-        if self.installation:
-            self.token, self.token_expire_time = self.sm.get_access_token()
 
         self.metadata = metadata
 
@@ -164,6 +129,62 @@ pipenv version: {pipenv_version}
             if not graceful:
                 raise
             return f"Unable to obtain dependency graph:\n\n{exc.stderr}"
+
+    def get_issue_by_title(self, title: str) -> Optional[Issue]:
+        """Get an ogr.Issue object with a matching title."""
+        for issue in self.project.get_issue_list():
+            if issue.title == title:
+                return issue
+        return None
+
+    def get_prs_by_branch(self, branch: str) -> List[PullRequest]:
+        """Get a list of ogr.PullRequest objects which are using the supplied branch name."""
+        to_ret = []
+        for pr in self.project.get_pr_list():
+            if pr.source_branch == branch:
+                to_ret.append(pr)
+        return to_ret
+
+    def delete_remote_branch(self, branch: str):
+        """Delete a remote branch without using pure git."""
+        remote = self.repo.remote()
+        for repo_branch in self.repo.references:
+            if branch == repo_branch.name:
+                remote.push(refspec=(f":{repo_branch.remote_head}"))
+
+    def close_issue_and_comment(self, title: str, comment: str):
+        """Comment and close an issue if it exists."""
+        issue = self.get_issue_by_title(title)
+
+        if issue is None:
+            _LOGGER.debug(f"Issue {title} not found, not closing.")
+            return
+        issue.comment(comment)
+        issue.close()
+
+    # TODO: implement upstream in OGR
+    def add_assignees(self, issue: Issue, assignees: List[str]):
+        """Add assignees to issues for all GitForges."""
+        if isinstance(self.service, GithubService):
+            issue._raw_issue.add_to_assignees(*assignees)
+        elif isinstance(self.service, GitlabService):
+            ids = []
+            for username in assignees:
+                ids.append(
+                    self.service.gitlab_instance.users.list(username=username)[0].id
+                )
+            issue._raw_issue.assignee_ids = ids
+            issue._raw_issue.save()
+        elif isinstance(self.service, PagureService):
+            if len(assignees) != 1:
+                raise ValueError(
+                    "Pagure only supports assigning a single user to an issue."
+                )
+            data = {"assignee": assignees[0]}
+            updated_issue = self.project._call_project_api(
+                "issue", str(issue.id), method="POST", data=data
+            )
+            issue._raw_issue = updated_issue["issue"]
 
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
