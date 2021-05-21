@@ -11,7 +11,3 @@ presubmits:
             - "pre-commit"
             - "run"
             - "--all-files"
-          resources:
-            requests:
-              memory: "2Gi"
-              cpu: "2"
