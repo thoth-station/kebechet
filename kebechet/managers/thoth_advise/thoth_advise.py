@@ -30,7 +30,7 @@ from kebechet.exception import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
 from kebechet.utils import cloned_repo
-from kebechet.managers import ManagerBase
+from kebechet.managers.manager import ManagerBase
 from thoth.common import ThothAdviserIntegrationEnum
 from thoth.common.enums import InternalTriggerEnum
 

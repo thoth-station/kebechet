@@ -22,7 +22,6 @@ import yaml
 import requests
 import typing
 from typing import Dict, Any, TextIO
-
 from .exception import ConfigurationError
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,7 +43,7 @@ class _Config:
             else:
                 with open(f) as config_file:
                     content = config_file.read()
-        elif isinstance(f, TextIO):
+        elif hasattr(f, "read"):
             content = f.read()
         else:
             raise ValueError("Type of f must be Union[str, TextIO].")
@@ -58,8 +57,8 @@ class _Config:
 
     @property
     def managers(self):
-        self.config.get("managers") or []
+        return self.config.get("managers") or []
 
     @property
     def tls_verify(self):
-        self.config.get("tls_verify") or False
+        return self.config.get("tls_verify") or False

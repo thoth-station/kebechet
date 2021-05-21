@@ -64,9 +64,7 @@ class ManagerBase:
 
         self.service = service
 
-        self.project = service.get_project(
-            namespace=slug.split()[0], repo=slug.split()[1]
-        )
+        self.project = service.get_project(namespace=self.owner, repo=self.repo_name)
 
         self._repo = None
 

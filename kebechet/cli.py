@@ -112,6 +112,8 @@ def cli_run_url(url: str, service: str, metadata: Optional[str] = None):
     """Run Kebechet by providing url to a git repository service."""
     if metadata is not None:
         meta = json.loads(metadata)
+    else:
+        meta = None
     run_url(url=url, service=service, kebechet_metadata=meta)
 
 

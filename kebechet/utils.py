@@ -111,11 +111,11 @@ def download_kebechet_config(
     """Get file containing contents of .thoth.yaml from a remote repository."""
     ogr_project = service.get_project(namespace=namespace, repo=project)
     if branch is None:
-        branch = ogr_project.default_branch()
+        branch = ogr_project.default_branch
 
     content = ogr_project.get_file_content(".thoth.yaml", ref=branch)
 
-    with tempfile.TemporaryFile() as f:
+    with tempfile.TemporaryFile("w+") as f:
         f.write(content)
         f.seek(0)
         _LOGGER.info(content)
