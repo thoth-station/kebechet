@@ -20,7 +20,7 @@
 import logging
 import os
 import urllib3
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 from .utils import download_kebechet_config, create_ogr_service
 from .payload_parser import PayloadParser
@@ -31,19 +31,46 @@ from kebechet.managers import REGISTERED_MANAGERS
 _LOGGER = logging.getLogger("kebechet")
 
 
+def _parse_url_4_args(url: str) -> Tuple[str, str, str, str]:
+    """
+    Parse url for args required by kebechet_runners.run(...).
+
+    args:
+    url to remote git repository
+
+    returns:
+    tuple: (slug, namespace, project, service_url)
+    """
+    scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)
+    slug = slug[1:]
+    namespace = slug.split("/")[0]
+    project = slug.split("/")[1]
+
+    service_url = f"{scheme}://{host}"
+
+    return (slug, namespace, project, service_url)
+
+
 def run_webhook(payload: Dict[str, Any]):
     """Run Kebechet using payload from webhook."""
     _payload_ = PayloadParser(payload)
     parsed_payload = _payload_.parsed_data()
-    if (
-        parsed_payload
-        and parsed_payload["url"] is not None
-        and parsed_payload["service_type"] is not None
-    ):
-        run_url(
-            parsed_payload["url"],
-            parsed_payload["service_type"],
-            parsed_payload,
+
+    if parsed_payload is not None:
+        url = parsed_payload.get("url")  # type: Optional[str]
+        service_type = parsed_payload.get("service_type")  # type: Optional[str]
+    else:
+        url = None
+        service_type = None
+
+    if parsed_payload and (url is not None) and (service_type is not None):
+        run_url(url, service_type, parsed_payload)
+    else:
+        raise ValueError(
+            "The parsed payload is missing required values:\n"
+            f"payload exists: {bool(parsed_payload)}\n"
+            f"payload['url'] is present: {url is not None}\n"  # type: ignore
+            f"payload['service_type'] is present: {service_type is not None}"  # type: ignore
         )
 
 
@@ -55,12 +82,7 @@ def run_url(
     analysis_id: Optional[str] = None,
 ):
     """Run Kebechet by specifying URL of repository to run on."""
-    scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)
-    slug = slug[1:]
-    namespace = slug.split("/")[0]
-    project = slug.split("/")[1]
-
-    service_url = f"{scheme}://{host}"
+    slug, namespace, project, service_url = _parse_url_4_args(url)
 
     run(
         service_type=service,
@@ -75,12 +97,7 @@ def run_url(
 
 def run_analysis(analysis_id: str, origin: str, service: str) -> None:
     """Run result managers (meant to be triggered automatically)."""
-    scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(origin)
-    slug = slug[1:]
-    namespace = slug.split("/")[0]
-    project = slug.split("/")[1]
-
-    service_url = f"{scheme}://{host}"
+    slug, namespace, project, service_url = _parse_url_4_args(origin)
 
     run(
         service_type=service,
@@ -103,7 +120,7 @@ def run(
     analysis_id: Optional[str] = None,
 ) -> None:
     """Run Kebechet using provided YAML configuration file."""
-    token = os.getenv(f"{service_type}_KEBECHET_TOKEN")
+    token = os.getenv(f"{service_type.upper()}_KEBECHET_TOKEN")
 
     ogr_service = create_ogr_service(
         service_type=service_type,

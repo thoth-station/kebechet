@@ -130,6 +130,7 @@ def create_ogr_service(
     github_private_key_path: Optional[str] = None,
 ):
     """Create a new OGR service for interacting with remote GitForges."""
+    service_type = service_type.upper()
     if service_type == "GITHUB":
         ogr_service = GithubService(
             token=token,
