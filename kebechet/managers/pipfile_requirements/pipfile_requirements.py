@@ -22,10 +22,8 @@ import logging
 import typing
 
 from kebechet.managers.manager import ManagerBase
-from kebechet.utils import construct_raw_file_url
 from kebechet.utils import cloned_repo
 
-import requests
 import toml
 
 _LOGGER = logging.getLogger(__name__)
@@ -87,31 +85,17 @@ class PipfileRequirementsManager(ManagerBase):
                 return
 
         file_name = "Pipfile.lock" if lockfile else "Pipfile"
-        file_url = construct_raw_file_url(
-            self.service_url, self.slug, file_name, self.service_type
-        )
 
-        _LOGGER.debug("Downloading %r from %r", file_name, file_url)
-        # TODO: propagate tls_verify for internal GitLab instances here and bellow as well
-        response = requests.get(file_url)
-        response.raise_for_status()
+        file_contents = self.project.get_file_content(file_name)
+
         pipfile_content = (
-            sorted(self.get_pipfile_lock_requirements(response.text))
+            sorted(self.get_pipfile_lock_requirements(file_contents))
             if lockfile
-            else sorted(self.get_pipfile_requirements(response.text))
+            else sorted(self.get_pipfile_requirements(file_contents))
         )
 
-        file_url = construct_raw_file_url(
-            self.service_url, self.slug, "requirements.txt", self.service_type
-        )
-        _LOGGER.debug("Downloading requirements.txt from %r", file_url)
-        response = requests.get(file_url)
-        if response.status_code == 404:
-            # If the requirements.txt file does not exist, create it.
-            requirements_txt_content = []
-        else:
-            response.raise_for_status()
-            requirements_txt_content = sorted(response.text.splitlines())
+        file_contents = self.project.get_file_content("requirements.txt")
+        requirements_txt_content = sorted(file_contents.splitlines())
 
         if pipfile_content == requirements_txt_content:
             _LOGGER.info("Requirements in requirements.txt are up to date")
