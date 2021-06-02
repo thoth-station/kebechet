@@ -1662,3 +1662,33 @@ Starting with this release we have a Zuul-CI pipeline that:
 * :bug: fix some flake8 complains
 ### Improvements
 * removed bissenbay, thanks for your contributions!
+
+## Release 1.3.0 (2021-06-02T21:26:33)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#724)
+* :hatched_chick: update the prow resource limits (#723)
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet (#716)
+* :arrow_up: Automatic update of dependencies by Kebechet (#713)
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet (#709)
+* add kebechet metadata when sending request to thamos (#699)
+* :arrow_up: Automatic update of dependencies by Kebechet (#708)
+* :arrow_up: Automatic update of dependencies by Kebechet (#706)
+* :arrow_up: Automatic update of dependencies by Kebechet (#703)
+* :arrow_up: Automatic update of dependencies by Kebechet (#697)
+* add justification based on metadata if possible
+* :arrow_up: Automatic update of dependencies by Kebechet (#695)
+* :arrow_up: Automatic update of dependencies by Kebechet (#694)
+* :arrow_up: Automatic update of dependencies by Kebechet (#692)
+* :arrow_up: Automatic update of dependencies by Kebechet (#691)
+### Bug Fixes
+* :zap: pre-commit fixes for the master branch
+* :arrow_up: fix some formatting and update pre-commit plugins
+### Improvements
+* :sparkles: reconfgured CI/CD to use prow and aicoe-ci
+### Other
+* remove thoth-sourcemanagement from Kebechet (#725)
+* remove todo
+* Delete branch if the pull request has been already closed
