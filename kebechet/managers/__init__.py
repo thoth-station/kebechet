@@ -17,4 +17,5 @@ REGISTERED_MANAGERS = {
     "label-bot": ThothLabelBotManager,
     "thoth-advise": ThothAdviseManager,
     "thoth-provenance": ThothProvenanceManager,
+    "cleanup": CleanupManager,
 }
