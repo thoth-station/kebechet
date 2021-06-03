@@ -45,9 +45,10 @@ class ManagerBase:
         slug: str,
         service: BaseGitService,
         service_type: str,
-        parsed_payload: dict = None,
-        token: str = None,
-        metadata: dict = None,
+        parsed_payload: Optional[dict] = None,
+        token: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        runtime_environment: Optional[str] = None,
     ):
         """Initialize manager instance for talking to services."""
         self.service_url: str = service.instance_url
@@ -63,12 +64,10 @@ class ManagerBase:
             self.installation = True  # Authenticate as github app.
 
         self.service = service
-
         self.project = service.get_project(namespace=self.owner, repo=self.repo_name)
-
         self._repo = None
-
         self.metadata = metadata
+        self.runtime_environment = runtime_environment
 
     @property
     def repo(self):

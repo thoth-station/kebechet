@@ -77,8 +77,13 @@ def cli(ctx=None, verbose=0):
 @click.option("-n", "--namespace", envvar="KEBECHET_PROJECT_NAMESPACE", required=True)
 @click.option("-p", "--project", envvar="KEBECHET_PROJECT_NAME", required=True)
 @click.option("-u", "--service-url", envvar="KEBECHET_SERVICE_URL")
+@click.option("-e", "--runtime-environment", envvar="KEBECHET_RUNTIME_ENVIRONMENT")
 def cli_run(
-    service: str, namespace: str, project: str, service_url: Optional[str] = None
+    service: str,
+    namespace: str,
+    project: str,
+    service_url: Optional[str] = None,
+    runtime_environment=Optional[str],
 ):
     """Run Kebechet using provided YAML configuration file."""
     run(
@@ -86,6 +91,7 @@ def cli_run(
         namespace=namespace,
         project=project,
         service_url=service_url,
+        runtime_environment=runtime_environment,
     )
 
 
@@ -95,9 +101,20 @@ def cli_run(
 @click.option(
     "-i", "--analysis_id", metavar="id", envvar="KEBECHET_ANALYSIS_ID", required=True
 )
-def cli_run_results(origin: str, service: str, analysis_id: str):
+@click.option("-e", "--runtime-environment", envvar="KEBECHET_RUNTIME_ENVIRONMENT")
+def cli_run_results(
+    origin: str,
+    service: str,
+    analysis_id: str,
+    runtime_environment: Optional[str] = None,
+):
     """Run Kebechet after results are received (meant to be triggered automatically)."""
-    run_analysis(analysis_id=analysis_id, origin=origin, service=service)
+    run_analysis(
+        analysis_id=analysis_id,
+        origin=origin,
+        service=service,
+        runtime_environment=runtime_environment,
+    )
 
 
 @cli.command("run-url")
@@ -108,13 +125,24 @@ def cli_run_results(origin: str, service: str, analysis_id: str):
 )
 @click.option("-s", "--service", envvar="KEBECHET_SERVICE_NAME")
 @click.option("-m", "--metadata", envvar="KEBECHET_METADATA")
-def cli_run_url(url: str, service: str, metadata: Optional[str] = None):
+@click.option("-e", "--runtime-environment", envvar="KEBECHET_RUNTIME_ENVIRONMENT")
+def cli_run_url(
+    url: str,
+    service: str,
+    metadata: Optional[str] = None,
+    runtime_environment: Optional[str] = None,
+):
     """Run Kebechet by providing url to a git repository service."""
     if metadata is not None:
         meta = json.loads(metadata)
     else:
         meta = None
-    run_url(url=url, service=service, kebechet_metadata=meta)
+    run_url(
+        url=url,
+        service=service,
+        kebechet_metadata=meta,
+        runtime_environment=runtime_environment,
+    )
 
 
 @cli.command("run-webhook")
