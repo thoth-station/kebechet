@@ -29,10 +29,8 @@ import git  # noqa F401
 from kebechet.exception import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
-from kebechet.managers.manager import ManagerBase, refresh_repo_url
-from thoth.sourcemanagement.sourcemanagement import Issue  # noqa F401
-from thoth.sourcemanagement.sourcemanagement import PullRequest  # noqa F401
 from kebechet.utils import cloned_repo
+from kebechet.managers.manager import ManagerBase
 from thoth.common import ThothAdviserIntegrationEnum
 from thoth.common.enums import InternalTriggerEnum
 
@@ -91,7 +89,6 @@ class ThothAdviseManager(ManagerBase):
         """Construct branch name for the updated dependency."""
         return f"{_BRANCH_NAME}-{self.sha[:10]}"
 
-    @refresh_repo_url
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
@@ -123,12 +120,12 @@ class ThothAdviseManager(ManagerBase):
             body = DEFAULT_PR_BODY
 
         # Delete branch if it didn't change Pipfile.lock
-        diff = self.repo.git.diff("master", files)
+        diff = self.repo.git.diff(self.project.default_branch, files)
         if diff == "":
             _LOGGER.info("No changes necessary, exiting...")
             return None
 
-        # push force always to keep branch up2date with the recent master and avoid merge conflicts.
+        # push force always to keep branch up2date with the recent branch HEAD and avoid merge conflicts.
         _LOGGER.info("Pushing changes")
         self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
 
@@ -139,10 +136,15 @@ class ThothAdviseManager(ManagerBase):
                 return None
 
         _LOGGER.info("Opening merge request")
-        merge_request = self.sm.open_merge_request(
-            commit_msg, branch_name, body, labels
+        pr = self.project.create_pr(
+            title=commit_msg,
+            body=body,
+            target_branch=self.project.default_branch,
+            source_branch=branch_name,
         )
-        return merge_request
+        pr.add_label(*labels)
+
+        return pr
 
     @staticmethod
     def _write_advise(adv_results: list):
@@ -189,12 +191,15 @@ class ThothAdviseManager(ManagerBase):
             )
 
         checksum = hashlib.md5(textblock.encode("utf-8")).hexdigest()[:10]
-        _LOGGER.info("Creating issue")
-        self.sm.open_issue_if_not_exist(
-            f"{checksum} - Automated kebechet thoth-advise Issue",
-            lambda: textblock,
-            labels=labels,
-        )
+        issue_title = f"{checksum} - Automated kebechet thoth-advise Issue"
+        issue = self.get_issue_by_title(issue_title)
+        if not issue:
+            _LOGGER.info("Creating issue")
+            self.project.create_issue(
+                title=issue_title,
+                body=textblock,
+                labels=labels,
+            )
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
@@ -211,11 +216,14 @@ class ThothAdviseManager(ManagerBase):
                 self.repo = repo
                 if not os.path.isfile("Pipfile"):
                     _LOGGER.warning("Pipfile not found in repo... Creating issue")
-                    self.sm.open_issue_if_not_exist(
-                        "Missing Pipfile",
-                        lambda: "Check your repository to make sure Pipfile exists",
-                        labels=labels,
-                    )
+                    issue = self.get_issue_by_title("Missing Pipfile")
+                    if not issue:
+                        self.project.create_issue(
+                            title="Missing Pipfile",
+                            body="Check your repository to make sure Pipfile exists",
+                            labels=labels,
+                        )
+
                     return False
 
                 lib.advise_here(
@@ -232,7 +240,7 @@ class ThothAdviseManager(ManagerBase):
                 res = lib.get_analysis_results(analysis_id)
                 branch_name = self._construct_branch_name()
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
-                self._cached_merge_requests = self.sm.repository.get_pr_list()
+                self._cached_merge_requests = self.project.get_pr_list()
 
                 if res is None:
                     _LOGGER.error(

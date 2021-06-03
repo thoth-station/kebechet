@@ -44,16 +44,17 @@ class InfoManager(ManagerBase):
                     self.parsed_payload.get("event"),
                 )
                 return None
-        issue = self.sm.get_issue(_INFO_ISSUE_NAME)
-        if not issue:
+
+        issue = self.get_issue_by_title(_INFO_ISSUE_NAME)
+
+        if issue is None:
             _LOGGER.info("No issue to report to, exiting")
             return None
 
         _LOGGER.info(f"Found issue {_INFO_ISSUE_NAME}, generating report")
         with cloned_repo(self, depth=1) as repo:
             # We could optimize this as the get_issue() does API calls as well. Keep it this simple now.
-            self.sm.close_issue_if_exists(
-                _INFO_ISSUE_NAME,
+            issue.comment(
                 INFO_REPORT.format(
                     sha=repo.head.commit.hexsha,
                     slug=self.slug,
@@ -61,4 +62,5 @@ class InfoManager(ManagerBase):
                     dependency_graph=self.get_dependency_graph(graceful=True),
                 ),
             )
+            issue.close()
         return None

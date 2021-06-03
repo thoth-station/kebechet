@@ -74,19 +74,20 @@ class ThothLabelBotManager(ManagerBase):
         payload = self.parsed_payload.get("raw_payload").get("payload")  # type: ignore
         if payload.get("action") == "opened":
             issue_title = payload.get("issue").get("title")
-            issue = self.sm.get_issue(issue_title)
-            if not issue:
-                _LOGGER.warning(
-                    "An event for issue %r received but the issue was not found",
-                    issue_title,
-                )
-                return None
 
             # TODO: Read from thoth.yaml so that user could add more issues to ignore.
             for issue_to_ignore in _ISSUES_TO_IGNORE:
                 if issue_title.lower().strip().startswith(issue_to_ignore):
                     _LOGGER.info("Ignored as it is a BOT related issue.")
                     return None
+
+            issue = self.get_issue_by_title(issue_title)
+            if issue is None:
+                _LOGGER.warning(
+                    "An event for issue %r received but the issue was not found",
+                    issue_title,
+                )
+                return None
 
             _LOGGER.info(f"Found issue {issue_title}, predicting label.")
             url = _GITHUB_LABEL_BOT_API + "/predict"  # type: ignore

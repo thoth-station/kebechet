@@ -13,14 +13,13 @@ This method accepts kwargs that are directly passed from configuration file (see
 
   class UpdateManager(ManagerBase):
       def run(self, labels: list):
-          self.sm.open_issue_if_not_exist(
-            "Hello from my Kebechet manager",
-            lambda: "This is an awesome issue sent automatically from Kebechet manager.",
-            labels=labels
-          )
-
-As you can see above, you can access already instantiated `SourceManagement` class that provides useful routines when transparently
-communicating with GitHub or GitLab services (what service you talk to is abstracted away).
+          issue = self.get_issue_by_title("Hello from my Kebechet manager")
+          if issue is None:
+            self.project.create_issue(
+              title="Hello from my Kebechet manager",
+              body="This is an awesome issue sent automatically from Kebechet manager.",
+              labels=labels
+            )
 
 If you wish to operate on repository source code, you can request to clone it:
 

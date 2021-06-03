@@ -4,8 +4,9 @@ import pytest
 
 from unittest.mock import patch
 
+from kebechet.utils import create_ogr_service
+
 from git import Repo  # noqa F401
-from thoth.sourcemanagement.enums import ServiceType
 from kebechet.managers import VersionManager
 
 
@@ -39,10 +40,12 @@ class FakeGit(object):
 class TestVersionManager:
     """Test version manager."""
 
+    ogr_service = create_ogr_service(service_type="GITHUB", token="test-token-xxx")
+
     manager = VersionManager(
         slug="fake-user/fake-repo",
-        service_type=ServiceType.GITHUB,
-        token="test-token-xxx",
+        service=ogr_service,
+        service_type="GITHUB",
     )
 
     @pytest.mark.parametrize(
