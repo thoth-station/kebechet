@@ -1692,3 +1692,10 @@ Starting with this release we have a Zuul-CI pipeline that:
 * remove thoth-sourcemanagement from Kebechet (#725)
 * remove todo
 * Delete branch if the pull request has been already closed
+
+## Release 1.3.1 (2021-06-09T11:13:43)
+### Features
+* Update OWNERS
+* add ogr dep to Pipfile
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
