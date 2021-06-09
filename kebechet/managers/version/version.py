@@ -162,6 +162,7 @@ class VersionManager(ManagerBase):
                     body=f"Automated version release cannot be performed.\nRelated: #{issue.id}",
                     labels=labels,
                 )
+            return None
 
         if len(adjusted) > 1:
             error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
@@ -180,6 +181,7 @@ class VersionManager(ManagerBase):
                     body=f"{_issue_body}\nRelated: #{issue.id}",
                     labels=labels,
                 )
+            return None
 
         # Return old and new version identifier.
         return adjusted[0][1], adjusted[0][2]
@@ -299,9 +301,9 @@ class VersionManager(ManagerBase):
             ).splitlines()
 
         if version_file:
-            # TODO: We should prepend changes instead of appending them.
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
-            with open("CHANGELOG.md", "a") as changelog_file:
+            with open("CHANGELOG.md", "r+") as changelog_file:
+                changelog_file.seek(0, 0)
                 changelog_file.write(
                     f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
                 )
@@ -465,7 +467,7 @@ class VersionManager(ManagerBase):
 
                 pr = self.project.create_pr(
                     title=message,
-                    body=self._construct_pr_body,
+                    body=self._construct_pr_body(issue, changelog),
                     target_branch=self.project.default_branch,
                     source_branch=branch_name,
                 )
