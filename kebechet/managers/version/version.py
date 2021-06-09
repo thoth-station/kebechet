@@ -303,12 +303,13 @@ class VersionManager(ManagerBase):
         if version_file:
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
             with open("CHANGELOG.md", "r+") as changelog_file:
+                content = changelog_file.read()
                 changelog_file.seek(0, 0)
                 changelog_file.write(
                     f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
                 )
                 changelog_file.write("\n".join(changelog))
-                changelog_file.write("\n")
+                changelog_file.write("\n" + content)
             repo.git.add("CHANGELOG.md")
 
         _LOGGER.info("Computed changelog has %d entries", len(changelog))
