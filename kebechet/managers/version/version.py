@@ -305,8 +305,8 @@ class VersionManager(ManagerBase):
             with open("CHANGELOG.md", "r+") as changelog_file:
                 lines = changelog_file.readlines()
                 changelog_file.seek(0, 0)
-                if (
-                    lines[0].startswith("# ")
+                if lines[0].startswith(
+                    "# "
                 ):  # checking if title its a title of type "# Title"
                     changelog_file.write(lines[0])
                     changelog_file.write(
