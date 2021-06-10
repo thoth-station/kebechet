@@ -303,13 +303,33 @@ class VersionManager(ManagerBase):
         if version_file:
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
             with open("CHANGELOG.md", "r+") as changelog_file:
-                content = changelog_file.read()
+                lines = changelog_file.readlines()
                 changelog_file.seek(0, 0)
-                changelog_file.write(
-                    f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
-                )
-                changelog_file.write("\n".join(changelog))
-                changelog_file.write("\n" + content)
+                if (
+                    lines[0][0] == "#" and lines[0][1] == " "
+                ):  # checking if title its a title of type "# Title"
+                    changelog_file.write(lines[0])
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines[1:]))
+                elif (
+                    lines[1][0] == "="
+                ):  # Checking if its a title of type "Title \n ===="
+                    changelog_file.write(lines[0] + lines[1])
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines[2:]))
+                else:  # No title
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines))
+
             repo.git.add("CHANGELOG.md")
 
         _LOGGER.info("Computed changelog has %d entries", len(changelog))
