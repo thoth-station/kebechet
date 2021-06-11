@@ -65,7 +65,7 @@ def cloned_repo(manager: "ManagerBase", **clone_kwargs):
         raise NotImplementedError
 
     if manager.installation:
-        access_token = manager.token
+        access_token = manager.service.authentication.get_token()
         repo_url = f"https://{APP_NAME}:{access_token}@{service_url}/{slug}"
     else:
         repo_url = f"git@{service_url}:{slug}.git"
