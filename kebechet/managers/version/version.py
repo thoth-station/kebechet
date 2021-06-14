@@ -420,7 +420,7 @@ class VersionManager(ManagerBase):
             with cloned_repo(self) as repo:
                 if assignees:
                     try:
-                        self.add_assignees(issue=issue, assignees=assignees)
+                        issue.add_assignee(*assignees)
                     except Exception:
                         _LOGGER.exception(
                             f"Failed to assign {assignees} to issue #{issue.id}"

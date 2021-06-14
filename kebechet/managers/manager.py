@@ -29,9 +29,6 @@ import kebechet
 
 from kebechet.exception import PipenvError
 from ogr.services.base import BaseGitService
-from ogr.services.github import GithubService
-from ogr.services.gitlab import GitlabService
-from ogr.services.pagure import PagureService
 from ogr.abstract import Issue, PullRequest
 
 _LOGGER = logging.getLogger(__name__)
@@ -159,30 +156,6 @@ pipenv version: {pipenv_version}
             return
         issue.comment(comment)
         issue.close()
-
-    # TODO: implement upstream in OGR
-    def add_assignees(self, issue: Issue, assignees: List[str]):
-        """Add assignees to issues for all GitForges."""
-        if isinstance(self.service, GithubService):
-            issue._raw_issue.add_to_assignees(*assignees)
-        elif isinstance(self.service, GitlabService):
-            ids = []
-            for username in assignees:
-                ids.append(
-                    self.service.gitlab_instance.users.list(username=username)[0].id
-                )
-            issue._raw_issue.assignee_ids = ids
-            issue._raw_issue.save()
-        elif isinstance(self.service, PagureService):
-            if len(assignees) != 1:
-                raise ValueError(
-                    "Pagure only supports assigning a single user to an issue."
-                )
-            data = {"assignee": assignees[0]}
-            updated_issue = self.project._call_project_api(
-                "issue", str(issue.id), method="POST", data=data
-            )
-            issue._raw_issue = updated_issue["issue"]
 
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
