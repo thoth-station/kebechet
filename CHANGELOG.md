@@ -1699,3 +1699,15 @@ Starting with this release we have a Zuul-CI pipeline that:
 * add ogr dep to Pipfile
 * :arrow_up: Automatic update of dependencies by Kebechet
 * :arrow_up: Automatic update of dependencies by Kebechet
+
+## Release 1.3.2 (2021-06-14T06:18:31)
+### Features
+* use ogr to get app auth token
+* pre-commit issue
+* Update kebechet/managers/version/version.py
+* Fixed prepending when Title exists
+* Fixed README to remove legacy example configuration
+* changed appending changelog to prepending changelog
+* add docs for locally running Kebechet
+### Bug Fixes
+* Fixed small bug in which original changelog was removed
