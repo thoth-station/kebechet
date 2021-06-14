@@ -148,11 +148,14 @@ class ThothAdviseManager(ManagerBase):
 
     @staticmethod
     def _write_advise(adv_results: list):
-        lock_info = adv_results[0]["report"][0][1]["requirements_locked"]
-        with open("Pipfile.lock", "w+") as f:
-            _LOGGER.info("Writing to Pipfile.lock")
-            _LOGGER.debug(f"{json.dumps(lock_info)}")
-            f.write(json.dumps(lock_info))
+        requirements_lock = adv_results[0]["report"][0][1]["requirements_locked"]
+        requirements = adv_results[0]["parameters"]["project"]["requirements"]
+        requirements_format = adv_results[0]["parameters"]["requirements_format"]
+        lib.write_files(
+            requirements=requirements,
+            requirements_lock=requirements_lock,
+            requirements_format=requirements_format,
+        )
 
     def _issue_advise_error(self, adv_results: list, labels: list):
         """Create an issue if advise fails."""
