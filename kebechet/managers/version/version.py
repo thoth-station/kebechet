@@ -280,7 +280,8 @@ class VersionManager(ManagerBase):
             )
             # Use the initial commit if this the previous tag was not found - this
             # can be in case of the very first release.
-            old_version = repo.git.rev_list("HEAD", max_parents=0)
+            old_versions = repo.git.rev_list("HEAD", max_parents=0).split()
+            old_version = old_versions[-1]
 
         _LOGGER.info("Smart Log : %s", str(changelog_smart))
 
