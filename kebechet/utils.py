@@ -135,7 +135,7 @@ def create_ogr_service(
         ogr_service = GithubService(
             token=token,
             github_app_id=os.getenv("GITHUB_APP_ID"),
-            github_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
+            github_app_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
         )
     elif service_type == "GITLAB":
         ogr_service = GitlabService(token=token, instance_url=service_url)
