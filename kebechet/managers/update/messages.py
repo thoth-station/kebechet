@@ -80,6 +80,9 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 
 Once this issue is resolved, the issue will be automatically closed by bot.
 
+/label thoth/potential-flake
+/kind bug
+/priority critical-urgent
 """
 )
 
@@ -152,6 +155,9 @@ $ git commit -m 'Add Pipfile for dependency management'
 ```
 
 Make sure your `Pipfile` or `requirements.in` or `requirements-dev.in` is placed in the root of your Git repository.
+
+/kind feature
+/priority important-soon
 """
 
 
@@ -191,24 +197,30 @@ See attached report below to inspect this issue.
 {environment_details}
 ```
 </details>
+
+/kind bug
+/priority critical-urgent
 """
 
 
 ISSUE_UNSUPPORTED_PACKAGE = """Kebechet cannot support maintaining this application as it contain's Git version of packages.
 
-  The package causing the issue is - {package}
-  Linked SHA - {sha}
+The package causing the issue is - {package}
+Linked SHA - {sha}
 
-  For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
+For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
 
-  <details>
-    <summary>Environment details</summary>
+<details>
+  <summary>Environment details</summary>
 
-  ```
-  {environment_details}
-  ```
-  </details>
-  """
+```
+{environment_details}
+```
+</details>
+
+/kind bug
+/priority critical-urgent
+"""
 
 UPDATE_MESSAGE_BODY = """Kebechet has updated the depedencies to the latest version :rocket:
 The direct dependencies updated in the pull request are -
