@@ -1711,3 +1711,19 @@ Starting with this release we have a Zuul-CI pipeline that:
 * add docs for locally running Kebechet
 ### Bug Fixes
 * Fixed small bug in which original changelog was removed
+
+## Release 1.3.3 (2021-06-30T16:07:37)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* pass environment name to managers and add documentation for expected manager behaviour
+* update from template project
+* add priority/critical-urgent label to all bot related issue templates
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: updated labels of issue templates
+### Bug Fixes
+* fix issue 746
+* fixed bug with unrelated histories where khebhut doesn't create PR
+### Improvements
+* use upstream solution for adding assignees
+* use thamos.lib.write_files
