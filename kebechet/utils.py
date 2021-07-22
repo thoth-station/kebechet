@@ -64,8 +64,9 @@ def cloned_repo(manager: "ManagerBase", branch="master", **clone_kwargs):
         # This is mostly internal error - we require service URL to have protocol explicitly set
         raise NotImplementedError
 
+    namespace, repository = slug.split("/")
     if manager.installation:
-        access_token = manager.service.authentication.get_token()
+        access_token = manager.service.authentication.get_token(namespace, repository)
         repo_url = f"https://{APP_NAME}:{access_token}@{service_url}/{slug}"
     else:
         repo_url = f"git@{service_url}:{slug}.git"
