@@ -52,7 +52,7 @@ def cwd(path: str):
 
 
 @contextmanager
-def cloned_repo(manager: "ManagerBase", **clone_kwargs):
+def cloned_repo(manager: "ManagerBase", branch="master", **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     service_url = manager.service_url
     slug = manager.slug
@@ -72,7 +72,7 @@ def cloned_repo(manager: "ManagerBase", **clone_kwargs):
 
     with TemporaryDirectory() as repo_path, cwd(repo_path):
         _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-        repo = git.Repo.clone_from(repo_url, repo_path, branch="master", **clone_kwargs)
+        repo = git.Repo.clone_from(repo_url, repo_path, branch=branch, **clone_kwargs)
         repo.config_writer().set_value(
             "user", "name", os.getenv("KEBECHET_GIT_NAME", "Kebechet")
         ).release()
