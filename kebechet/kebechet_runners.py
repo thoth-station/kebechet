@@ -22,7 +22,11 @@ import os
 import urllib3
 from typing import Dict, Any, List, Optional, Tuple
 
-from .utils import download_kebechet_config, create_ogr_service
+from .utils import (
+    download_kebechet_config,
+    create_ogr_service,
+    _create_issue_from_exception,
+)
 from .payload_parser import PayloadParser
 from .config import _Config
 
@@ -183,12 +187,14 @@ def run(
                 service=ogr_service,
                 service_type=service_type,
                 parsed_payload=parsed_payload,
-                token=token,
                 metadata=metadata,
                 runtime_environment=runtime_environment,
             )
             instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
+            _create_issue_from_exception(
+                manager_name=manager_name, ogr_service=ogr_service, slug=slug, exc=exc
+            )
             _LOGGER.exception(
                 "An error occurred during run of manager %r %r for %r, skipping",
                 manager,
