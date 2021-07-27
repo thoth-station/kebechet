@@ -144,8 +144,8 @@ Most likely the deployment build will fail.
 For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url}).
 """
 
-ISSUE_NO_DEPENDENCY_MANAGEMENT = """No dependency management found for this repository. If you want to keep your dependencies managed, \
-please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
+ISSUE_NO_DEPENDENCY_MANAGEMENT = """No dependency management found for the {environment_name} environment. If you want
+to keep your dependencies managed, please submit `Pipfile` or `requirements.in` or `requirements-dev.in` file.
 
 To generate a `Pipfile`, use:
 ```
