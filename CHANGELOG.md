@@ -1727,3 +1727,12 @@ Starting with this release we have a Zuul-CI pipeline that:
 ### Improvements
 * use upstream solution for adding assignees
 * use thamos.lib.write_files
+
+## Release 1.4.0 (2021-08-02T08:06:03)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#768)
+* add args to get access token
+* make update manager work with overlays
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :sparkles: add some Kubernetes-inspired Labels to Issues opened by Kebechet
