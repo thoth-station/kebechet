@@ -23,6 +23,8 @@ import typing
 from kebechet.managers.manager import ManagerBase
 from kebechet.utils import cloned_repo
 
+import toml
+
 _LOGGER = logging.getLogger(__name__)
 
 class CleanupManager(ManagerBase):
