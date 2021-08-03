@@ -21,13 +21,35 @@ import logging
 import typing
 
 from kebechet.managers.manager import ManagerBase
-from kebechet.utils imoprt cloned_repo
+from kebechet.utils import cloned_repo
 
 _LOGGER = logging.getLogger(__name__)
 
 class CleanupManager(ManagerBase):
     """Manager to check whether all the packages defined in requirements are used. If not removes unused ones from requirements files."""
-    
-    def run(self) -> typing.Optional[dict]: 
+
+    #adopted from pipfile_requirements/pipfile_requirements.py
+
+    @staticmethod
+    def get_pipfile_requirements(content_str: str) -> typing.Set[str]:
+        """Parse Pipfile file and gather requirements, respect version specifications listed."""
+        content = toml.loads(content_str)
+
+        requirements = set()
+        for package_name, entry in content["packages"].items():
+            if not isinstance(entry, str):
+                # e.g. using git, ...
+                raise ValueError(
+                    "Package {} does not use pinned version: {}".format(
+                        package_name, entry
+                    )
+                )
+
+            package_version = entry if entry != "*" else ""
+            requirements.add(f"{package_name}{package_version}")
+
+        return requirements
+
+    def run(self) -> typing.Optional[dict]:
         """Check packages usage and remove from requirements if not used."""
         return None
