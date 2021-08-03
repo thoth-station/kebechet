@@ -31,6 +31,8 @@ from kebechet.exception import PipenvError
 from ogr.services.base import BaseGitService
 from ogr.abstract import Issue, PullRequest
 
+from kebechet import utils
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -43,7 +45,6 @@ class ManagerBase:
         service: BaseGitService,
         service_type: str,
         parsed_payload: Optional[dict] = None,
-        token: Optional[str] = None,
         metadata: Optional[dict] = None,
         runtime_environment: Optional[str] = None,
     ):
@@ -126,10 +127,7 @@ pipenv version: {pipenv_version}
 
     def get_issue_by_title(self, title: str) -> Optional[Issue]:
         """Get an ogr.Issue object with a matching title."""
-        for issue in self.project.get_issue_list():
-            if issue.title == title:
-                return issue
-        return None
+        return utils.get_issue_by_title(self.project, title)
 
     def get_prs_by_branch(self, branch: str) -> List[PullRequest]:
         """Get a list of ogr.PullRequest objects which are using the supplied branch name."""
