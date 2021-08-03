@@ -8,7 +8,7 @@ from .thoth_advise import ThothAdviseManager
 from .thoth_provenance import ThothProvenanceManager
 from .label_bot import ThothLabelBotManager
 from .manager import ManagerBase  # noqa F401
-from .cleanup imoport CleanupManager
+from .cleanup import CleanupManager
 
 REGISTERED_MANAGERS = {
     "update": UpdateManager,
