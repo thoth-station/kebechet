@@ -22,7 +22,11 @@ import os
 import urllib3
 from typing import Dict, Any, List, Optional, Tuple
 
-from .utils import download_kebechet_config, create_ogr_service
+from .utils import (
+    download_kebechet_config,
+    create_ogr_service,
+    _create_issue_from_exception,
+)
 from .payload_parser import PayloadParser
 from .config import _Config
 
@@ -80,6 +84,7 @@ def run_url(
     parsed_payload: Optional[Dict[str, Any]] = None,
     kebechet_metadata: Optional[Dict[str, Any]] = None,
     analysis_id: Optional[str] = None,
+    runtime_environment: Optional[str] = None,
 ):
     """Run Kebechet by specifying URL of repository to run on."""
     slug, namespace, project, service_url = _parse_url_4_args(url)
@@ -92,10 +97,16 @@ def run_url(
         parsed_payload=parsed_payload,
         metadata=kebechet_metadata,
         analysis_id=analysis_id,
+        runtime_environment=runtime_environment,
     )
 
 
-def run_analysis(analysis_id: str, origin: str, service: str) -> None:
+def run_analysis(
+    analysis_id: str,
+    origin: str,
+    service: str,
+    runtime_environment: Optional[str] = None,
+) -> None:
     """Run result managers (meant to be triggered automatically)."""
     slug, namespace, project, service_url = _parse_url_4_args(origin)
 
@@ -106,6 +117,7 @@ def run_analysis(analysis_id: str, origin: str, service: str) -> None:
         project=project,
         enabled_managers=["thoth-provenance", "thoth-advise"],
         analysis_id=analysis_id,
+        runtime_environment=runtime_environment,
     )
 
 
@@ -118,6 +130,7 @@ def run(
     parsed_payload: Optional[Dict[Any, Any]] = None,
     metadata: Optional[Dict[str, Any]] = None,
     analysis_id: Optional[str] = None,
+    runtime_environment: Optional[str] = None,
 ) -> None:
     """Run Kebechet using provided YAML configuration file."""
     token = os.getenv(f"{service_type.upper()}_KEBECHET_TOKEN")
@@ -174,11 +187,14 @@ def run(
                 service=ogr_service,
                 service_type=service_type,
                 parsed_payload=parsed_payload,
-                token=token,
                 metadata=metadata,
+                runtime_environment=runtime_environment,
             )
             instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
+            _create_issue_from_exception(
+                manager_name=manager_name, ogr_service=ogr_service, slug=slug, exc=exc
+            )
             _LOGGER.exception(
                 "An error occurred during run of manager %r %r for %r, skipping",
                 manager,

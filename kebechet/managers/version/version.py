@@ -162,6 +162,7 @@ class VersionManager(ManagerBase):
                     body=f"Automated version release cannot be performed.\nRelated: #{issue.id}",
                     labels=labels,
                 )
+            return None
 
         if len(adjusted) > 1:
             error_msg = _MULTIPLE_VERSIONS_FOUND_ISSUE_NAME
@@ -180,6 +181,7 @@ class VersionManager(ManagerBase):
                     body=f"{_issue_body}\nRelated: #{issue.id}",
                     labels=labels,
                 )
+            return None
 
         # Return old and new version identifier.
         return adjusted[0][1], adjusted[0][2]
@@ -278,7 +280,8 @@ class VersionManager(ManagerBase):
             )
             # Use the initial commit if this the previous tag was not found - this
             # can be in case of the very first release.
-            old_version = repo.git.rev_list("HEAD", max_parents=0)
+            old_versions = repo.git.rev_list("HEAD", max_parents=0).split()
+            old_version = old_versions[-1]
 
         _LOGGER.info("Smart Log : %s", str(changelog_smart))
 
@@ -299,14 +302,35 @@ class VersionManager(ManagerBase):
             ).splitlines()
 
         if version_file:
-            # TODO: We should prepend changes instead of appending them.
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
-            with open("CHANGELOG.md", "a") as changelog_file:
-                changelog_file.write(
-                    f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
-                )
-                changelog_file.write("\n".join(changelog))
-                changelog_file.write("\n")
+            with open("CHANGELOG.md", "r+") as changelog_file:
+                lines = changelog_file.readlines()
+                changelog_file.seek(0, 0)
+                if lines[0].startswith(
+                    "# "
+                ):  # checking if title its a title of type "# Title"
+                    changelog_file.write(lines[0])
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines[1:]))
+                elif (
+                    lines[1][0] == "="
+                ):  # Checking if its a title of type "Title \n ===="
+                    changelog_file.write(lines[0] + lines[1])
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines[2:]))
+                else:  # No title
+                    changelog_file.write(
+                        f"\n## Release {new_version} ({datetime.now().replace(microsecond=0).isoformat()})\n"
+                    )
+                    changelog_file.write("\n".join(changelog) + "\n")
+                    changelog_file.write("".join(lines))
+
             repo.git.add("CHANGELOG.md")
 
         _LOGGER.info("Computed changelog has %d entries", len(changelog))
@@ -397,7 +421,7 @@ class VersionManager(ManagerBase):
             with cloned_repo(self) as repo:
                 if assignees:
                     try:
-                        self.add_assignees(issue=issue, assignees=assignees)
+                        issue.add_assignee(*assignees)
                     except Exception:
                         _LOGGER.exception(
                             f"Failed to assign {assignees} to issue #{issue.id}"
@@ -465,7 +489,7 @@ class VersionManager(ManagerBase):
 
                 pr = self.project.create_pr(
                     title=message,
-                    body=self._construct_pr_body,
+                    body=self._construct_pr_body(issue, changelog),
                     target_branch=self.project.default_branch,
                     source_branch=branch_name,
                 )

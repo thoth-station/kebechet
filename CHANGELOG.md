@@ -1692,3 +1692,47 @@ Starting with this release we have a Zuul-CI pipeline that:
 * remove thoth-sourcemanagement from Kebechet (#725)
 * remove todo
 * Delete branch if the pull request has been already closed
+
+## Release 1.3.1 (2021-06-09T11:13:43)
+### Features
+* Update OWNERS
+* add ogr dep to Pipfile
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+
+## Release 1.3.2 (2021-06-14T06:18:31)
+### Features
+* use ogr to get app auth token
+* pre-commit issue
+* Update kebechet/managers/version/version.py
+* Fixed prepending when Title exists
+* Fixed README to remove legacy example configuration
+* changed appending changelog to prepending changelog
+* add docs for locally running Kebechet
+### Bug Fixes
+* Fixed small bug in which original changelog was removed
+
+## Release 1.3.3 (2021-06-30T16:07:37)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* pass environment name to managers and add documentation for expected manager behaviour
+* update from template project
+* add priority/critical-urgent label to all bot related issue templates
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: updated labels of issue templates
+### Bug Fixes
+* fix issue 746
+* fixed bug with unrelated histories where khebhut doesn't create PR
+### Improvements
+* use upstream solution for adding assignees
+* use thamos.lib.write_files
+
+## Release 1.4.0 (2021-08-02T08:06:03)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#768)
+* add args to get access token
+* make update manager work with overlays
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :sparkles: add some Kubernetes-inspired Labels to Issues opened by Kebechet
