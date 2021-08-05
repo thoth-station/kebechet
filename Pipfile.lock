@@ -1138,7 +1138,7 @@
                 "sha256:0498039b3e110f53824417a9f59418a20843e8752b8b15c26bb81a659d4aec5c",
                 "sha256:9da195db6630b76f0d37612f195dd7c325e280ad398dae4fcf30890a124ceb74"
             ],
-            "markers": "python_full_version >= '3.6.2' and python_full_version < '4.0.0'",
+            "markers": "python_version < '4.0' and python_full_version >= '3.6.2'",
             "version": "==2.0.0"
         }
     },

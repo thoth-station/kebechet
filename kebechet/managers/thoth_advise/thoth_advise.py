@@ -18,10 +18,10 @@
 """Consume Thoth Output for Kebechet auto-dependency management."""
 
 import hashlib
-import os
 import logging
 import json
 import typing
+import yaml
 from thamos import lib
 
 import git  # noqa F401
@@ -31,7 +31,7 @@ from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
 from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
-from thoth.common import ThothAdviserIntegrationEnum
+from thoth.common import ThothAdviserIntegrationEnum, cwd
 from thoth.common.enums import InternalTriggerEnum
 
 from .messages import (
@@ -106,6 +106,7 @@ class ThothAdviseManager(ManagerBase):
         kebechet_metadata = metadata.get(
             "kebechet_metadata"
         )  # type: typing.Optional[dict]
+
         if kebechet_metadata is not None and kebechet_metadata.get(
             "message_justification"
         ):
@@ -118,6 +119,18 @@ class ThothAdviseManager(ManagerBase):
             )
         else:
             body = DEFAULT_PR_BODY
+
+        with open(".thoth.yaml", "r") as f:
+            thoth_config = yaml.safe_load(f)
+        overlays_dir = thoth_config.get("overlays_dir")
+
+        full_name = (
+            f"{overlays_dir}/{self.runtime_environment}"
+            if overlays_dir
+            else self.runtime_environment
+        )
+
+        body = f"# Automatic Update of {full_name} runtime-environment\n" + body
 
         # Delete branch if it didn't change Pipfile.lock
         diff = self.repo.git.diff(self.project.default_branch, files)
@@ -146,16 +159,26 @@ class ThothAdviseManager(ManagerBase):
 
         return pr
 
-    @staticmethod
-    def _write_advise(adv_results: list):
+    def _write_advise(self, adv_results: list):
+        with open(".thoth.yaml", "r") as f:
+            thoth_config = yaml.safe_load(f)
+        overlays_dir = thoth_config.get("overlays_dir")
         requirements_lock = adv_results[0]["report"][0][1]["requirements_locked"]
         requirements = adv_results[0]["parameters"]["project"]["requirements"]
         requirements_format = adv_results[0]["parameters"]["requirements_format"]
-        lib.write_files(
-            requirements=requirements,
-            requirements_lock=requirements_lock,
-            requirements_format=requirements_format,
-        )
+        if overlays_dir:
+            with cwd(f"{overlays_dir}/{self.runtime_environment}"):
+                lib.write_files(
+                    requirements=requirements,
+                    requirements_lock=requirements_lock,
+                    requirements_format=requirements_format,
+                )
+        else:
+            lib.write_files(
+                requirements=requirements,
+                requirements_lock=requirements_lock,
+                requirements_format=requirements_format,
+            )
 
     def _issue_advise_error(self, adv_results: list, labels: list):
         """Create an issue if advise fails."""
@@ -186,6 +209,7 @@ class ThothAdviseManager(ManagerBase):
             textblock = (
                 textblock
                 + f"## Error type: {type_}\n"
+                + f"**runtime_environment**: {self.runtime_environment}\n"
                 + f"**Justification**: {justification}\n"
                 + internal_trigger_info
             )
@@ -212,35 +236,52 @@ class ThothAdviseManager(ManagerBase):
                 return
 
         if analysis_id is None:
-            with cloned_repo(self, depth=1) as repo:
+            with cloned_repo(self, self.project.default_branch, depth=1) as repo:
                 self.repo = repo
-                if not os.path.isfile("Pipfile"):
-                    _LOGGER.warning("Pipfile not found in repo... Creating issue")
-                    issue = self.get_issue_by_title("Missing Pipfile")
-                    if not issue:
-                        self.project.create_issue(
-                            title="Missing Pipfile",
-                            body="Check your repository to make sure Pipfile exists",
-                            labels=labels,
+
+                with open(".thoth.yaml", "r") as f:
+                    thoth_config = yaml.safe_load(f)
+
+                if self.runtime_environment:
+                    if self.runtime_environment not in [
+                        e["name"] for e in thoth_config["runtime_environments"]
+                    ]:
+                        _LOGGER.error(
+                            "Requested runtime does not exist in target repo."
                         )
+                        return False
+                    runtime_environments = [self.runtime_environment]
+                else:
+                    if thoth_config.get("overlays_dir"):
+                        runtime_environments = [
+                            e["name"] for e in thoth_config["runtime_environments"]
+                        ]
+                    else:
+                        runtime_environments = [
+                            thoth_config["runtime_environments"][0]["name"]
+                        ]
 
-                    return False
-
-                lib.advise_here(
-                    nowait=True,
-                    origin=(f"{self.service_url}/{self.slug}"),
-                    source_type=ThothAdviserIntegrationEnum.KEBECHET,
-                    kebechet_metadata=self.metadata,
-                )
+                for e in runtime_environments:
+                    lib.advise_here(
+                        nowait=True,
+                        origin=(f"{self.service_url}/{self.slug}"),
+                        source_type=ThothAdviserIntegrationEnum.KEBECHET,
+                        kebechet_metadata=self.metadata,
+                        # CHNG: adjust logic in thamos so that runtime_environment uses the correct requirements
+                        runtime_environment_name=e,
+                    )
             return True
         else:
-            with cloned_repo(self, depth=1) as repo:
+            with cloned_repo(self, self.project.default_branch, depth=1) as repo:
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
                 branch_name = self._construct_branch_name()
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
+
+                if self.runtime_environment is None:
+                    raise ValueError("Runtime environment is not set.")
 
                 if res is None:
                     _LOGGER.error(
