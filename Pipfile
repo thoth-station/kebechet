@@ -25,11 +25,6 @@ pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
 pylint = "*"
-coala = "*"
-PycodestyleBear = "*"
-YAMLLintBear = "*"
-PyDocStyleBear = "*"
-FilenameBear = "*"
 
 [requires]
 python_version = "3.8"
