@@ -1,5 +1,9 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.4.1 (2021-08-18T16:49:22)
+### Features
+* Empty commit for a new release
+
 ## [1.0.0-rc.4] - 2018-Jun-25 - goern
 
 ### Added
