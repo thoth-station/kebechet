@@ -168,7 +168,10 @@ runtime. If you think this exception is a bug please open an issue upstream at h
 otherwise use the traceback below to help you fix whatever issues were encountered with your repository.
 
 ## Traceback
-{traceback}"""
+```python
+{traceback}
+```
+"""
 
 
 def _create_issue_from_exception(
