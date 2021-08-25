@@ -71,6 +71,10 @@ _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP = {
 }
 
 
+def _runtime_env_name_from_advise_response(response: dict):
+    return response["results"]["parameters"]["project"]["runtime_environment"]["name"]
+
+
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
 
@@ -280,15 +284,16 @@ class ThothAdviseManager(ManagerBase):
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
 
-                if self.runtime_environment is None:
-                    raise ValueError("Runtime environment is not set.")
-
                 if res is None:
                     _LOGGER.error(
                         "Advise failed on server side, contact the maintainer"
                     )
                     return False
                 _LOGGER.debug(json.dumps(res))
+
+                self.runtime_environment = _runtime_env_name_from_advise_response(
+                    res[0]
+                )
 
                 if res[1] is False:
                     _LOGGER.info("Advise succeeded")
