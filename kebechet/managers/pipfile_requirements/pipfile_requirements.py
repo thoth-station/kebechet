@@ -25,6 +25,7 @@ from kebechet.managers.manager import ManagerBase
 from kebechet.utils import cloned_repo
 
 import toml
+from github.GithubException import UnknownObjectException
 
 _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
@@ -94,8 +95,13 @@ class PipfileRequirementsManager(ManagerBase):
             else sorted(self.get_pipfile_requirements(file_contents))
         )
 
-        file_contents = self.project.get_file_content("requirements.txt")
-        requirements_txt_content = sorted(file_contents.splitlines())
+        try:
+            file_contents = self.project.get_file_content("requirements.txt")
+            requirements_txt_content = sorted(file_contents.splitlines())
+        except (FileNotFoundError, UnknownObjectException):
+            requirements_txt_content = (
+                []
+            )  # requirements.txt file has not been created so the manager will create it
 
         if pipfile_content == requirements_txt_content:
             _LOGGER.info("Requirements in requirements.txt are up to date")
