@@ -83,6 +83,7 @@ def _string2branch_name(string: str):
     to_ret = string
     for c in _INVALID_BRANCH_CHARACTERS:
         to_ret = to_ret.replace(c, "-")
+    return to_ret
 
 
 class UpdateManager(ManagerBase):
