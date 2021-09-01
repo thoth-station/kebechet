@@ -30,7 +30,7 @@ from .utils import (
 from .payload_parser import PayloadParser
 from .config import _Config
 
-from kebechet.managers import REGISTERED_MANAGERS
+from kebechet.managers import REGISTERED_MANAGERS, ConfigInitializer
 
 _LOGGER = logging.getLogger("kebechet")
 
@@ -143,10 +143,19 @@ def run(
         github_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
     )
 
-    with download_kebechet_config(ogr_service, namespace, project) as f:
-        config = _Config.from_file(f)
-
     slug = f"{namespace}/{project}"
+
+    try:
+        with download_kebechet_config(ogr_service, namespace, project) as f:
+            config = _Config.from_file(f)
+    except FileNotFoundError:
+        _LOGGER.info("No Kebechet found in repo. Opening PR with simple configuration.")
+        ConfigInitializer(
+            slug=slug,
+            service=ogr_service,
+            service_type=service_type,
+        ).run()
+        return
 
     managers = config.managers
 
