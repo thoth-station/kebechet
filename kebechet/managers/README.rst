@@ -1,8 +1,25 @@
 Kebechet Managers
 -----------------
 
-This submodule states all the available managers in Kebechet. See each manager's submodule to get all available options
-each manager provides for you.
+Available Managers
+==================
+
+* `Info Manager`_
+* `Label Bot Manager`_
+* `Pipfile Requirements Manager`_
+* `Thoth Advise Manager`_
+* `Thoth Provenance Manager`_
+* `Update Manager`_
+* `Version Manager`_
+
+.. _`Info Manager`: info/README.rst
+.. _`Label Bot Manager`: label_bot/README.rst
+.. _`Pipfile Requirements Manager`: pipfile_requirements/README.rst
+.. _`Thoth Advise Manager`: thoth_advise/README.rst
+.. _`Thoth Provenance Manager`: thoth_provenance/README.rst
+.. _`Update Manager`: update/README.rst
+.. _`Version Manager`: version/README.rst
+
 
 Developing your own manager
 ===========================
@@ -29,7 +46,7 @@ If you wish to operate on repository source code, you can request to clone it:
 
         from kebechet.utils import cloned_repo
 
-        with cloned_repo(self.service_url, self.slug) as repo:
+        with cloned_repo(self.service_url, self.slug, branch="my_branch") as repo:
             with open('my_file.txt', 'w') as my_file:
                 my_file.write("Hello, Kebechet!")
 
@@ -37,8 +54,8 @@ If you wish to operate on repository source code, you can request to clone it:
             repo.git.push()
 
 The last thing you need to do, is to register your manager to `REGISTERED_MANAGERS` constant (you can find it in
-`kebechet/managers/__init__.py` file) so Kebechet knows about your manager. Manager can be referenced by its name in
-lowercase (class name without the "manager" suffix).
+`kebechet/managers/__init__.py` file) so that the mapping can be used for configuration. Best practice is to remove the
+Manager suffix from the class name, convert to lowercase and put "-" between each word.
 
 Overlays
 ========

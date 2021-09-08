@@ -14,21 +14,15 @@ An example configuration:
 
 .. code-block:: yaml
 
-    repositories:
-    - slug: thoth-station/kebechet
-      # State token explicitly or let it expand from env vars:
-      token: '{SECRET_TOKEN_IN_ENV}'
-      service_type: github  # or gitlab
-      # Optionally for self-hosted services:
-      # service_url: <URL>
-      # tls_verify: true/false
-      managers:
-        - name: pipfile-requirements
-          configuration:
-            # Set to true if you would like to state fully pinned down software stack of your application.
-            lockfile: true  # Defaults to false.
+    ...
+    managers:
+      - name: pipfile-requirements
+        configuration:
+          # Set to true if you would like to state fully pinned down software stack of your application.
+          lockfile: true  # Defaults to false.
+    ...
 
-An example of this version manager in action can be found `here <https://github.com/thoth-station/kebechet/issues/404>`_.
+An example of this version manager in action can be found `here <https://github.com/thoth-station/kebechet/issues/404>`__.
 
 Manager Author
 ==============
