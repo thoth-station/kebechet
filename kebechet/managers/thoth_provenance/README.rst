@@ -1,16 +1,16 @@
 Kebechet Thamos-Provenance_check Manager
------------------------
+----------------------------------------
 
 The purpose of this manager is to use Thoth's ability to conduct provenance checks to ensure that your Python dependency sources are valid
-file, it uses `thamos.lib` to communicate with `thoth` user API
+file, it uses :code:`thamos.lib` to communicate with **Thoth** user API
 
-A prerequisite for this manager is to have `Pipfile` and `Pipfile.lock`, and `.thoth.yaml`, present in the repo.
-`Pipfile` should state all direct dependencies (with possible required specifications).
-`Pipfile.lock` should hold all the lock data associated with the Python software stack generated either by `thamos.lib.advise()` or `pipenv sync`
-`.thoth.yaml` should contain a valid configuration for `thamos`
+A prerequisite for this manager is to have :code:`Pipfile` and :code:`Pipfile.lock`, and :code:`.thoth.yaml`, present in
+the repo. :code:`Pipfile` should state all direct dependencies (with possible required specifications).
+:code:`Pipfile.lock` should hold all the lock data associated with the Python software stack generated either by
+`thamos.lib.advise()` or `pipenv sync` :code:`.thoth.yaml` should contain a valid configuration for :code:`thamos`
 
-* `Pipfile` - respecting `pipenv <https://pipenv.readthedocs.io/en/latest/advanced/#specifying-package-indexes>`_ tool
-* `Pipfile.lock` - states all pinned down versions of your application stack
+* **Pipfile** - respecting `pipenv <https://pipenv.readthedocs.io/en/latest/advanced/#specifying-package-indexes>`__ tool
+* **Pipfile.lock** - states all pinned down versions of your application stack
 
 Custom PyPI indexes are supported respecting `Pipfile` syntax.
 
@@ -19,16 +19,15 @@ If there is any issue in your application stack, this manager will create issues
 Why should I use this manager instead of other solutions?
 =========================================================
 
-Provenance checks are make sure that your locked down dependencies are discoverable within the index that you stated with the correct indexes and shas
+Provenance checks are make sure that your locked down dependencies are discoverable within the index that you stated
+with the correct indexes and SHA values.
 
 Forkflow for pipenv - ``Pipfile`` and ``Pipfile.lock``
 ======================================================
 
-To use Kebechet with `pipenv <https://docs.pipenv.org>`_ you have to commit ``Pipfile`` and ``Pipfile.lock`` files into the root of your Git respository structure. Kebechet will automatically monitor these files and create issues if any problems are found through `thoth` provenance checks
-
-Options
-=======
-`labels`: specify the labels associated with pull requests and issues
+To use Kebechet with `pipenv <https://docs.pipenv.org>`__ you have to commit ``Pipfile`` and ``Pipfile.lock`` files into
+the root of your Git respository structure. Kebechet will automatically monitor these files and create issues if any
+problems are found through thoth provenance checks
 
 Example
 =======
@@ -59,12 +58,11 @@ NOTE: This configuration file should be in the root directory of your repository
   managers:
     - name: thoth-provenance
       configuration:
-        # Labels for opened issues and pull requests.
-        labels: [bot]
+        labels: [bot] # Labels for opened issues and pull requests.
 
-A more detailed description of `thamos` can be found `here <https://github.com/thoth-station/thamos>`_
-
-You can see this manager in action `here <https://github.com/thoth-station/kebechet/pull/46>`_, `here <https://github.com/thoth-station/kebechet/pull/85>`_ or `here <https://github.com/thoth-station/solver/issues/38>`_.
+Because this manager uses more of Thoth's services, a runtime environment, host and requirements format should be
+defined in the configuration file. More information about configuration options for .thoth.yaml can be found `in the
+thoth-station/thamos repository <https://github.com/thoth-station/thamos>`__.
 
 Manager Author
 ==============
