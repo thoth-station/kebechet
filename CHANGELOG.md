@@ -1,5 +1,20 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.0 (2021-09-15T16:02:53)
+### Features
+* add unregistered manager which adds thoth-config
+* convert README from RST to MD
+* add return statement
+### Bug Fixes
+* instead of opening issues in user repo open in thoth-station/support
+* if requirements.txt does not exist it must be created
+### Improvements
+* updated README files to reflect current state of Kebechet
+* pull runtime_environment directly from advise results
+* removed unused -dev dependencies
+### Other
+* Format traceback with Python backtick code
+
 ## Release 1.4.1 (2021-08-18T16:49:22)
 ### Features
 * Empty commit for a new release
