@@ -204,7 +204,7 @@ def run(
             _create_issue_from_exception(
                 manager_name=manager_name,
                 ogr_service=ogr_service,
-                slug="thoth-station/support",
+                slug=slug,
                 exc=exc,
             )
             _LOGGER.exception(
