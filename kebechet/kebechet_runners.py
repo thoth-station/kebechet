@@ -201,12 +201,13 @@ def run(
             )
             instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
-            _create_issue_from_exception(
-                manager_name=manager_name,
-                ogr_service=ogr_service,
-                slug=slug,
-                exc=exc,
-            )
+            if not isinstance(exc, ConnectionError):
+                _create_issue_from_exception(
+                    manager_name=manager_name,
+                    ogr_service=ogr_service,
+                    slug=slug,
+                    exc=exc,
+                )
             _LOGGER.exception(
                 "An error occurred during run of manager %r %r for %r, skipping",
                 manager,
