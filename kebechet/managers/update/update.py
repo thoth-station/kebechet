@@ -703,7 +703,9 @@ class UpdateManager(ManagerBase):
                 details.get("new_version"),
                 details.get("dev"),
             )
-            package_name_rows += f"**{package}**|{old_version}|{new_version}|{is_dev}\n"
+            package_name_rows += (
+                f"|**{package}**|{old_version}|{new_version}|{is_dev}|\n"
+            )
         body = UPDATE_MESSAGE_BODY.format(
             package_name_rows=package_name_rows, kebechet_version=kebechet_version
         )
