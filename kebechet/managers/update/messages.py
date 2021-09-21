@@ -222,10 +222,11 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 /priority critical-urgent
 """
 
-UPDATE_MESSAGE_BODY = """Kebechet has updated the dependencies to the latest version :rocket:
-The direct dependencies updated in the pull request are -
-|Package Name | Old Version | Updated Version | Is Dev
-|--- | --- | --- | ---
+UPDATE_MESSAGE_BODY = """Kebechet has updated the depedencies to the latest version :rocket:
+The direct dependencies updated in the pull request are:
+
+Package Name | Old Version | Updated Version | Is Dev
+--- | --- | --- | ---
 {package_name_rows}
 
 This Pull Request is based on a [Project Thoth GitHub App](https://github.com/marketplace/khebhut),
