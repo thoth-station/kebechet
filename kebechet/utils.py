@@ -19,6 +19,7 @@
 
 
 import os
+import sys
 import traceback
 import logging
 import tempfile
@@ -28,7 +29,6 @@ from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
 from typing import TYPE_CHECKING, Optional
 import git
-import hashlib
 
 from ogr.services.github import GithubService
 from ogr.services.gitlab import GitlabService
@@ -176,10 +176,14 @@ def _create_issue_from_exception(
     manager_name: str, slug: str, exc: Exception, ogr_service: BaseGitService
 ):
     tb = "".join(traceback.format_exception(None, exc, exc.__traceback__))
+    _, _, exc_tb = sys.exc_info()
+    if exc_tb is None:
+        _LOGGER.exception("Exception has no traceback.")
+        return
+
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
     exception_type = type(exc).__name__
-    hash_object = hashlib.md5(tb.encode("utf-8"))
-    digest = hash_object.hexdigest()
-    title = f"Kebechet {manager_name} manager: {exception_type} - {digest[:10]}"
+    title = f"Kebechet {manager_name} manager: {exception_type} on {fname}:{exc_tb.tb_lineno}"
     project = ogr_service.get_project(namespace="thoth-station", repo="support")
     body = EXCEPTION_ISSUE_BODY.format(
         manager=manager_name, exception_type=exception_type, traceback=tb, slug=slug
