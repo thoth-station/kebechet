@@ -1,5 +1,18 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.1 (2021-09-23T19:16:52)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* add link to repository which caused exception
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+### Bug Fixes
+* :bug: fix some typos
+* do not raise issue for conn error
+
 ## Release 1.5.0 (2021-09-15T16:02:53)
 ### Features
 * add unregistered manager which adds thoth-config
