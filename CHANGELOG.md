@@ -1,5 +1,15 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.2 (2021-09-27T21:37:47)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment (#837)
+* add KPostOffice to approvers
+* only create one issue per exc per line
+* Fix markdown format for table rows
+* get relative path of overlay currently being updated for link
+### Improvements
+* Minor format improvements in the README
+
 ## Release 1.5.1 (2021-09-23T19:16:52)
 ### Features
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
