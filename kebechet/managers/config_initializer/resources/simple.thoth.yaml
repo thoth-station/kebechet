@@ -10,7 +10,4 @@ runtime_environments:
     python_version: "3.8"
     recommendation_type: latest
 
-managers:
-  - name: thoth-advise
-    configuration:
-      labels: [bot]
+managers: []
