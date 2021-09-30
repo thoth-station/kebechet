@@ -12,3 +12,4 @@ recursive-include kebechet *.rst
 recursive-include openshift *.yaml
 recursive-include playbooks *.yaml
 recursive-include workflows *.yaml
+recursive-include kebechet *.yaml

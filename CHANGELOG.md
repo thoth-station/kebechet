@@ -1,5 +1,43 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.2 (2021-09-27T21:37:47)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment (#837)
+* add KPostOffice to approvers
+* only create one issue per exc per line
+* Fix markdown format for table rows
+* get relative path of overlay currently being updated for link
+### Improvements
+* Minor format improvements in the README
+
+## Release 1.5.1 (2021-09-23T19:16:52)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* add link to repository which caused exception
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+### Bug Fixes
+* :bug: fix some typos
+* do not raise issue for conn error
+
+## Release 1.5.0 (2021-09-15T16:02:53)
+### Features
+* add unregistered manager which adds thoth-config
+* convert README from RST to MD
+* add return statement
+### Bug Fixes
+* instead of opening issues in user repo open in thoth-station/support
+* if requirements.txt does not exist it must be created
+### Improvements
+* updated README files to reflect current state of Kebechet
+* pull runtime_environment directly from advise results
+* removed unused -dev dependencies
+### Other
+* Format traceback with Python backtick code
+
 ## Release 1.4.1 (2021-08-18T16:49:22)
 ### Features
 * Empty commit for a new release

@@ -111,6 +111,11 @@ class UpdateManager(ManagerBase):
         """Get SHA of the current head commit."""
         return self.repo.head.commit.hexsha
 
+    def _get_cwd_relative2gitroot(self):
+        """Get path of cwd relative to the git root."""
+        top_level = self.repo.git.rev_parse("--show-toplevel")
+        return os.getcwd()[len(top_level) + 1 :]
+
     @staticmethod
     def _get_dependency_version(dependency: str, is_dev: bool) -> str:
         """Get version of the given dependency from Pipfile.lock."""
@@ -233,12 +238,19 @@ class UpdateManager(ManagerBase):
 
     def _create_unsupported_package_issue(self, package_name):
         """Create an issue as Kebechet doesn't support packages with git as source."""
-        _LOGGER.info("Key Errror encountered, due package source being git.")
+        _LOGGER.info("Key Error encountered, due package source being git.")
+        relative_dir = self._get_cwd_relative2gitroot()
         pip_url = construct_raw_file_url(
-            self.service_url, self.slug, "Pipfile", self.service_type
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile"),
+            self.service_type,
         )
         piplock_url = construct_raw_file_url(
-            self.service_url, self.slug, "Pipfile.lock", self.service_type
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile.lock"),
+            self.service_type,
         )
         issue = self.get_issue_by_title(_ISSUE_UNSUPPORTED_PACKAGE)
         if issue is None:
@@ -606,11 +618,18 @@ class UpdateManager(ManagerBase):
 
     def _relock_all(self, exc: PipenvError, labels: list) -> None:
         """Re-lock all dependencies given the Pipfile."""
+        relative_dir = self._get_cwd_relative2gitroot()
         pip_url = construct_raw_file_url(
-            self.service_url, self.slug, "Pipfile", self.service_type
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile"),
+            self.service_type,
         )
         piplock_url = construct_raw_file_url(
-            self.service_url, self.slug, "Pipfile.lock", self.service_type
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile.lock"),
+            self.service_type,
         )
         issue = self.get_issue_by_title(_ISSUE_REPLICATE_ENV_NAME)
         if issue is None:
@@ -703,7 +722,9 @@ class UpdateManager(ManagerBase):
                 details.get("new_version"),
                 details.get("dev"),
             )
-            package_name_rows += f"**{package}**|{old_version}|{new_version}|{is_dev}\n"
+            package_name_rows += (
+                f"|**{package}**|{old_version}|{new_version}|{is_dev}|\n"
+            )
         body = UPDATE_MESSAGE_BODY.format(
             package_name_rows=package_name_rows, kebechet_version=kebechet_version
         )
@@ -768,11 +789,18 @@ class UpdateManager(ManagerBase):
                 _LOGGER.warning(
                     "Failed to update dependencies to their latest version, reporting issue"
                 )
+                relative_dir = self._get_cwd_relative2gitroot()
                 pip_url = construct_raw_file_url(
-                    self.service_url, self.slug, "Pipfile", self.service_type
+                    self.service_url,
+                    self.slug,
+                    os.path.join(relative_dir, "Pipfile"),
+                    self.service_type,
                 )
                 piplock_url = construct_raw_file_url(
-                    self.service_url, self.slug, "Pipfile.lock", self.service_type
+                    self.service_url,
+                    self.slug,
+                    os.path.join(relative_dir, "Pipfile.lock"),
+                    self.service_type,
                 )
                 issue = self.get_issue_by_title(_ISSUE_UPDATE_ALL_NAME)
                 if issue is None:
