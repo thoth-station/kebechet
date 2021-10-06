@@ -28,6 +28,7 @@ from ogr.abstract import Issue
 import yaml
 import semver
 from datetime import datetime
+from github.GithubException import GithubException
 
 from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
@@ -484,15 +485,30 @@ class VersionManager(ManagerBase):
                 repo.git.checkout("HEAD", b=branch_name)
                 message = _VERSION_PULL_REQUEST_NAME.format(version_identifier)
                 repo.index.commit(message)
-                # If this PR already exists, this will fail.
+
                 repo.remote().push(branch_name)
 
-                pr = self.project.create_pr(
-                    title=message,
-                    body=self._construct_pr_body(issue, changelog),
-                    target_branch=self.project.default_branch,
-                    source_branch=branch_name,
-                )
+                try:
+                    # If this PR already exists, this will fail.
+
+                    pr = self.project.create_pr(
+                        title=message,
+                        body=self._construct_pr_body(issue, changelog),
+                        target_branch=self.project.default_branch,
+                        source_branch=branch_name,
+                    )
+                except GithubException as ghub_exc:
+                    errors = ghub_exc.data.get("errors", [])  # type: ignore
+                    for e in errors:
+                        if isinstance(
+                            e, dict
+                        ) and "pull request already exists" in e.get("message", ""):
+                            _LOGGER.warning(
+                                "Attempted to open another PR for current branch."
+                            )
+                            return
+                    else:
+                        raise ghub_exc
 
                 pr.add_label(*labels)
 
