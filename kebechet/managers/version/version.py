@@ -444,14 +444,17 @@ class VersionManager(ManagerBase):
                     continue
 
                 try:
-                    version_identifier, old_version = self._adjust_version_in_sources(  # type: ignore
-                        repo, labels, issue
-                    )
+                    v_info = self._adjust_version_in_sources(repo, labels, issue)
+                    if v_info is None:
+                        return
+
                 except VersionError as exc:
                     _LOGGER.exception("Failed to adjust version information in sources")
                     issue.comment(str(exc))
                     issue.close()
                     raise
+
+                version_identifier, old_version = v_info
 
                 if not version_identifier:
                     _LOGGER.error("Giving up with automated release")
