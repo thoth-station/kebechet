@@ -26,6 +26,7 @@ repos:
     rev: 5.1.1
     hooks:
       - id: pydocstyle
+        exclude: '^docs'
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
