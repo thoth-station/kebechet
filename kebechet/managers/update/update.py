@@ -31,6 +31,7 @@ from functools import partial
 import git
 from ogr.abstract import Issue, PullRequest, PRStatus
 from packaging.utils import canonicalize_name
+from pipenv.patched.piptools.sync import PACKAGES_TO_IGNORE
 
 from kebechet.exception import DependencyManagementError
 from kebechet.exception import InternalError
@@ -60,7 +61,8 @@ _ISSUE_NO_DEPENDENCY_NAME = (
     "No dependency management found for the {environment_name} environment"
 )
 _ISSUE_UNSUPPORTED_PACKAGE = (
-    "Application cannot be managed by Kebechet due to Git package"
+    "Application cannot be managed by Kebechet due to it containing an unsupported package "
+    "location."
 )
 _ISSUE_MANUAL_UPDATE = "Kebechet update"
 
@@ -130,18 +132,33 @@ class UpdateManager(ManagerBase):
 
         # We look for normalized dependency in Pipfile.lock.
         normalized_dependency = canonicalize_name(dependency)
-        version = (
-            pipfile_lock_content["develop" if is_dev else "default"]
-            .get(normalized_dependency, {})
-            .get("version")
+
+        if (
+            normalized_dependency in PACKAGES_TO_IGNORE
+            or dependency in PACKAGES_TO_IGNORE
+        ):
+            _LOGGER.debug("Skipping... dependency is locked by pipenv.")
+            return ""
+
+        package_info = pipfile_lock_content["develop" if is_dev else "default"].get(
+            normalized_dependency, {}
         )
-        if version is None:
-            # if not kept as normaized depedency in Pipfile.lock.
-            version = (
-                pipfile_lock_content["develop" if is_dev else "default"]
-                .get(dependency, {})
-                .get("version")
+        if not package_info:
+            # if not kept as normalized depedency in Pipfile.lock.
+            package_info = pipfile_lock_content["develop" if is_dev else "default"].get(
+                dependency, {}
             )
+
+        version = package_info.get("version")
+        if version is None and package_info.get("git"):
+            # package is referencing a git VCS for package installation so no version is present
+            _LOGGER.debug(
+                "Skipping... package installation references a version control system."
+            )
+            return ""
+        elif version is None and package_info.get("path"):
+            _LOGGER.debug("Skipping... package installation references a local path.")
+
         if not version:
             raise InternalError(
                 f"Failed to retrieve version information for dependency {dependency}, (dev: {is_dev})"
@@ -207,9 +224,14 @@ class UpdateManager(ManagerBase):
 
         for package_name, package_info in pipfile_lock_content["default"].items():
             if "git" in package_info:
-                self._create_unsupported_package_issue(package_name)
+                self._create_unsupported_package_issue(package_name, "git")
                 raise DependencyManagementError(
                     "Failed to find version in package that uses git source."
+                )
+            elif "path" in package_info:
+                self._create_unsupported_package_issue(package_name, "local")
+                raise DependencyManagementError(
+                    "Failed to find version in package that uses local source."
                 )
             result[package_name.lower()] = {
                 "dev": False,
@@ -218,9 +240,14 @@ class UpdateManager(ManagerBase):
 
         for package_name, package_info in pipfile_lock_content["develop"].items():
             if "git" in package_info:
-                self._create_unsupported_package_issue(package_name)
+                self._create_unsupported_package_issue(package_name, "git")
                 raise DependencyManagementError(
                     "Failed to find version in package that uses git source."
+                )
+            elif "path" in package_info:
+                self._create_unsupported_package_issue(package_name, "local")
+                raise DependencyManagementError(
+                    "Failed to find version for package that uses local installation."
                 )
             result[package_name.lower()] = {
                 "dev": False,
@@ -236,7 +263,7 @@ class UpdateManager(ManagerBase):
             issue.close()
         return result
 
-    def _create_unsupported_package_issue(self, package_name):
+    def _create_unsupported_package_issue(self, package_name, pkg_location):
         """Create an issue as Kebechet doesn't support packages with git as source."""
         _LOGGER.info("Key Error encountered, due package source being git.")
         relative_dir = self._get_cwd_relative2gitroot()
@@ -259,6 +286,7 @@ class UpdateManager(ManagerBase):
                 body=ISSUE_UNSUPPORTED_PACKAGE.format(
                     sha=self.sha,
                     package=package_name,
+                    pkg_location=pkg_location,
                     pip_url=pip_url,
                     piplock_url=piplock_url,
                     environment_details=self.get_environment_details(),
@@ -277,7 +305,8 @@ class UpdateManager(ManagerBase):
         )
         for dependency, is_dev in chain(default, develop):
             version = cls._get_dependency_version(dependency, is_dev=is_dev)
-            result[dependency] = {"version": version, "dev": is_dev}
+            if version:
+                result[dependency] = {"version": version, "dev": is_dev}
 
         return result
 
@@ -923,7 +952,7 @@ class UpdateManager(ManagerBase):
                     )
                     if (
                         update_issue is not None and update_issue.status == 2
-                    ):  # Means "open" in OGR.
+                    ):  # status == 2 means "open" in OGR.
                         try:
                             self.delete_remote_branch(
                                 _string2branch_name(
