@@ -33,8 +33,9 @@ _EVENTS_SUPPORTED = ["issues", "issue"]
 
 
 _PR_BODY = """## Automatic configuration initialization
-The Kebechet app was installed on this repository but no configuration was found.  This PR contains basic configuration
-of runtime environments and managers."""
+The Kebechet app was installed on this repository but no configuration was
+found.  This PR contains basic configuration of runtime environments and
+managers."""
 
 _BRANCH_NAME = "initial_thoth_config"
 

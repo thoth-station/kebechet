@@ -11,6 +11,24 @@ runtime_environments:
     recommendation_type: latest
 
 managers:
+  - name: info
+    configuration:
+      enabled: false
+  - name: label-bot
+    configuration:
+      enabled: false
+  - name: pipfile-requirements
+    configuration:
+      enabled: false
   - name: thoth-advise
     configuration:
-      labels: [bot]
+      enabled: false
+  - name: thoth-provenance
+    configuration:
+      enabled: false
+  - name: update
+    configuration:
+      enabled: false
+  - name: version
+    configuration:
+      enabled: false
