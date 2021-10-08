@@ -294,7 +294,7 @@ class UpdateManager(ManagerBase):
             )
 
     @classmethod
-    def _get_direct_dependencies_version(cls) -> dict:
+    def _get_direct_dependencies_version(cls, strict=True) -> dict:
         """Get versions of all direct dependencies based on the currently present Pipfile.lock."""
         default, develop = cls._get_direct_dependencies()
 
@@ -304,9 +304,14 @@ class UpdateManager(ManagerBase):
             ((dep, True) for dep in develop),
         )
         for dependency, is_dev in chain(default, develop):
-            version = cls._get_dependency_version(dependency, is_dev=is_dev)
-            if version:
+            try:
+                version = cls._get_dependency_version(dependency, is_dev=is_dev)
                 result[dependency] = {"version": version, "dev": is_dev}
+            except InternalError as exc:
+                if strict:
+                    raise exc
+                else:
+                    result[dependency] = {"version": None, "dev": is_dev}
 
         return result
 
@@ -811,7 +816,9 @@ class UpdateManager(ManagerBase):
 
         if pipenv_used:
             old_environment = self._get_all_packages_versions()
-            old_direct_dependencies_version = self._get_direct_dependencies_version()
+            old_direct_dependencies_version = self._get_direct_dependencies_version(
+                strict=False
+            )
             try:
                 self._pipenv_update_all()
             except PipenvError as exc:
