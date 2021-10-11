@@ -33,6 +33,7 @@ from kebechet.utils import cloned_repo
 from kebechet.managers.manager import ManagerBase
 from thoth.common import ThothAdviserIntegrationEnum, cwd
 from thoth.common.enums import InternalTriggerEnum
+from thoth.python.exceptions import FileLoadError
 
 from .messages import (
     DEFAULT_PR_BODY,
@@ -266,14 +267,26 @@ class ThothAdviseManager(ManagerBase):
                         ]
 
                 for e in runtime_environments:
-                    lib.advise_here(
-                        nowait=True,
-                        origin=(f"{self.service_url}/{self.slug}"),
-                        source_type=ThothAdviserIntegrationEnum.KEBECHET,
-                        kebechet_metadata=self.metadata,
-                        # CHNG: adjust logic in thamos so that runtime_environment uses the correct requirements
-                        runtime_environment_name=e,
-                    )
+                    try:
+                        lib.advise_here(
+                            nowait=True,
+                            origin=(f"{self.service_url}/{self.slug}"),
+                            source_type=ThothAdviserIntegrationEnum.KEBECHET,
+                            kebechet_metadata=self.metadata,
+                            runtime_environment_name=e,
+                        )
+                    except FileLoadError:
+                        issue_title = (
+                            f"No requirements file found for runtime environment {e}."
+                        )
+                        body = f"""Please create requirements file for environment {e}
+
+                        If this project does not use requirements.txt or Pipfile then remove thoth-advise manager from
+                        your .thoth.yaml configuration."""
+                        self.project.create_issue(
+                            title=issue_title, body=body, labels=labels
+                        )
+                        return False
             return True
         else:
             with cloned_repo(self, self.project.default_branch, depth=1) as repo:
