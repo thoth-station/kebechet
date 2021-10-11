@@ -32,6 +32,8 @@ from .config import _Config
 
 from kebechet.managers import REGISTERED_MANAGERS, ConfigInitializer
 
+from github import GithubException
+
 _LOGGER = logging.getLogger("kebechet")
 
 
@@ -202,6 +204,18 @@ def run(
                 )
                 instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
+            if isinstance(exc, GithubException):
+                if (
+                    exc.status == 410
+                    and isinstance(exc.data, dict)
+                    and (message := exc.data.get("message")) is not None
+                    and "issue" in message.lower()  # type: ignore
+                    and "disable" in message.lower()  # type: ignore
+                ):
+                    _LOGGER.info(
+                        "Cannot open issue because it is disabled on this repo."
+                    )
+                    continue
             if not isinstance(exc, ConnectionError):
                 _create_issue_from_exception(
                     manager_name=manager_name,
