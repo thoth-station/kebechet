@@ -386,7 +386,7 @@ class VersionManager(ManagerBase):
         assignees: list = None,
         labels: list = None,
         changelog_file: bool = False,
-        changelog_smart: bool = True,
+        changelog_smart: bool = False,
         changelog_classifier: str = MLModel.DEFAULT.name,
         changelog_format: str = Format.DEFAULT.name,
     ) -> None:
