@@ -1,5 +1,20 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.3 (2021-10-11T20:43:58)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* add enabled flag to manager configuration
+* don't require locked version for old deps
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* add checks for local installations and pkgs bundled by pipenv
+* check for none indicating function failed
+* create issue if no requirements found for runtime env
+* log if issue creation is disabled
+### Improvements
+* make changelog not smart by default
+* if PR already exists warn and continue
+
 ## Release 1.5.2 (2021-09-27T21:37:47)
 ### Features
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment (#837)
