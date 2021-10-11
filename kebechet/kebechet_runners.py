@@ -191,15 +191,16 @@ def run(
             manager_configuration["analysis_id"] = analysis_id
 
         try:
-            instance = kebechet_manager(
-                slug=slug,
-                service=ogr_service,
-                service_type=service_type,
-                parsed_payload=parsed_payload,
-                metadata=metadata,
-                runtime_environment=runtime_environment,
-            )
-            instance.run(**manager_configuration)
+            if manager_configuration.get("enabled", True):
+                instance = kebechet_manager(
+                    slug=slug,
+                    service=ogr_service,
+                    service_type=service_type,
+                    parsed_payload=parsed_payload,
+                    metadata=metadata,
+                    runtime_environment=runtime_environment,
+                )
+                instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
             if not isinstance(exc, ConnectionError):
                 _create_issue_from_exception(
