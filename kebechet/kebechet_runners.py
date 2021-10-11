@@ -33,6 +33,7 @@ from .config import _Config
 from kebechet.managers import REGISTERED_MANAGERS, ConfigInitializer
 
 from github import GithubException
+from requests.exceptions import SSLError
 
 _LOGGER = logging.getLogger("kebechet")
 
@@ -204,29 +205,32 @@ def run(
                 )
                 instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
-            if isinstance(exc, GithubException):
-                if (
-                    exc.status == 410
-                    and isinstance(exc.data, dict)
-                    and (message := exc.data.get("message")) is not None
-                    and "issue" in message.lower()  # type: ignore
-                    and "disable" in message.lower()  # type: ignore
-                ):
-                    _LOGGER.info(
-                        "Cannot open issue because it is disabled on this repo."
-                    )
-                    continue
-            if not isinstance(exc, ConnectionError):
-                _create_issue_from_exception(
-                    manager_name=manager_name,
-                    ogr_service=ogr_service,
-                    slug=slug,
-                    exc=exc,
-                )
             _LOGGER.exception(
                 "An error occurred during run of manager %r %r for %r, skipping",
                 manager,
                 kebechet_manager,
                 slug,
             )
+            if (
+                isinstance(exc, GithubException)
+                and exc.status == 410
+                and isinstance(exc.data, dict)
+                and (message := exc.data.get("message")) is not None
+                and "issue" in message.lower()  # type: ignore
+                and "disable" in message.lower()  # type: ignore
+            ):
+                _LOGGER.info("Cannot open issue because it is disabled on this repo.")
+                continue
+            elif isinstance(exc, ConnectionError):
+                continue
+            elif isinstance(exc, SSLError):
+                continue
+
+            _create_issue_from_exception(
+                manager_name=manager_name,
+                ogr_service=ogr_service,
+                slug=slug,
+                exc=exc,
+            )
+
     _LOGGER.info("Finished management for %r", slug)
