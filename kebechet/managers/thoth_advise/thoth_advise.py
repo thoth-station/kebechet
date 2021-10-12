@@ -283,9 +283,10 @@ class ThothAdviseManager(ManagerBase):
 
                         If this project does not use requirements.txt or Pipfile then remove thoth-advise manager from
                         your .thoth.yaml configuration."""
-                        self.project.create_issue(
-                            title=issue_title, body=body, labels=labels
-                        )
+                        if self.get_issue_by_title(issue_title) is None:
+                            self.project.create_issue(
+                                title=issue_title, body=body, labels=labels
+                            )
                         return False
             return True
         else:
