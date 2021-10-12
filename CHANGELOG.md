@@ -1,5 +1,9 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.5.4 (2021-10-12T14:03:50)
+* check if issue already exists
+* create changelog file if it doesn't exist
+
 ## Release 1.5.3 (2021-10-11T20:43:58)
 ### Features
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
