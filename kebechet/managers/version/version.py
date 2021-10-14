@@ -304,7 +304,8 @@ class VersionManager(ManagerBase):
 
         if version_file:
             _LOGGER.info("Adding changelog to the CHANGELOG.md file")
-            with open("CHANGELOG.md", "w+") as changelog_file:
+            file_mode = "r+" if os.path.exists("CHANGELOG.md") else "w+"
+            with open("CHANGELOG.md", file_mode) as changelog_file:
                 lines = changelog_file.readlines()
                 changelog_file.seek(0, 0)
                 if lines[0].startswith(
