@@ -115,7 +115,7 @@ def run_analysis(
     runtime_environment: Optional[str] = None,
 ) -> None:
     """Run result managers (meant to be triggered automatically)."""
-    slug, namespace, project, service_url = _parse_url_4_args(origin)
+    _, namespace, project, service_url = _parse_url_4_args(origin)
 
     run(
         service_type=service,

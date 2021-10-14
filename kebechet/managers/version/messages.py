@@ -30,3 +30,11 @@ If that is not the right behavior:
 - Create a new release issue.
 ---
 """
+
+RELEASE_LABEL_CONFIG_INVALID = """
+The `release_label_config` in your `version` manager configuration in
+`.thoth.yaml` here is a list of valid configuration entries: `calendar`,
+`major`, `minor`, `patch`, `pre`, `build`, `finalize`. They should all contain a
+list strings which match the labels which you want to create the corresponding
+releases for.
+"""
