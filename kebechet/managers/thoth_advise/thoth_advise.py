@@ -73,7 +73,7 @@ _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP = {
 
 
 def _runtime_env_name_from_advise_response(response: dict):
-    return response["results"]["parameters"]["project"]["runtime_environment"]["name"]
+    return response["result"]["parameters"]["project"]["runtime_environment"]["name"]
 
 
 class ThothAdviseManager(ManagerBase):
