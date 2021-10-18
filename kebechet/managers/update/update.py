@@ -54,21 +54,29 @@ from thamos.config import config as thoth_config
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile("(==|===|<=|>=|~=|!=|<|>|\\[)")
 
-_ISSUE_UPDATE_ALL_NAME = "Failed to update dependencies to their latest version"
-_ISSUE_INITIAL_LOCK_NAME = "Failed to perform initial lock of software stack"
-_ISSUE_REPLICATE_ENV_NAME = "Failed to replicate environment for updates"
+_ISSUE_UPDATE_ALL_NAME = (
+    "Failed to update dependencies to their latest version for {env_name} environment"
+)
+_ISSUE_INITIAL_LOCK_NAME = (
+    "Failed to perform initial lock of software stack for {env_name} environment"
+)
+_ISSUE_REPLICATE_ENV_NAME = (
+    "Failed to replicate environment for updates in {env_name} environment"
+)
 _ISSUE_NO_DEPENDENCY_NAME = (
-    "No dependency management found for the {environment_name} environment"
+    "No dependency management found for the {env_name} environment"
 )
 _ISSUE_UNSUPPORTED_PACKAGE = (
     "Application cannot be managed by Kebechet due to it containing an unsupported package "
-    "location."
+    "location in {env_name} environment."
 )
 _ISSUE_MANUAL_UPDATE = "Kebechet update"
 
-_UPDATE_BRANCH_NAME = "kebechet-automatic-update-{environment_name}"
+_UPDATE_BRANCH_NAME = "kebechet-automatic-update-{env_name}"
 
-_UPDATE_MERGE_REQUEST_TITLE = "Automatic update of dependencies by Kebechet for the {environment_name} environment"
+_UPDATE_MERGE_REQUEST_TITLE = (
+    "Automatic update of dependencies by Kebechet for the {env_name} environment"
+)
 _UPDATE_COMMIT_MSG = ":arrow_up: " + _UPDATE_MERGE_REQUEST_TITLE
 
 # Github and Gitlab events on which the manager acts upon.
@@ -255,7 +263,9 @@ class UpdateManager(ManagerBase):
             }
         # Close git as a source issues.
 
-        issue = self.get_issue_by_title(_ISSUE_UNSUPPORTED_PACKAGE)
+        issue = self.get_issue_by_title(
+            _ISSUE_UNSUPPORTED_PACKAGE.format(env_name=self.runtime_environment)
+        )
         if issue:
             issue.comment(
                 f"Issue closed as no packages use git as a source anymore. Related SHA - {self.sha}"
@@ -279,10 +289,14 @@ class UpdateManager(ManagerBase):
             os.path.join(relative_dir, "Pipfile.lock"),
             self.service_type,
         )
-        issue = self.get_issue_by_title(_ISSUE_UNSUPPORTED_PACKAGE)
+        issue = self.get_issue_by_title(
+            _ISSUE_UNSUPPORTED_PACKAGE.format(env_name=self.runtime_environment)
+        )
         if issue is None:
             self.project.create_issue(
-                title=_ISSUE_UNSUPPORTED_PACKAGE,
+                title=_ISSUE_UNSUPPORTED_PACKAGE.format(
+                    env_name=self.runtime_environment
+                ),
                 body=ISSUE_UNSUPPORTED_PACKAGE.format(
                     sha=self.sha,
                     package=package_name,
@@ -356,7 +370,6 @@ class UpdateManager(ManagerBase):
     def _open_merge_request_update(
         self,
         body: str,
-        environment_name: str,
         labels: typing.Optional[list],
         files: list,
         merge_request: Optional[PullRequest],
@@ -365,9 +378,9 @@ class UpdateManager(ManagerBase):
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
         self._git_push(
-            _UPDATE_COMMIT_MSG.format(environment_name=environment_name),
+            _UPDATE_COMMIT_MSG.format(env_name=self.runtime_environment),
             _string2branch_name(
-                _UPDATE_BRANCH_NAME.format(environment_name=environment_name)
+                _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
             ),
             files,
             force_push=True,
@@ -377,12 +390,12 @@ class UpdateManager(ManagerBase):
             _LOGGER.info("Creating a new pull request to update dependencies.")
             merge_request = self.project.create_pr(
                 title=_UPDATE_MERGE_REQUEST_TITLE.format(
-                    environment_name=environment_name
+                    env_name=self.runtime_environment
                 ),
                 body=body,
                 target_branch=self.project.default_branch,
                 source_branch=_string2branch_name(
-                    _UPDATE_BRANCH_NAME.format(environment_name=environment_name)
+                    _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
                 ),
             )
             merge_request.add_label(*labels)
@@ -396,10 +409,10 @@ class UpdateManager(ManagerBase):
         )
         return merge_request
 
-    def _should_update(self, environment_name) -> tuple:
+    def _should_update(self) -> tuple:
         """Check whether the given update was already proposed as a pull request."""
         branch_name = _string2branch_name(
-            _UPDATE_BRANCH_NAME.format(environment_name=environment_name)
+            _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
         )
         pull_requests = {
             mr
@@ -485,7 +498,6 @@ class UpdateManager(ManagerBase):
     def _create_update(
         self,
         body: str,
-        environment_name: str,
         is_dev: bool = False,
         labels: list = None,
         old_environment: dict = None,
@@ -499,11 +511,10 @@ class UpdateManager(ManagerBase):
         information of packages that were present in the old environment so we can selectively change versions in the
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
-        overlays_dir = thoth_config.get_overlays_directory(environment_name)
+        overlays_dir = thoth_config.get_overlays_directory(self.runtime_environment)
         if not old_environment:
             pull_request = self._open_merge_request_update(
                 body,
-                environment_name,
                 labels,
                 [f"{overlays_dir}/Pipfile.lock"],
                 pull_request,
@@ -515,7 +526,7 @@ class UpdateManager(ManagerBase):
         output_file = "requirements-dev.txt" if req_dev else "requirements.txt"
         self._pipenv_lock_requirements(output_file)
         pull_request = self._open_merge_request_update(
-            body, environment_name, labels, [output_file], pull_request
+            body, labels, [output_file], pull_request
         )
         return pull_request.id  # type: ignore
 
@@ -665,10 +676,14 @@ class UpdateManager(ManagerBase):
             os.path.join(relative_dir, "Pipfile.lock"),
             self.service_type,
         )
-        issue = self.get_issue_by_title(_ISSUE_REPLICATE_ENV_NAME)
+        issue = self.get_issue_by_title(
+            _ISSUE_REPLICATE_ENV_NAME.format(env_name=self.runtime_environment)
+        )
         if issue is None:
             issue = self.project.create_issue(
-                title=_ISSUE_REPLICATE_ENV_NAME,
+                title=_ISSUE_REPLICATE_ENV_NAME.format(
+                    env_name=self.runtime_environment
+                ),
                 body=ISSUE_REPLICATE_ENV.format(
                     **exc.__dict__,
                     sha=self.sha,
@@ -767,14 +782,13 @@ class UpdateManager(ManagerBase):
     def _do_update(
         self,
         labels: list,
-        environment_name: str,
         pipenv_used: bool = False,
         req_dev: bool = False,
     ) -> dict:
         """Update dependencies based on management used."""
         close_initial_lock_issue = partial(
             self.close_issue_and_comment,
-            _ISSUE_INITIAL_LOCK_NAME,
+            _ISSUE_INITIAL_LOCK_NAME.format(env_name=self.runtime_environment),
             comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
         )
 
@@ -795,10 +809,14 @@ class UpdateManager(ManagerBase):
             file_url = construct_raw_file_url(
                 self.service_url, self.slug, file_name, self.service_type
             )
-            issue = self.get_issue_by_title(_ISSUE_INITIAL_LOCK_NAME)
+            issue = self.get_issue_by_title(
+                _ISSUE_INITIAL_LOCK_NAME.format(env_name=self.runtime_environment)
+            )
             if issue is None:
                 self.project.create_issue(
-                    title=_ISSUE_INITIAL_LOCK_NAME,
+                    title=_ISSUE_INITIAL_LOCK_NAME.format(
+                        env_name=self.runtime_environment
+                    ),
                     body=ISSUE_INITIAL_LOCK.format(
                         sha=self.sha,
                         url=file_url,
@@ -838,10 +856,14 @@ class UpdateManager(ManagerBase):
                     os.path.join(relative_dir, "Pipfile.lock"),
                     self.service_type,
                 )
-                issue = self.get_issue_by_title(_ISSUE_UPDATE_ALL_NAME)
+                issue = self.get_issue_by_title(
+                    _ISSUE_UPDATE_ALL_NAME.format(env_name=self.runtime_environment)
+                )
                 if issue is None:
                     self.project.create_issue(
-                        title=_ISSUE_UPDATE_ALL_NAME,
+                        title=_ISSUE_UPDATE_ALL_NAME.format(
+                            env_name=self.runtime_environment
+                        ),
                         body=ISSUE_PIPENV_UPDATE_ALL.format(
                             sha=self.sha,
                             pip_url=pip_url,
@@ -858,7 +880,9 @@ class UpdateManager(ManagerBase):
             else:
                 # We were able to update all, close reported issue if any.
                 self.close_issue_and_comment(
-                    title=_ISSUE_UPDATE_ALL_NAME,
+                    title=_ISSUE_UPDATE_ALL_NAME.format(
+                        env_name=self.runtime_environment
+                    ),
                     comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
                 )
         else:  # either requirements.txt or requirements-dev.txt
@@ -879,7 +903,7 @@ class UpdateManager(ManagerBase):
             # Do API calls only once, cache results.
             self._cached_merge_requests = self.project.get_pr_list()
             body = self._generate_update_body(outdated)
-            pull_request, should_update = self._should_update(environment_name)
+            pull_request, should_update = self._should_update()
             if not should_update:
                 _LOGGER.info(
                     f"Skipping update creation as the given update already exists in PR #{pull_request.id}"
@@ -887,7 +911,6 @@ class UpdateManager(ManagerBase):
             try:
                 versions = self._create_update(
                     body=body,
-                    environment_name=environment_name,
                     labels=labels,
                     old_environment=old_environment if not pipenv_used else None,
                     pull_request=pull_request,
@@ -903,7 +926,7 @@ class UpdateManager(ManagerBase):
         else:
             self.close_issue_and_comment(
                 title=_UPDATE_MERGE_REQUEST_TITLE.format(
-                    environment_name=environment_name
+                    env_name=self.runtime_environment
                 ),
                 comment=f"No longer relevant based on the state of the current branch {self.sha}",
             )
@@ -948,14 +971,15 @@ class UpdateManager(ManagerBase):
             results: dict = {}
 
             for e in runtime_environments:
+                self.runtime_environment = e
                 close_no_management_issue = partial(
                     self.close_issue_and_comment,
-                    _ISSUE_NO_DEPENDENCY_NAME.format(environment_name=e),
+                    _ISSUE_NO_DEPENDENCY_NAME.format(env_name=e),
                     comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
                 )
                 with cwd(thoth_config.get_overlays_directory(e)):
                     update_issue = self.get_issue_by_title(
-                        _UPDATE_MERGE_REQUEST_TITLE.format(environment_name=e)
+                        _UPDATE_MERGE_REQUEST_TITLE.format(env_name=e)
                     )
                     if (
                         update_issue is not None and update_issue.status == 2
@@ -963,12 +987,12 @@ class UpdateManager(ManagerBase):
                         try:
                             self.delete_remote_branch(
                                 _string2branch_name(
-                                    _UPDATE_BRANCH_NAME.format(environment_name=e)
+                                    _UPDATE_BRANCH_NAME.format(env_name=e)
                                 )
                             )
                         except Exception:
                             _LOGGER.exception(
-                                f"Failed to delete branch {_UPDATE_BRANCH_NAME.format(environment_name=e)}, "
+                                f"Failed to delete branch {_UPDATE_BRANCH_NAME.format(env_name=e)}, "
                                 "trying to continue"
                             )
 
@@ -982,7 +1006,7 @@ class UpdateManager(ManagerBase):
                         _LOGGER.info("Using Pipfile for dependency management")
                         close_no_management_issue()
                         result = self._do_update(
-                            labels, e, pipenv_used=True, req_dev=False
+                            labels, pipenv_used=True, req_dev=False
                         )
                         close_manual_update_issue()
                     elif os.path.isfile("requirements.in"):
@@ -990,7 +1014,7 @@ class UpdateManager(ManagerBase):
                         _LOGGER.info("Using requirements.in for dependency management")
                         close_no_management_issue()
                         result = self._do_update(
-                            labels, e, pipenv_used=False, req_dev=False
+                            labels, pipenv_used=False, req_dev=False
                         )
                         if os.path.isfile("requirements-dev.in"):
                             self._create_pipenv_environment(
@@ -1001,22 +1025,18 @@ class UpdateManager(ManagerBase):
                             )
                             close_no_management_issue()
                             result = self._do_update(
-                                labels, e, pipenv_used=False, req_dev=True
+                                labels, pipenv_used=False, req_dev=True
                             )
                         close_manual_update_issue()
                     else:
                         _LOGGER.warning("No dependency management found")
                         issue = self.get_issue_by_title(
-                            _ISSUE_NO_DEPENDENCY_NAME.format(environment_name=e)
+                            _ISSUE_NO_DEPENDENCY_NAME.format(env_name=e)
                         )
                         if issue is None:
                             self.project.create_issue(
-                                title=_ISSUE_NO_DEPENDENCY_NAME.format(
-                                    environment_name=e
-                                ),
-                                body=ISSUE_NO_DEPENDENCY_MANAGEMENT.format(
-                                    environment_name=e
-                                ),
+                                title=_ISSUE_NO_DEPENDENCY_NAME.format(env_name=e),
+                                body=ISSUE_NO_DEPENDENCY_MANAGEMENT.format(env_name=e),
                                 labels=labels,
                             )
                         result = {}
