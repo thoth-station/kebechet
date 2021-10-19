@@ -21,7 +21,7 @@ import json
 import logging
 import typing
 
-from kebechet.managers.manager import ManagerBase
+from kebechet.managers.manager import ManagerBase, ManagerFailedException
 from kebechet.utils import cloned_repo
 
 import toml
@@ -35,28 +35,31 @@ _EVENTS_SUPPORTED = ["push", "merge_request"]
 class PipfileRequirementsManager(ManagerBase):
     """Keep requirements.txt in sync with Pipfile or Pipfile.lock."""
 
-    @staticmethod
-    def get_pipfile_requirements(content_str: str) -> typing.Set[str]:
+    def get_pipfile_requirements(self, content_str: str) -> typing.Set[str]:
         """Parse Pipfile file and gather requirements, respect version specifications listed."""
         content = toml.loads(content_str)
 
         requirements = set()
         for package_name, entry in content["packages"].items():
-            if not isinstance(entry, str):
+            if not isinstance(entry, str) or (
+                isinstance(entry, dict) and "version" not in entry
+            ):
                 # e.g. using git, ...
-                raise ValueError(
-                    "Package {} does not use pinned version: {}".format(
-                        package_name, entry
+                issue_title = f"No pinned version for {package_name}"
+                body = f"Package {package_name} does not use pinned version in Pipfile: {entry}"
+                if self.get_issue_by_title(issue_title) is None:
+                    self.project.create_issue(
+                        title=issue_title,
+                        body=body,
                     )
-                )
+                raise ManagerFailedException(body)
 
             package_version = entry if entry != "*" else ""
             requirements.add(f"{package_name}{package_version}")
 
         return requirements
 
-    @staticmethod
-    def get_pipfile_lock_requirements(content_str: str) -> typing.Set[str]:
+    def get_pipfile_lock_requirements(self, content_str: str) -> typing.Set[str]:
         """Parse Pipfile.lock and gather pinned down requirements."""
         content = json.loads(content_str)
 
@@ -64,11 +67,14 @@ class PipfileRequirementsManager(ManagerBase):
         for package_name, package_version in content.items():
             if not isinstance(package_version, str):
                 # e.g. using git, ...
-                raise ValueError(
-                    "Unsupported version entry for {}: {!r}".format(
-                        package_name, package_version
+                issue_title = f"Unsupported version entry for {package_name}"
+                body = f"Unsupported version entry for {package_name} in Pipfile.lock: {package_version}"
+                if self.get_issue_by_title(issue_title) is None:
+                    self.project.create_issue(
+                        title=issue_title,
+                        body=body,
                     )
-                )
+                raise ManagerFailedException(body)
 
             specifier = package_version if package_version != "*" else ""
             requirements.add(f"{package_name}{specifier}")

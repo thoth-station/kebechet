@@ -30,7 +30,11 @@ from .utils import (
 from .payload_parser import PayloadParser
 from .config import _Config
 
-from kebechet.managers import REGISTERED_MANAGERS, ConfigInitializer
+from kebechet.managers import (
+    REGISTERED_MANAGERS,
+    ConfigInitializer,
+    ManagerFailedException,
+)
 
 from github import GithubException
 from requests.exceptions import SSLError
@@ -224,6 +228,8 @@ def run(
             elif isinstance(exc, ConnectionError):
                 continue
             elif isinstance(exc, SSLError):
+                continue
+            elif isinstance(exc, ManagerFailedException):
                 continue
 
             _create_issue_from_exception(

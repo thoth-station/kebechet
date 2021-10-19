@@ -157,3 +157,7 @@ pipenv version: {pipenv_version}
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
         raise NotImplementedError
+
+
+class ManagerFailedException(Exception):
+    """Used to explicitly fail managers without opening issues."""
