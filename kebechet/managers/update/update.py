@@ -33,7 +33,7 @@ from ogr.abstract import Issue, PullRequest, PRStatus
 from packaging.utils import canonicalize_name
 from pipenv.patched.piptools.sync import PACKAGES_TO_IGNORE
 
-from kebechet.exception import DependencyManagementError
+from kebechet.managers.exceptions import DependencyManagementError
 from kebechet.exception import InternalError
 from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
