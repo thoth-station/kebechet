@@ -26,7 +26,7 @@ from thamos import lib
 
 import git  # noqa F401
 
-from kebechet.exception import DependencyManagementError  # noqa F401
+from kebechet.managers.exceptions import DependencyManagementError  # noqa F401
 from kebechet.exception import InternalError  # noqa F401
 from kebechet.exception import PipenvError  # noqa F401
 from kebechet.utils import cloned_repo
