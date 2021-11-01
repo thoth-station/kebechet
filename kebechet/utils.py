@@ -41,6 +41,8 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
 
+_CLONE_DIRECTORY = os.getenv("KEBECHET_GIT_CLONE_DIRECTORY", None)
+
 
 @contextmanager
 def cwd(path: str):
@@ -53,11 +55,26 @@ def cwd(path: str):
         os.chdir(previous_dir)
 
 
+def _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs) -> git.Repo:
+    _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
+    repo = git.Repo.clone_from(repo_url, repo_path, branch=branch, **clone_kwargs)
+    repo.config_writer().set_value(
+        "user", "name", os.getenv("KEBECHET_GIT_NAME", "Kebechet")
+    ).release()
+    repo.config_writer().set_value(
+        "user",
+        "email",
+        os.getenv("KEBECHET_GIT_EMAIL", "noreply+kebechet@redhat.com"),
+    ).release()
+    return repo
+
+
 @contextmanager
-def cloned_repo(manager: "ManagerBase", branch="master", **clone_kwargs):
+def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     service_url = manager.service_url
     slug = manager.slug
+    branch = branch or manager.project.default_branch
     if service_url.startswith("https://"):
         service_url = service_url[len("https://") :]
     elif service_url.startswith("http://"):
@@ -73,18 +90,16 @@ def cloned_repo(manager: "ManagerBase", branch="master", **clone_kwargs):
     else:
         repo_url = f"git@{service_url}:{slug}.git"
 
-    with TemporaryDirectory() as repo_path, cwd(repo_path):
-        _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-        repo = git.Repo.clone_from(repo_url, repo_path, branch=branch, **clone_kwargs)
-        repo.config_writer().set_value(
-            "user", "name", os.getenv("KEBECHET_GIT_NAME", "Kebechet")
-        ).release()
-        repo.config_writer().set_value(
-            "user",
-            "email",
-            os.getenv("KEBECHET_GIT_EMAIL", "noreply+kebechet@redhat.com"),
-        ).release()
-        yield repo
+    if _CLONE_DIRECTORY is not None:
+        with cwd(_CLONE_DIRECTORY):
+            repo = _clone_repo_and_set_vals(
+                repo_url, _CLONE_DIRECTORY, branch, **clone_kwargs
+            )
+            yield repo
+    else:
+        with TemporaryDirectory() as repo_path, cwd(repo_path):
+            repo = _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs)
+            yield repo
 
 
 def construct_raw_file_url(
