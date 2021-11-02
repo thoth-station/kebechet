@@ -1,14 +1,17 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
+  - codificat
   - fridex
-  - pacospace
-  - kpostoffice
-  - sesheta
-  - sefkhet-abwy
-reviewers:
-  - kpostoffice
+  - goern
   - harshad16
+  - kpostoffice
+  - pacospace
+  - sefkhet-abwy
+  - sesheta
+reviewers:
+  - harshad16
+  - kpostoffice
 
 labels:
   - sig/cyborgs
