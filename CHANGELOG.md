@@ -1,5 +1,17 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.0 (2021-11-03T08:32:59)
+* add triage/accepted labels to release issue template to prevent Prow from starting a traige
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* Add Goern, Harshad and Pep as approvers
+* :bomb: use https based url in the pre-commit
+* allow clone dir to be passed as environment variable
+* use approvers section of OWNERS file as default maintainers
+* do not report dependency manager exception on support (#878)
+* add custom exception for known failure cases and open issues for failed manager
+* change key value for getting results from advise endpoint
+* set self.runtime_environment and use for all issue titles
+
 ## Release 1.5.5 (2021-10-14T18:00:50)
 
 - add checks for num lines to avoid out-of-bounds exception
