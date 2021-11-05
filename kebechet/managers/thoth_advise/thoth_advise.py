@@ -17,7 +17,6 @@
 
 """Consume Thoth Output for Kebechet auto-dependency management."""
 
-import hashlib
 import logging
 import json
 import typing
@@ -34,6 +33,7 @@ from kebechet.managers.manager import ManagerBase
 from thoth.common import ThothAdviserIntegrationEnum, cwd
 from thoth.common.enums import InternalTriggerEnum
 from thoth.python.exceptions import FileLoadError
+from ogr.abstract import Issue, PullRequest
 
 from .messages import (
     DEFAULT_PR_BODY,
@@ -42,6 +42,7 @@ from .messages import (
     NEW_RELEASE_PR_BODY,
     NEW_CVE_PR_BODY,
     HASH_MISMATCH_PR_BODY,
+    ADVISE_ACTION_NOT_PERMITTED,
 )
 from .messages import (
     MISSING_PACKAGE_ISSUE_BODY,
@@ -55,6 +56,18 @@ _LOGGER = logging.getLogger(__name__)
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 
+ADVISE_ISSUE_TITLE = "Kebechet Advise"
+
+STARTED_ADVISE_COMMENT = "Started advise with id {analysis_id} for {env_name} to get current status, click [here](\
+    https://{host}/api/v1/advise/python/{analysis_id})"
+STARTED_COMMENT_STARTS_WITH = STARTED_ADVISE_COMMENT[
+    : STARTED_ADVISE_COMMENT.index("{analysis_id}")
+]
+
+FINISHED_ADVISE_COMMENT_PREFIX = "Finished advise for {env_name}\n\n"
+FINISHED_COMMENT_STARTS_WITH = FINISHED_ADVISE_COMMENT_PREFIX[
+    : FINISHED_ADVISE_COMMENT_PREFIX.index("{env_name}")
+]
 
 _INTERNAL_TRIGGER_PR_BODY_LOOKUP = {
     InternalTriggerEnum.CVE.value: NEW_CVE_PR_BODY,
@@ -83,6 +96,9 @@ class ThothAdviseManager(ManagerBase):
         """Initialize ThothAdvise manager."""
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
+        self._issue_list = None
+
+        self._tracking_issue = None  # if a Kebechet Advise issue is found it will be commented on to track progress
         super().__init__(*args, **kwargs)
 
     @property
@@ -104,7 +120,7 @@ class ThothAdviseManager(ManagerBase):
 
     def _open_merge_request(
         self, branch_name: str, labels: list, files: list, metadata: dict
-    ) -> typing.Optional[int]:
+    ) -> typing.Optional[PullRequest]:
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
 
@@ -151,7 +167,7 @@ class ThothAdviseManager(ManagerBase):
         for mr in self._cached_merge_requests:
             if mr.source_branch == branch_name:
                 _LOGGER.info("Merge request already exists, updating...")
-                return None
+                return mr
 
         _LOGGER.info("Opening merge request")
         pr = self.project.create_pr(
@@ -185,7 +201,7 @@ class ThothAdviseManager(ManagerBase):
                 requirements_format=requirements_format,
             )
 
-    def _issue_advise_error(self, adv_results: list, labels: list):
+    def _act_on_advise_error(self, adv_results: list):
         """Create an issue if advise fails."""
         _LOGGER.debug(json.dumps(adv_results))
         textblock = ""
@@ -219,16 +235,68 @@ class ThothAdviseManager(ManagerBase):
                 + internal_trigger_info
             )
 
-        checksum = hashlib.md5(textblock.encode("utf-8")).hexdigest()[:10]
-        issue_title = f"{checksum} - Automated kebechet thoth-advise Issue"
-        issue = self.get_issue_by_title(issue_title)
-        if not issue:
-            _LOGGER.info("Creating issue")
-            self.project.create_issue(
-                title=issue_title,
-                body=textblock,
-                labels=labels,
+        if self._tracking_issue:
+            comment = (
+                FINISHED_ADVISE_COMMENT_PREFIX.format(env_name=self.runtime_environment)
+                + f"Adviser failed\n{textblock}"
             )
+            self._tracking_issue.comment(comment)
+
+    def _get_users_with_permission(self) -> typing.List[str]:
+        try:
+            with open("OWNERS", "r") as owners_file:
+                owners = yaml.safe_load(owners_file)
+            return list(map(str, owners.get("approvers") or [])) + [
+                self.service.user.get_username()
+            ]
+        except FileNotFoundError:
+            return self.project.who_can_merge_pr().append(
+                self.service.user.get_username()
+            )
+
+    def _close_advise_issues4users_lacking_perms(self):
+        permitted_users = self._get_users_with_permission()
+        copy_of_issue_list = (
+            self._issue_list.copy()
+        )  # so we don't mess with iteration by removing items
+        for issue in self._issue_list:
+            if (
+                issue.title == ADVISE_ISSUE_TITLE
+                and issue.author not in permitted_users
+            ):
+                issue.comment(
+                    ADVISE_ACTION_NOT_PERMITTED.format(
+                        author=issue.author, permitted_users=", ".join(permitted_users)
+                    )
+                )
+                issue.close()
+                copy_of_issue_list.remove(issue)
+        self._issue_list = copy_of_issue_list
+
+    def _advise_issue_is_fresh(self, issue: Issue):
+        return not issue.get_comments(author=self.project.service.user.get_username)
+
+    def _close_all_but_oldest_issue(self) -> typing.Optional[Issue]:
+        oldest = None
+        to_close: Issue = []
+        for issue in self._issue_list:
+            if issue.title == ADVISE_ISSUE_TITLE:
+                if oldest is None:
+                    oldest = issue
+                elif oldest.created > issue.created:
+                    to_close.append(oldest)
+                    oldest = issue
+                else:
+                    to_close.append(issue)
+
+        for issue in to_close:
+            issue.comment(
+                f"Older Kebechet Advise found that is still in progress, see #{oldest.id}"  # type: ignore
+            )
+            issue.close()
+            self._issue_list.remove(issue)
+
+        return oldest
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
@@ -240,40 +308,53 @@ class ThothAdviseManager(ManagerBase):
                 )
                 return
 
+        self._issue_list = self.project.get_issue_list()
+        self._close_advise_issues4users_lacking_perms()
+        self._tracking_issue = self._close_all_but_oldest_issue()
+        runtime_environments: typing.List[typing.Tuple[str, Issue]]
+
         if analysis_id is None:
+            if self._tracking_issue is None:
+                _LOGGER.debug("No issue found to start advises for.")
+                return
+            elif not self._advise_issue_is_fresh(self._tracking_issue):
+                _LOGGER.debug(
+                    "Issue has already been acted on by Kebechet and is still 'in progress'"
+                )
+                return
+
             with cloned_repo(self, self.project.default_branch, depth=1) as repo:
                 self.repo = repo
 
                 with open(".thoth.yaml", "r") as f:
                     thoth_config = yaml.safe_load(f)
 
-                if self.runtime_environment:
-                    if self.runtime_environment not in [
+                if thoth_config.get("overlays_dir"):
+                    runtime_environments = [
                         e["name"] for e in thoth_config["runtime_environments"]
-                    ]:
-                        _LOGGER.error(
-                            "Requested runtime does not exist in target repo."
-                        )
-                        return False
-                    runtime_environments = [self.runtime_environment]
+                    ]
+                    for e in thoth_config["runtime_environments"]:
+                        runtime_environments.append(e["name"])
                 else:
-                    if thoth_config.get("overlays_dir"):
-                        runtime_environments = [
-                            e["name"] for e in thoth_config["runtime_environments"]
-                        ]
-                    else:
-                        runtime_environments = [
-                            thoth_config["runtime_environments"][0]["name"]
-                        ]
+                    runtime_environments = [
+                        thoth_config["runtime_environments"][0]["name"]
+                    ]
 
                 for e in runtime_environments:
                     try:
-                        lib.advise_here(
+                        analysis_id = lib.advise_here(
                             nowait=True,
                             origin=(f"{self.service_url}/{self.slug}"),
                             source_type=ThothAdviserIntegrationEnum.KEBECHET,
                             kebechet_metadata=self.metadata,
                             runtime_environment_name=e,
+                        )
+                        self._tracking_issue.comment(
+                            STARTED_ADVISE_COMMENT.format(
+                                analysis_id=analysis_id,
+                                env_name=e,
+                                host=thoth_config["host"],
+                            )
                         )
                     except FileLoadError:
                         issue_title = (
@@ -283,10 +364,14 @@ class ThothAdviseManager(ManagerBase):
 
                         If this project does not use requirements.txt or Pipfile then remove thoth-advise manager from
                         your .thoth.yaml configuration."""
-                        if self.get_issue_by_title(issue_title) is None:
-                            self.project.create_issue(
+                        error_issue = self.get_issue_by_title(issue_title)
+                        if error_issue is None:
+                            error_issue = self.project.create_issue(
                                 title=issue_title, body=body, labels=labels
                             )
+                        self._tracking_issue.comment(
+                            f"Cannot advise for {e}, no requirements found, see: #{error_issue.id}"
+                        )
                         return False
             return True
         else:
@@ -308,17 +393,51 @@ class ThothAdviseManager(ManagerBase):
                 self.runtime_environment = _runtime_env_name_from_advise_response(
                     res[0]
                 )
-
+                to_ret = False
                 if res[1] is False:
                     _LOGGER.info("Advise succeeded")
                     self._write_advise(res)
-                    self._open_merge_request(
+                    opened_merge = self._open_merge_request(
                         branch_name, labels, ["Pipfile.lock"], res[0].get("metadata")
                     )
-                    return True
+                    if opened_merge and self._tracking_issue:
+                        comment = (
+                            FINISHED_ADVISE_COMMENT_PREFIX.format(
+                                env_name=self.runtime_environment
+                            )
+                            + f"Opened merge request, see: #{opened_merge.id}"
+                        )
+                        self._tracking_issue.comment(comment)
+                    elif self._tracking_issue:
+                        comment = (
+                            FINISHED_ADVISE_COMMENT_PREFIX.format(
+                                env_name=self.runtime_environment
+                            )
+                            + "Dependencies for this runtime environment are already up to date :)."
+                        )
+                        self._tracking_issue.comment(comment)
+                    to_ret = True
                 else:
                     _LOGGER.warning(
                         "Found error while running adviser... Creating issue"
                     )
-                    self._issue_advise_error(res, labels)
-                    return False
+                    self._act_on_advise_error(res)
+                if self._tracking_issue:
+                    to_open = len(
+                        self._tracking_issue.get_comments(
+                            filter_regex=f"^{STARTED_COMMENT_STARTS_WITH}",
+                            author=self.project.service.user.get_username(),
+                        )
+                    )
+                    finished = len(
+                        self._tracking_issue.get_comments(
+                            filter_regex=f"^{FINISHED_COMMENT_STARTS_WITH}",
+                            author=self.project.service.user.get_username(),
+                        )
+                    )
+                    if to_open - finished == 0:
+                        self._tracking_issue.comment(
+                            "Finished advising for all environments."
+                        )
+                        self._tracking_issue.close()
+                return to_ret

@@ -21,7 +21,8 @@ import json
 import logging
 import typing
 
-from kebechet.managers.manager import ManagerBase, ManagerFailedException
+from kebechet.managers.manager import ManagerBase
+from kebechet.managers.exceptions import ManagerFailedException
 from kebechet.utils import cloned_repo
 
 import toml

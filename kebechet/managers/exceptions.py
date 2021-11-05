@@ -17,7 +17,9 @@
 
 """Exceptions used by the update manager."""
 
-from kebechet.managers import ManagerFailedException
+
+class ManagerFailedException(Exception):
+    """Used to explicitly fail managers without opening issues."""
 
 
 class DependencyManagementError(ManagerFailedException):
