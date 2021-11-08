@@ -13,3 +13,7 @@ recursive-include openshift *.yaml
 recursive-include playbooks *.yaml
 recursive-include workflows *.yaml
 recursive-include kebechet *.yaml
+recursive-include docs *.bat
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
