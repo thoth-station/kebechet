@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.1 (2021-11-09T06:47:27)
+* add keb version to issue body
+* :turtle: Support python 3.9 in kebechet dependency management
+* use sphinx for Kebechet documentation
+
 ## Release 1.6.0 (2021-11-03T08:32:59)
 * add triage/accepted labels to release issue template to prevent Prow from starting a traige
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
