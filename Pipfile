@@ -19,6 +19,7 @@ GitPython = ">=3.1.0"
 PyYAML = "*"
 typing-extensions = "*"
 ogr = "*"
+fasttext = "==0.9.1"
 
 [dev-packages]
 pytest = "*"
