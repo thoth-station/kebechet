@@ -18,10 +18,6 @@ managers:
   - name: info
   - name: version
     configuration:
-      maintainers:
-        - sesheta
-        - goern
-        - fridex
       assignees:
         - sesheta
       labels: [bot]
