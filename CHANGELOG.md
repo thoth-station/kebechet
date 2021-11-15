@@ -1,21 +1,30 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.2 (2021-11-15T06:47:27)
+
+- Remove the maintainers section from .thoth.yaml
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+- Track advise status using GitHub issue
+- patch the fasttext version for build fix
+
 ## Release 1.6.1 (2021-11-09T06:47:27)
-* add keb version to issue body
-* :turtle: Support python 3.9 in kebechet dependency management
-* use sphinx for Kebechet documentation
+
+- add keb version to issue body
+- :turtle: Support python 3.9 in kebechet dependency management
+- use sphinx for Kebechet documentation
 
 ## Release 1.6.0 (2021-11-03T08:32:59)
-* add triage/accepted labels to release issue template to prevent Prow from starting a traige
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
-* Add Goern, Harshad and Pep as approvers
-* :bomb: use https based url in the pre-commit
-* allow clone dir to be passed as environment variable
-* use approvers section of OWNERS file as default maintainers
-* do not report dependency manager exception on support (#878)
-* add custom exception for known failure cases and open issues for failed manager
-* change key value for getting results from advise endpoint
-* set self.runtime_environment and use for all issue titles
+
+- add triage/accepted labels to release issue template to prevent Prow from starting a traige
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+- Add Goern, Harshad and Pep as approvers
+- :bomb: use https based url in the pre-commit
+- allow clone dir to be passed as environment variable
+- use approvers section of OWNERS file as default maintainers
+- do not report dependency manager exception on support (#878)
+- add custom exception for known failure cases and open issues for failed manager
+- change key value for getting results from advise endpoint
+- set self.runtime_environment and use for all issue titles
 
 ## Release 1.5.5 (2021-10-14T18:00:50)
 
@@ -49,6 +58,7 @@
   ### Improvements
 
 - make changelog not smart by default
+
 - if PR already exists warn and continue
 
 ## Release 1.5.2 (2021-09-27T21:37:47)
@@ -80,6 +90,7 @@
   ### Bug Fixes
 
 - :bug: fix some typos
+
 - do not raise issue for conn error
 
 ## Release 1.5.0 (2021-09-15T16:02:53)
@@ -93,11 +104,13 @@
   ### Bug Fixes
 
 - instead of opening issues in user repo open in thoth-station/support
+
 - if requirements.txt does not exist it must be created
 
   ### Improvements
 
 - updated README files to reflect current state of Kebechet
+
 - pull runtime_environment directly from advise results
 - removed unused -dev dependencies
 
@@ -123,6 +136,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ## Release 1.0.1 (2020-06-05T11:15:40)
 
 - Add repo for solver error classifier
+
 - Correct template
 - add pre-commit config
 - added a 'tekton trigger tag_release pipeline issue'
@@ -1474,6 +1488,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Bug Fixes
 
 - Minor fix
+
 - String concatenation fix
 - Minor fix
 - String concatenation fix
@@ -1528,6 +1543,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Improvements
 
 - Updated to pipenv 2020.8.13 and locked
+
 - Document CHANGELOG.md file generation and assignees (#487)
 - Extra line removed
 - Extra line removed
@@ -1582,6 +1598,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Other
 
 - remove metadata prefix
+
 - Removed IGitt from manager base class
 - Changed README and removed unnecessary code that was copied over
 - Simplify code for with statement
@@ -1589,6 +1606,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Automatic Updates
 
 - :pushpin: Automatic update of dependency pytest-cov from 2.10.0 to 2.10.1 (#490)
+
 - :pushpin: Automatic update of dependency thamos from 0.11.0 to 0.11.1 (#489)
 - :pushpin: Automatic update of dependency thoth-common from 0.16.0 to 0.16.1 (#488)
 - :pushpin: Automatic update of dependency thamos from 0.10.6 to 0.11.0 (#486)
@@ -1682,6 +1700,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Automatic Updates
 
 - :pushpin: Automatic update of dependency gitpython from 3.1.7 to 3.1.8
+
 - :pushpin: Automatic update of dependency thoth-glyph from 0.1.0 to 0.1.1
 - :pushpin: Automatic update of dependency sentry-sdk from 0.17.0 to 0.17.4
 - :pushpin: Automatic update of dependency thamos from 0.11.1 to 0.12.2
@@ -1736,11 +1755,13 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Bug Fixes
 
 - Updated source-management and fixed version test (#590)
+
 - Precommit fixes
 
   ### Improvements
 
 - :sparkles: :pencil: updated the readme, now we deploy via kustomize rather than ansible
+
 - Fix typo
 
 ## Release 1.1.0 (2020-11-18T18:13:51)
@@ -1875,6 +1896,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Bug Fixes
 
 - :zap: pre-commit fixes for the master branch
+
 - :arrow_up: fix some formatting and update pre-commit plugins
 
   ### Improvements
@@ -1884,6 +1906,7 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Other
 
 - remove thoth-sourcemanagement from Kebechet (#725)
+
 - remove todo
 - Delete branch if the pull request has been already closed
 
@@ -1927,11 +1950,13 @@ Starting with this release we have a Zuul-CI pipeline that:
   ### Bug Fixes
 
 - fix issue 746
+
 - fixed bug with unrelated histories where khebhut doesn't create PR
 
   ### Improvements
 
 - use upstream solution for adding assignees
+
 - use thamos.lib.write_files
 
 ## Release 1.4.0 (2021-08-02T08:06:03)
