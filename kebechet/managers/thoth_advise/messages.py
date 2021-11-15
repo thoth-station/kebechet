@@ -84,3 +84,11 @@ your application stack.
 
 This PR contains an automatic update of Pipfile.lock by Kebechet thoth-advise manager.
 """
+
+ADVISE_ACTION_NOT_PERMITTED = """
+Sorry {author}, you are not permitted to request Kebechet to run thoth-advise. Here is a list of individuals who can
+request thoth.advises: {permitted_users}.
+
+Users present in the `approvers` section of the `OWNERS` file are allowed to request thoth-advises, if there is no
+`OWNERS file present, then individuals with merge permissions are allowed to request thoth-advises.
+"""
