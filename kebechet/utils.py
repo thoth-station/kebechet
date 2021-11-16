@@ -91,9 +91,12 @@ def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
 
     if _CLONE_DIRECTORY is not None:
         with cwd(_CLONE_DIRECTORY):
-            repo = _clone_repo_and_set_vals(
-                repo_url, _CLONE_DIRECTORY, branch, **clone_kwargs
-            )
+            try:
+                repo = _clone_repo_and_set_vals(
+                    repo_url, _CLONE_DIRECTORY, branch, **clone_kwargs
+                )
+            except git.GitCommandError:
+                repo = git.Repo(_CLONE_DIRECTORY)
             yield repo
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
