@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.3 (2021-11-16T06:47:27)
+
+- :fire: patch the circuler import fix for keb version in utils
+- reraise github server exception
+
 ## Release 1.6.2 (2021-11-15T06:47:27)
 
 - Remove the maintainers section from .thoth.yaml
@@ -112,6 +117,7 @@
 - updated README files to reflect current state of Kebechet
 
 - pull runtime_environment directly from advise results
+
 - removed unused -dev dependencies
 
   ### Other
@@ -138,8 +144,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Add repo for solver error classifier
 
 - Correct template
+
 - add pre-commit config
+
 - added a 'tekton trigger tag_release pipeline issue'
+
 - Add thoth-station/datasets
 - Add version release for advise-reporter
 - :pushpin: Automatic update of dependency pipenv from 2018.11.26 to 2020.5.28
@@ -1490,8 +1499,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Minor fix
 
 - String concatenation fix
+
 - Minor fix
+
 - String concatenation fix
+
 - Minor fix
 - Relock fix (#468)
 - Precommit fixes (#470)
@@ -1545,8 +1557,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Updated to pipenv 2020.8.13 and locked
 
 - Document CHANGELOG.md file generation and assignees (#487)
+
 - Extra line removed
+
 - Extra line removed
+
 - Remove result-api and workload-operator
 - Make config parsing more safe
 - use source type enum
@@ -1600,7 +1615,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 - remove metadata prefix
 
 - Removed IGitt from manager base class
+
 - Changed README and removed unnecessary code that was copied over
+
 - Simplify code for with statement
 
   ### Automatic Updates
@@ -1608,8 +1625,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency pytest-cov from 2.10.0 to 2.10.1 (#490)
 
 - :pushpin: Automatic update of dependency thamos from 0.11.0 to 0.11.1 (#489)
+
 - :pushpin: Automatic update of dependency thoth-common from 0.16.0 to 0.16.1 (#488)
+
 - :pushpin: Automatic update of dependency thamos from 0.10.6 to 0.11.0 (#486)
+
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#482)
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#481)
 - :pushpin: Automatic update of dependency thoth-common from 0.14.2 to 0.16.0 (#480)
@@ -1702,8 +1722,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency gitpython from 3.1.7 to 3.1.8
 
 - :pushpin: Automatic update of dependency thoth-glyph from 0.1.0 to 0.1.1
+
 - :pushpin: Automatic update of dependency sentry-sdk from 0.17.0 to 0.17.4
+
 - :pushpin: Automatic update of dependency thamos from 0.11.1 to 0.12.2
+
 - :pushpin: Automatic update of dependency thoth-common from 0.16.1 to 0.18.2
 
 ## Release 1.0.6 (2020-09-18T10:59:54)
@@ -1908,6 +1931,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - remove thoth-sourcemanagement from Kebechet (#725)
 
 - remove todo
+
 - Delete branch if the pull request has been already closed
 
 ## Release 1.3.1 (2021-06-09T11:13:43)
