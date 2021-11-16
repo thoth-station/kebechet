@@ -225,6 +225,8 @@ def run(
             ):
                 _LOGGER.info("Cannot open issue because it is disabled on this repo.")
                 continue
+            elif isinstance(exc, GithubException) and exc.status >= 500:
+                raise exc  # reraise server error as the response could be flaky (behaviour dependent on retry policy).
             elif isinstance(exc, ConnectionError):
                 continue
             elif isinstance(exc, SSLError):
