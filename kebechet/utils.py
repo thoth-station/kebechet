@@ -37,8 +37,6 @@ from ogr.services.pagure import PagureService
 if TYPE_CHECKING:
     from .manager import ManagerBase
 
-from . import __version__ as keb_version
-
 _LOGGER = logging.getLogger(__name__)
 APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
 
@@ -189,7 +187,11 @@ at runtime while working on the following repository https://github.com/{slug}
 
 
 def _create_issue_from_exception(
-    manager_name: str, slug: str, exc: Exception, ogr_service: BaseGitService
+    keb_version: str,
+    manager_name: str,
+    slug: str,
+    exc: Exception,
+    ogr_service: BaseGitService,
 ):
     tb = "".join(traceback.format_exception(None, exc, exc.__traceback__))
     _, _, exc_tb = sys.exc_info()

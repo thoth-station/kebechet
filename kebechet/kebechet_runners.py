@@ -35,7 +35,7 @@ from kebechet.managers import (
     ConfigInitializer,
     ManagerFailedException,
 )
-
+from . import __version__ as keb_version
 from github import GithubException
 from requests.exceptions import SSLError
 
@@ -235,6 +235,7 @@ def run(
                 continue
 
             _create_issue_from_exception(
+                keb_version=keb_version,
                 manager_name=manager_name,
                 ogr_service=ogr_service,
                 slug=slug,
