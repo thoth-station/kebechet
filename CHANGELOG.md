@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.4 (2021-11-17T06:47:27)
+
+- check if .git exists so that we don't catch all gitcommand exceptions (#909)
+- if we have already cloned to dir, return repo from dir
+
 ## Release 1.6.3 (2021-11-16T06:47:27)
 
 - :fire: patch the circuler import fix for keb version in utils
@@ -150,6 +155,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - added a 'tekton trigger tag_release pipeline issue'
 
 - Add thoth-station/datasets
+
 - Add version release for advise-reporter
 - :pushpin: Automatic update of dependency pipenv from 2018.11.26 to 2020.5.28
 - Consider app.py and wsgi.py as a source for version
@@ -1505,6 +1511,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - String concatenation fix
 
 - Minor fix
+
 - Relock fix (#468)
 - Precommit fixes (#470)
 - Fix attribute error while parsing YAML
@@ -1563,6 +1570,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Extra line removed
 
 - Remove result-api and workload-operator
+
 - Make config parsing more safe
 - use source type enum
 - Fix test imports
@@ -1631,6 +1639,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency thamos from 0.10.6 to 0.11.0 (#486)
 
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#482)
+
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#481)
 - :pushpin: Automatic update of dependency thoth-common from 0.14.2 to 0.16.0 (#480)
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#476)
