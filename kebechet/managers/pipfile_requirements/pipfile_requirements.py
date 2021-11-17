@@ -120,7 +120,7 @@ class PipfileRequirementsManager(ManagerBase):
                 requirements_file.write("\n".join(pipfile_content))
                 requirements_file.write("\n")
 
-            branch_name = "pipfile-requirements-sync"
+            branch_name = "kebechet-pipfile-requirements-sync"
             repo.git.checkout(b=branch_name)
             repo.index.add(["requirements.txt"])
             repo.index.commit(
