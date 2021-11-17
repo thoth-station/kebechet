@@ -91,13 +91,13 @@ def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
 
     if _CLONE_DIRECTORY is not None:
         with cwd(_CLONE_DIRECTORY):
-            if os.path.isdir(os.path.join(_CLONE_DIRECTORY, ".git")):
-                repo = git.Repo(_CLONE_DIRECTORY)
+            if os.path.isdir(os.path.join(".", ".git")):
+                repo = git.Repo(".")
+                repo.git.checkout(branch)
             else:
-                repo = _clone_repo_and_set_vals(
-                    repo_url, _CLONE_DIRECTORY, branch, **clone_kwargs
-                )
+                repo = _clone_repo_and_set_vals(repo_url, ".", branch, **clone_kwargs)
             yield repo
+            repo.git.clean("-xdf")
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
             repo = _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs)
