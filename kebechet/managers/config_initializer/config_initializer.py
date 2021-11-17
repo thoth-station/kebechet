@@ -37,7 +37,7 @@ The Kebechet app was installed on this repository but no configuration was
 found.  This PR contains basic configuration of runtime environments and
 managers."""
 
-_BRANCH_NAME = "initial_thoth_config"
+_BRANCH_NAME = "kebechet-initial-thoth-config"
 
 
 class ConfigInitializer(ManagerBase):
