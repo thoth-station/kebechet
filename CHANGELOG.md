@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.5 (2021-11-17T16:47:27)
+
+- clean repo after using
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+
 ## Release 1.6.4 (2021-11-17T06:47:27)
 
 - check if .git exists so that we don't catch all gitcommand exceptions (#909)
@@ -157,6 +162,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Add thoth-station/datasets
 
 - Add version release for advise-reporter
+
 - :pushpin: Automatic update of dependency pipenv from 2018.11.26 to 2020.5.28
 - Consider app.py and wsgi.py as a source for version
 - :pushpin: Automatic update of dependency thoth-common from 0.13.6 to 0.13.7
@@ -1513,6 +1519,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Minor fix
 
 - Relock fix (#468)
+
 - Precommit fixes (#470)
 - Fix attribute error while parsing YAML
 - Fix if maintainers are not stated in OWNERS file
@@ -1572,6 +1579,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Remove result-api and workload-operator
 
 - Make config parsing more safe
+
 - use source type enum
 - Fix test imports
 - Added instruction for manual trigger and closses issue
@@ -1641,6 +1649,7 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#482)
 
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#481)
+
 - :pushpin: Automatic update of dependency thoth-common from 0.14.2 to 0.16.0 (#480)
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#476)
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#475)
