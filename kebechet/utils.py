@@ -93,7 +93,13 @@ def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
         with cwd(_CLONE_DIRECTORY):
             if os.path.isdir(os.path.join(".", ".git")):
                 repo = git.Repo(".")
+                depth = clone_kwargs.get("depth")
+                if depth:
+                    repo.remote().fetch(depth=depth)
+                else:
+                    repo.git.fetch(unshallow=True)
                 repo.git.checkout(branch)
+                repo.git.pull()
             else:
                 repo = _clone_repo_and_set_vals(repo_url, ".", branch, **clone_kwargs)
             yield repo
