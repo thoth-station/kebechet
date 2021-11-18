@@ -29,7 +29,7 @@ import kebechet
 
 from kebechet.exception import PipenvError
 from ogr.services.base import BaseGitService
-from ogr.abstract import Issue, PullRequest
+from ogr.abstract import Issue, PullRequest, PRStatus
 
 from kebechet import utils
 
@@ -129,10 +129,11 @@ pipenv version: {pipenv_version}
         """Get an ogr.Issue object with a matching title."""
         return utils.get_issue_by_title(self.project, title)
 
-    def get_prs_by_branch(self, branch: str) -> List[PullRequest]:
+    def get_prs_by_branch(self, branch: str, status=PRStatus.open) -> List[PullRequest]:
         """Get a list of ogr.PullRequest objects which are using the supplied branch name."""
         to_ret = []
-        for pr in self.project.get_pr_list():
+        self.project.get_pr_list
+        for pr in self.project.get_pr_list(status=status):
             if pr.source_branch == branch:
                 to_ret.append(pr)
         return to_ret
