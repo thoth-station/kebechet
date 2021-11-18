@@ -4,5 +4,5 @@ from .managers import InfoManager  # noqa F401
 from .managers import UpdateManager  # noqa F401
 
 __name__ = "kebechet"
-__version__ = "1.6.5"
+__version__ = "1.6.6"
 __author__ = "Fridolin Pokorny <fridolin.pokorny@gmail.com>"

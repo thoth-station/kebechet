@@ -1,5 +1,11 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.6 (2021-11-18T16:47:27)
+
+- No computed changelog
+- if no depth is passed fetch full history
+- add kebechet- to all branch names
+
 ## Release 1.6.5 (2021-11-17T16:47:27)
 
 - clean repo after using
@@ -164,8 +170,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Add version release for advise-reporter
 
 - :pushpin: Automatic update of dependency pipenv from 2018.11.26 to 2020.5.28
+
 - Consider app.py and wsgi.py as a source for version
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.6 to 0.13.7
+
 - :pushpin: Automatic update of dependency thamos from 0.10.1 to 0.10.2
 - :pushpin: Automatic update of dependency pytest-cov from 2.8.1 to 2.9.0
 - :pushpin: Automatic update of dependency thoth-common from 0.13.5 to 0.13.6
@@ -1521,8 +1530,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Relock fix (#468)
 
 - Precommit fixes (#470)
+
 - Fix attribute error while parsing YAML
+
 - Fix if maintainers are not stated in OWNERS file
+
 - Typo fix
 - fixed coala
 - coala fix
@@ -1581,8 +1593,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Make config parsing more safe
 
 - use source type enum
+
 - Fix test imports
+
 - Added instruction for manual trigger and closses issue
+
 - Added instruction for manual trigger and closses issue"
 - Updated template and workflow to use openshift image
 - removed extra files
@@ -1651,8 +1666,11 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency pytest from 5.4.3 to 6.0.1 (#481)
 
 - :pushpin: Automatic update of dependency thoth-common from 0.14.2 to 0.16.0 (#480)
+
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#476)
+
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#475)
+
 - :pushpin: Automatic update of dependency thoth-common from 0.14.1 to 0.14.2 (#474)
 - :pushpin: Automatic update of dependency gitpython from 3.1.3 to 3.1.7 (#471)
 - :pushpin: Automatic update of dependency thamos from 0.10.5 to 0.10.6 (#472)
