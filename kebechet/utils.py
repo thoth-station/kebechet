@@ -93,9 +93,11 @@ def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
         with cwd(_CLONE_DIRECTORY):
             if os.path.isdir(os.path.join(".", ".git")):
                 repo = git.Repo(".")
+                repo.remote().fetch()
                 repo.git.checkout(branch)
             else:
                 repo = _clone_repo_and_set_vals(repo_url, ".", branch, **clone_kwargs)
+                repo.remote().fetch()
             yield repo
             repo.git.clean("-xdf")
     else:
