@@ -1257,11 +1257,11 @@
         },
         "thamos": {
             "hashes": [
-                "sha256:516818ad75a24a7ad2a3fb18624bb7db8864f8263d1c1bf6f757122ede8656b9",
-                "sha256:9f881b7bcecd291512727e3ac8593c7ba8515160157586f59448b6b3b758c675"
+                "sha256:08354d70494b5cac8da5ae69a059f3193aafbc97e63035b0425ac4cbe6064366",
+                "sha256:30642683a59d0d22f9dc3a61be93fe2920e114f9baae385ad4ef009abbd0902c"
             ],
             "index": "pypi",
-            "version": "==1.20.0"
+            "version": "==1.21.0"
         },
         "thoth-analyzer": {
             "hashes": [
