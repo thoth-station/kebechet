@@ -1,5 +1,11 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.7 (2021-11-26T18:41:48)
+* Fix format string reference to environment name
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+* remove kebechet- prefix from version branch (used for image tag)
+
 ## Release 1.6.6 (2021-11-18T16:47:27)
 
 - No computed changelog
