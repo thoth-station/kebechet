@@ -495,7 +495,7 @@ class VersionManager(ManagerBase):
                 try:
                     # If this PR already exists, this will fail.
 
-                    pr = self.project.create_pr(
+                    pr = self.create_pr(
                         title=message,
                         body=self._construct_pr_body(issue, changelog),
                         target_branch=self.project.default_branch,

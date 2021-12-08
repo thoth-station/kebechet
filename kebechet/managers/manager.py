@@ -154,6 +154,16 @@ pipenv version: {pipenv_version}
         issue.comment(comment)
         issue.close()
 
+    def create_pr(self, title: str, body: str, source_branch: str, target_branch: str):
+        """Create a PR but defaults to opening PR within a fork rather than on parent fork."""
+        return self.project.create_pr(
+            title=title,
+            body=body,
+            target_branch=target_branch,
+            source_branch=source_branch,
+            fork_username=self.project.namespace if self.project.is_fork else None,
+        )
+
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
         raise NotImplementedError

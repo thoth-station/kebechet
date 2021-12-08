@@ -174,7 +174,7 @@ class ThothAdviseManager(ManagerBase):
                 return mr
 
         _LOGGER.info("Opening merge request")
-        pr = self.project.create_pr(
+        pr = self.create_pr(
             title=commit_msg,
             body=body,
             target_branch=self.project.default_branch,
