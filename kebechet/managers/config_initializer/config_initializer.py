@@ -58,7 +58,7 @@ class ConfigInitializer(ManagerBase):
             repo.index.add([".thoth.yaml"])
             repo.index.commit("Initialize .thoth.yaml with basic configuration")
             repo.remote().push(_BRANCH_NAME)
-            self.project.create_pr(
+            self.create_pr(
                 title="Thoth Configuration Initialization",
                 body=_PR_BODY,
                 target_branch=self.project.default_branch,

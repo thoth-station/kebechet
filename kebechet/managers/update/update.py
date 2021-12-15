@@ -388,7 +388,7 @@ class UpdateManager(ManagerBase):
 
         if not merge_request:
             _LOGGER.info("Creating a new pull request to update dependencies.")
-            merge_request = self.project.create_pr(
+            merge_request = self.create_pr(
                 title=_UPDATE_MERGE_REQUEST_TITLE.format(
                     env_name=self.runtime_environment
                 ),
@@ -589,7 +589,7 @@ class UpdateManager(ManagerBase):
         if len(pull_requests) == 0:
             lock_func()
             self._git_push(commit_msg, branch_name, files)
-            pr = self.project.create_pr(
+            pr = self.create_pr(
                 title=commit_msg,
                 body="",
                 target_branch=self.project.default_branch,
@@ -724,7 +724,7 @@ class UpdateManager(ManagerBase):
         elif len(existing_prs) == 0:
             # Default case
             self._git_push(":pushpin: " + commit_msg, branch_name, ["Pipfile.lock"])
-            pr = self.project.create_pr(
+            pr = self.create_pr(
                 title=commit_msg,
                 body=f"Fixes: #{issue.id}",
                 target_branch=self.project.default_branch,
