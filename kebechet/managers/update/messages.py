@@ -149,7 +149,8 @@ to keep your dependencies managed, please submit `Pipfile` or `requirements.in` 
 
 To generate a `Pipfile`, use:
 ```
-$ pipenv install --skip-lock --code ./
+$ pip install --upgrade --user thamos
+$ thamos discover --src-path ./
 $ git add Pipfile
 $ git commit -m 'Add Pipfile for dependency management'
 ```
