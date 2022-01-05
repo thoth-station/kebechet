@@ -1,5 +1,14 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.6.8 (2022-01-05T12:38:37)
+* Fix the links to each manager's README
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* create_pr for manager class with default value for forknamespace
+* use env variable for kebechets name
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+
 ## Release 1.6.7 (2021-11-26T18:41:48)
 * Fix format string reference to environment name
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
