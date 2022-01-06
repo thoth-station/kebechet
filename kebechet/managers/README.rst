@@ -12,13 +12,13 @@ Available Managers
 * `Update Manager`_
 * `Version Manager`_
 
-.. _`Info Manager`: info/README.rst
-.. _`Label Bot Manager`: label_bot/README.rst
-.. _`Pipfile Requirements Manager`: pipfile_requirements/README.rst
-.. _`Thoth Advise Manager`: thoth_advise/README.rst
-.. _`Thoth Provenance Manager`: thoth_provenance/README.rst
-.. _`Update Manager`: update/README.rst
-.. _`Version Manager`: version/README.rst
+.. _`Info Manager`: ../../docs/managers/info_manager.rst
+.. _`Label Bot Manager`: ../../docs/managers/label_bot.rst
+.. _`Pipfile Requirements Manager`: ../../docs/managers/pipfile_requirements.rst
+.. _`Thoth Advise Manager`: ../../docs/managers/thoth_advise.rst
+.. _`Thoth Provenance Manager`: ../../docs/managers/thoth_provenance.rst
+.. _`Update Manager`: ../../docs/managers/update.rst
+.. _`Version Manager`: ../../docs/managers/version.rst
 
 
 Developing your own manager

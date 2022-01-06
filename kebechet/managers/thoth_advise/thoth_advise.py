@@ -21,6 +21,7 @@ import logging
 import json
 import typing
 import yaml
+import os
 from thamos import lib
 
 import git  # noqa F401
@@ -83,6 +84,9 @@ _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP = {
     InternalTriggerEnum.MISSING_PACKAGE.value: MISSING_PACKAGE_ISSUE_BODY,
     InternalTriggerEnum.MISSING_VERSION.value: MISSING_PACKAGE_VERSION_ISSUE_BODY,
 }
+
+
+APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
 
 
 def _runtime_env_name_from_advise_response(response: dict):
@@ -170,7 +174,7 @@ class ThothAdviseManager(ManagerBase):
                 return mr
 
         _LOGGER.info("Opening merge request")
-        pr = self.project.create_pr(
+        pr = self.create_pr(
             title=commit_msg,
             body=body,
             target_branch=self.project.default_branch,
@@ -246,13 +250,9 @@ class ThothAdviseManager(ManagerBase):
         try:
             with open("OWNERS", "r") as owners_file:
                 owners = yaml.safe_load(owners_file)
-            return list(map(str, owners.get("approvers") or [])) + [
-                self.service.user.get_username()
-            ]
+            return list(map(str, owners.get("approvers") or [])) + [APP_NAME]
         except FileNotFoundError:
-            return self.project.who_can_merge_pr().append(
-                self.service.user.get_username()
-            )
+            return self.project.who_can_merge_pr().append(APP_NAME)
 
     def _close_advise_issues4users_lacking_perms(self):
         permitted_users = self._get_users_with_permission()

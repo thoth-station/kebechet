@@ -513,7 +513,7 @@ class UpdateManager(ManagerBase):
         if len(pull_requests) == 0:
             lock_func()
             self._git_push(commit_msg, branch_name, files)
-            pr = self.project.create_pr(
+            pr = self.create_pr(
                 title=commit_msg,
                 body="",
                 target_branch=self.project.default_branch,
