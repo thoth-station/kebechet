@@ -37,6 +37,7 @@ from ogr.services.pagure import PagureService
 if TYPE_CHECKING:
     from .manager import ManagerBase
 
+
 _LOGGER = logging.getLogger(__name__)
 APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
 
