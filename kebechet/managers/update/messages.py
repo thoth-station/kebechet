@@ -100,6 +100,10 @@ ISSUE_CLOSE_COMMENT = """
 Closing this issue as it is no longer relevant for the current master with SHA {sha}.
 """
 
+CLOSE_MANUAL_ISSUE_COMMENT = """
+Update manager ran @{time} for {sha}. Management complete.
+"""
+
 
 # Issue created when the environment cannot be replicated.
 ISSUE_REPLICATE_ENV = """

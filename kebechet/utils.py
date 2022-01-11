@@ -54,9 +54,9 @@ def cwd(path: str):
         os.chdir(previous_dir)
 
 
-def _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs) -> git.Repo:
+def _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs) -> git.Repo:
     _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
-    repo = git.Repo.clone_from(repo_url, repo_path, branch=branch, **clone_kwargs)
+    repo = git.Repo.clone_from(repo_url, repo_path, **clone_kwargs)
     repo.config_writer().set_value(
         "user", "name", os.getenv("KEBECHET_GIT_NAME", "Kebechet")
     ).release()
@@ -69,7 +69,7 @@ def _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs) -> git
 
 
 @contextmanager
-def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
+def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
     service_url = manager.service_url
     slug = manager.slug
@@ -99,14 +99,15 @@ def cloned_repo(manager: "ManagerBase", branch=None, **clone_kwargs):
                 else:
                     repo.git.fetch(unshallow=True)
                 repo.git.checkout(branch)
-                repo.git.pull()
             else:
-                repo = _clone_repo_and_set_vals(repo_url, ".", branch, **clone_kwargs)
+                repo = _clone_repo_and_set_vals(repo_url, ".", **clone_kwargs)
+                repo.git.checkout(branch)
             yield repo
             repo.git.clean("-xdf")
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
-            repo = _clone_repo_and_set_vals(repo_url, repo_path, branch, **clone_kwargs)
+            repo = _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs)
+            repo.git.checkout(branch)
             yield repo
 
 

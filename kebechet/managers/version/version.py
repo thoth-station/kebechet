@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020, 2021 Fridolin Pokorny, Kevin Postlethwait
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by

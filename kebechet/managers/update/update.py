@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Kebechet
-# Copyright(C) 2018, 2019, 2020 Fridolin Pokorny
+# Copyright(C) 2018, 2019, 2020, 2021 Fridolin Pokorny, Kevin Postlethwait
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import typing
 from typing import Optional
 from itertools import chain
 from functools import partial
+from datetime import datetime
 
 import git
 from ogr.abstract import Issue, PullRequest, PRStatus
@@ -39,14 +40,17 @@ from kebechet.exception import PipenvError
 from kebechet.managers.manager import ManagerBase
 from kebechet.utils import cloned_repo
 
-from .messages import ISSUE_CLOSE_COMMENT
-from .messages import ISSUE_COMMENT_UPDATE_ALL
-from .messages import ISSUE_INITIAL_LOCK
-from .messages import ISSUE_NO_DEPENDENCY_MANAGEMENT
-from .messages import ISSUE_PIPENV_UPDATE_ALL
-from .messages import ISSUE_REPLICATE_ENV
-from .messages import ISSUE_UNSUPPORTED_PACKAGE
-from .messages import UPDATE_MESSAGE_BODY
+from .messages import (
+    ISSUE_CLOSE_COMMENT,
+    CLOSE_MANUAL_ISSUE_COMMENT,
+    ISSUE_COMMENT_UPDATE_ALL,
+    ISSUE_INITIAL_LOCK,
+    ISSUE_NO_DEPENDENCY_MANAGEMENT,
+    ISSUE_PIPENV_UPDATE_ALL,
+    ISSUE_UNSUPPORTED_PACKAGE,
+    UPDATE_MESSAGE_BODY,
+)
+from .utils import rebase_pr_branch_and_comment
 from kebechet.utils import construct_raw_file_url
 from thoth.common.helpers import cwd
 from thamos.config import config as thoth_config
@@ -54,7 +58,7 @@ from thamos.config import config as thoth_config
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile("(==|===|<=|>=|~=|!=|<|>|\\[)")
 
-_ISSUE_UPDATE_ALL_NAME = (
+_ISSUE_FAILED_TO_UPDATE_DEPENDENCIES = (
     "Failed to update dependencies to their latest version for {env_name} environment"
 )
 _ISSUE_INITIAL_LOCK_NAME = (
@@ -362,17 +366,11 @@ class UpdateManager(ManagerBase):
 
         return result
 
-    @staticmethod
-    def _construct_branch_name(package_name: str, new_package_version: str) -> str:
-        """Construct branch name for the updated dependency."""
-        return f"kebechet-{package_name}-{new_package_version}"
-
     def _open_merge_request_update(
         self,
         body: str,
         labels: typing.Optional[list],
         files: list,
-        merge_request: Optional[PullRequest],
     ) -> PullRequest:
         """Open a pull/merge request for dependency update."""
         # If we have already an update for this package we simple issue git
@@ -386,72 +384,17 @@ class UpdateManager(ManagerBase):
             force_push=True,
         )
 
-        if not merge_request:
-            _LOGGER.info("Creating a new pull request to update dependencies.")
-            merge_request = self.create_pr(
-                title=_UPDATE_MERGE_REQUEST_TITLE.format(
-                    env_name=self.runtime_environment
-                ),
-                body=body,
-                target_branch=self.project.default_branch,
-                source_branch=_string2branch_name(
-                    _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
-                ),
-            )
-            merge_request.add_label(*labels)
-            return merge_request
-
-        _LOGGER.info(
-            f"Pull request #{merge_request.id} to update dependencies has been updated."
+        _LOGGER.info("Creating a new pull request to update dependencies.")
+        merge_request = self.project.create_pr(
+            title=_UPDATE_MERGE_REQUEST_TITLE.format(env_name=self.runtime_environment),
+            body=body,
+            target_branch=self.project.default_branch,
+            source_branch=_string2branch_name(
+                _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
+            ),
         )
-        merge_request.comment(
-            f"Pull request has been rebased on top of the current {self.project.default_branch} with SHA {self.sha}"
-        )
+        merge_request.add_label(*labels)
         return merge_request
-
-    def _should_update(self) -> tuple:
-        """Check whether the given update was already proposed as a pull request."""
-        branch_name = _string2branch_name(
-            _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
-        )
-        pull_requests = {
-            mr
-            for mr in self._cached_merge_requests
-            if mr.source_branch == branch_name and mr.status == PRStatus.open
-        }
-
-        if len(pull_requests) == 0:
-            _LOGGER.debug("No pull request was found for automatic update.")
-            return None, True
-        elif len(pull_requests) == 1:
-            pr = list(pull_requests)[0]
-            commits = pr.get_all_commits()  # type: ignore
-            if len(commits) != 1:
-                _LOGGER.info(
-                    "Automatic update will not be issued,"
-                    "the pull request as additional commits (by a maintaner?)"
-                )
-                return pr, False
-
-            pr_number = pr.id  # type: ignore
-            if self.sha != commits[0]:
-                _LOGGER.debug(
-                    f"Found already existing  pull request #{pr_number} for old master "
-                    f"branch {commits[0][:7]!r} updating pull request based on "
-                    f"branch {branch_name!r} for the current {self.project.default_branch} branch {self.sha[:7]!r}"
-                )
-                return pr, True
-            else:
-                _LOGGER.debug(
-                    f"Found already existing  pull request #{pr_number} for the current master "
-                    f"branch {self.sha[:7]!r}, not updating pull request"
-                )
-                return pr, False
-        else:
-            raise InternalError(
-                f"Multiple ({len(pr)}) pull requests with same "
-                f"branch name {branch_name!r} opened."
-            )
 
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
@@ -500,8 +443,6 @@ class UpdateManager(ManagerBase):
         body: str,
         is_dev: bool = False,
         labels: list = None,
-        old_environment: dict = None,
-        pull_request: Optional[PullRequest] = None,
         pipenv_used: bool = True,
         req_dev: bool = False,
     ) -> str:
@@ -512,29 +453,20 @@ class UpdateManager(ManagerBase):
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
         overlays_dir = thoth_config.get_overlays_directory(self.runtime_environment)
-        if not old_environment:
+        if pipenv_used:
             pull_request = self._open_merge_request_update(
                 body,
                 labels,
                 [f"{overlays_dir}/Pipfile.lock"],
-                pull_request,
             )
             return pull_request.id  # type: ignore
 
         # For either requirements.txt  or requirements-dev.text scenario we need to propagate all changes
         # (updates of transitive dependencies) into requirements.txt or requirements-dev file
         output_file = "requirements-dev.txt" if req_dev else "requirements.txt"
-        self._pipenv_lock_requirements(output_file)
-        pull_request = self._open_merge_request_update(
-            body, labels, [output_file], pull_request
-        )
+        output_file = f"{overlays_dir}/{output_file}"
+        pull_request = self._open_merge_request_update(body, labels, [output_file])
         return pull_request.id  # type: ignore
-
-    @classmethod
-    def _replicate_old_environment(cls) -> None:
-        """Replicate old environment based on its specification - packages in specific versions."""
-        _LOGGER.info("Replicating old environment for incremental update")
-        cls.run_pipenv("pipenv sync --dev")
 
     @classmethod
     def _create_pipenv_environment(cls, input_file: str) -> None:
@@ -549,14 +481,6 @@ class UpdateManager(ManagerBase):
             raise DependencyManagementError(
                 "No dependency management found in the repo - no Pipfile nor requirements.in nor requirements-dev.in"
             )
-
-    def _get_prs(self, source_branch_name: str) -> set:
-        """Get pull requests with source branch name."""
-        return {
-            mr
-            for mr in self.project.get_pr_list()
-            if mr.source_branch == source_branch_name and mr.status == PRStatus.open
-        }
 
     def _create_initial_lock(
         self, labels: list, pipenv_used: bool, req_dev: bool
@@ -605,23 +529,12 @@ class UpdateManager(ManagerBase):
 
             if len(commits) != 1:
                 _LOGGER.info(
-                    "There have been done changes in the original pull request (multiple commits found), "
+                    "There have been changes in the original pull request (multiple commits found), "
                     "aborting doing changes to the adjusted opened pull request"
                 )
                 return False
 
-            if self.sha != commits[0]:
-                lock_func()
-                self._git_push(commit_msg, branch_name, files, force_push=True)
-                pr.comment(  # type: ignore
-                    f"Pull request has been rebased on top of the current {self.project.default_branch} "
-                    f"with SHA {self.sha}"
-                )
-            else:
-                _LOGGER.info(
-                    f"Pull request #{pr.id} is up to date for the current "
-                    f"{self.project.default_branch} branch"  # type: ignore
-                )
+            rebase_pr_branch_and_comment(self.repo, pr)
         else:
             raise DependencyManagementError(
                 f"Found two or more pull requests for initial requirements lock for branch {branch_name}"
@@ -661,106 +574,6 @@ class UpdateManager(ManagerBase):
                 )
             )
 
-    def _relock_all(self, exc: PipenvError, labels: list) -> None:
-        """Re-lock all dependencies given the Pipfile."""
-        relative_dir = self._get_cwd_relative2gitroot()
-        pip_url = construct_raw_file_url(
-            self.service_url,
-            self.slug,
-            os.path.join(relative_dir, "Pipfile"),
-            self.service_type,
-        )
-        piplock_url = construct_raw_file_url(
-            self.service_url,
-            self.slug,
-            os.path.join(relative_dir, "Pipfile.lock"),
-            self.service_type,
-        )
-        issue = self.get_issue_by_title(
-            _ISSUE_REPLICATE_ENV_NAME.format(env_name=self.runtime_environment)
-        )
-        if issue is None:
-            issue = self.project.create_issue(
-                title=_ISSUE_REPLICATE_ENV_NAME.format(
-                    env_name=self.runtime_environment
-                ),
-                body=ISSUE_REPLICATE_ENV.format(
-                    **exc.__dict__,
-                    sha=self.sha,
-                    pip_url=pip_url,
-                    piplock_url=piplock_url,
-                    environment_details=self.get_environment_details(),
-                ),
-                labels=labels,
-            )
-        else:
-            self._add_refresh_comment(exc=exc, issue=issue)
-
-        self._pipenv_update_all()
-        commit_msg = "Automatic dependency re-locking"
-        branch_name = "kebechet-dependency-relock"
-
-        existing_prs = self.get_prs_by_branch(branch_name)
-        if len(existing_prs) == 1:
-            pr = list(existing_prs)[0]
-            commits = pr.get_all_commits()
-            if len(commits) != 1:
-                pr.comment(
-                    "There have been done changes in the original pull request (multiple commits found), "
-                    "aborting doing changes to the modified opened pull request"
-                )
-                return None
-            if self.sha != commits[0]:
-                self._git_push(
-                    ":pushpin: " + commit_msg,
-                    branch_name,
-                    ["Pipfile.lock"],
-                    force_push=True,
-                )
-                pr.comment(
-                    f"Pull request has been rebased on top of the current {self.project.default_branch} "
-                    f"with SHA {self.sha}"
-                )
-        elif len(existing_prs) == 0:
-            # Default case
-            self._git_push(":pushpin: " + commit_msg, branch_name, ["Pipfile.lock"])
-            pr = self.create_pr(
-                title=commit_msg,
-                body=f"Fixes: #{issue.id}",
-                target_branch=self.project.default_branch,
-                source_branch=branch_name,
-            )
-            _LOGGER.info(
-                f"Issued automatic dependency re-locking in PR #{pr.id} to fix issue #{issue.id}"
-            )
-        else:
-            raise DependencyManagementError(
-                f"Found two or more pull requests for automatic relock for branch {branch_name}"
-            )
-
-    def _delete_old_branches(self, outdated: dict) -> None:
-        """Delete old kebechet branches from the remote repository."""
-        branches = {
-            entry
-            for entry in self.project.get_branches()
-            if entry.startswith("kebechet-")
-        }
-        for package_name, info in outdated.items():
-            # Do not remove active branches - branches we issued PRs in.
-            branch_name = self._construct_branch_name(package_name, info["new_version"])
-            try:
-                branches.remove(branch_name)
-            except KeyError:
-                # e.g. if there was an issue with PR opening.
-                pass
-
-        for branch_name in branches:
-            _LOGGER.debug(f"Deleting old branch {branch_name}")
-            try:
-                self.delete_remote_branch(branch_name)
-            except Exception:
-                _LOGGER.exception(f"Failed to delete inactive branch {branch_name}")
-
     def _generate_update_body(self, outdated: dict) -> str:
         kebechet_version = kebechet.__version__
         package_name_rows = ""
@@ -779,13 +592,7 @@ class UpdateManager(ManagerBase):
         )
         return body
 
-    def _do_update(
-        self,
-        labels: list,
-        pipenv_used: bool = False,
-        req_dev: bool = False,
-    ) -> dict:
-        """Update dependencies based on management used."""
+    def _create_or_update_initial_lock(self, labels, pipenv_used, req_dev):
         close_initial_lock_issue = partial(
             self.close_issue_and_comment,
             _ISSUE_INITIAL_LOCK_NAME.format(env_name=self.runtime_environment),
@@ -832,6 +639,57 @@ class UpdateManager(ManagerBase):
 
         close_initial_lock_issue()
 
+    def _create_issue_for_pipenv_failure(self, exc: PipenvError, labels: list):
+        _LOGGER.warning(
+            "Failed to update dependencies to their latest version, reporting issue"
+        )
+        relative_dir = self._get_cwd_relative2gitroot()
+        pip_url = construct_raw_file_url(
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile"),
+            self.service_type,
+        )
+        piplock_url = construct_raw_file_url(
+            self.service_url,
+            self.slug,
+            os.path.join(relative_dir, "Pipfile.lock"),
+            self.service_type,
+        )
+        issue = self.get_issue_by_title(
+            _ISSUE_FAILED_TO_UPDATE_DEPENDENCIES.format(
+                env_name=self.runtime_environment
+            )
+        )
+        if issue is None:
+            self.project.create_issue(
+                title=_ISSUE_FAILED_TO_UPDATE_DEPENDENCIES.format(
+                    env_name=self.runtime_environment
+                ),
+                body=ISSUE_PIPENV_UPDATE_ALL.format(
+                    sha=self.sha,
+                    pip_url=pip_url,
+                    piplock_url=piplock_url,
+                    environment_details=self.get_environment_details(),
+                    dependency_graph=self.get_dependency_graph(graceful=True),
+                    **exc.__dict__,  # noqa F821
+                ),
+                labels=labels,
+            )
+        else:
+            self._add_refresh_comment(exc=exc, issue=issue)
+
+    def _do_update(
+        self,
+        labels: list,
+        pipenv_used: bool = False,
+        req_dev: bool = False,
+    ) -> dict:
+        """Update dependencies based on management used."""
+        self._create_or_update_initial_lock(
+            labels=labels, pipenv_used=pipenv_used, req_dev=req_dev
+        )
+
         if pipenv_used:
             old_environment = self._get_all_packages_versions()
             old_direct_dependencies_version = self._get_direct_dependencies_version(
@@ -840,47 +698,12 @@ class UpdateManager(ManagerBase):
             try:
                 self._pipenv_update_all()
             except PipenvError as exc:
-                _LOGGER.warning(
-                    "Failed to update dependencies to their latest version, reporting issue"
-                )
-                relative_dir = self._get_cwd_relative2gitroot()
-                pip_url = construct_raw_file_url(
-                    self.service_url,
-                    self.slug,
-                    os.path.join(relative_dir, "Pipfile"),
-                    self.service_type,
-                )
-                piplock_url = construct_raw_file_url(
-                    self.service_url,
-                    self.slug,
-                    os.path.join(relative_dir, "Pipfile.lock"),
-                    self.service_type,
-                )
-                issue = self.get_issue_by_title(
-                    _ISSUE_UPDATE_ALL_NAME.format(env_name=self.runtime_environment)
-                )
-                if issue is None:
-                    self.project.create_issue(
-                        title=_ISSUE_UPDATE_ALL_NAME.format(
-                            env_name=self.runtime_environment
-                        ),
-                        body=ISSUE_PIPENV_UPDATE_ALL.format(
-                            sha=self.sha,
-                            pip_url=pip_url,
-                            piplock_url=piplock_url,
-                            environment_details=self.get_environment_details(),
-                            dependency_graph=self.get_dependency_graph(graceful=True),
-                            **exc.__dict__,  # noqa F821
-                        ),
-                        labels=labels,
-                    )
-                else:
-                    self._add_refresh_comment(exc=exc, issue=issue)
+                self._create_issue_for_pipenv_failure(exc=exc, labels=labels)
                 return {}
             else:
                 # We were able to update all, close reported issue if any.
                 self.close_issue_and_comment(
-                    title=_ISSUE_UPDATE_ALL_NAME.format(
+                    title=_ISSUE_FAILED_TO_UPDATE_DEPENDENCIES.format(
                         env_name=self.runtime_environment
                     ),
                     comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
@@ -891,6 +714,8 @@ class UpdateManager(ManagerBase):
             old_direct_dependencies_version = {
                 k: v for k, v in old_environment.items() if k in direct_dependencies
             }
+            output_file = "requirements-dev.txt" if req_dev else "requirements.txt"
+            self._pipenv_lock_requirements(output_file)
 
         outdated = self._get_all_outdated(old_direct_dependencies_version)
         _LOGGER.info(f"Outdated: {outdated}")
@@ -903,17 +728,10 @@ class UpdateManager(ManagerBase):
             # Do API calls only once, cache results.
             self._cached_merge_requests = self.project.get_pr_list()
             body = self._generate_update_body(outdated)
-            pull_request, should_update = self._should_update()
-            if not should_update:
-                _LOGGER.info(
-                    f"Skipping update creation as the given update already exists in PR #{pull_request.id}"
-                )
             try:
                 versions = self._create_update(
                     body=body,
                     labels=labels,
-                    old_environment=old_environment if not pipenv_used else None,
-                    pull_request=pull_request,
                     pipenv_used=pipenv_used,
                     req_dev=req_dev,
                 )
@@ -945,7 +763,7 @@ class UpdateManager(ManagerBase):
         # We will keep venv in the project itself - we have permissions in the cloned repo.
         os.environ["PIPENV_VENV_IN_PROJECT"] = "1"
 
-        with cloned_repo(self, branch=self.project.default_branch, depth=1) as repo:
+        with cloned_repo(self) as repo:
             # Make repo available in the instance.
             thoth_config.load_config()
             self.repo = repo
@@ -970,6 +788,14 @@ class UpdateManager(ManagerBase):
 
             results: dict = {}
 
+            close_manual_update_issue = partial(
+                self.close_issue_and_comment,
+                _ISSUE_MANUAL_UPDATE,
+                comment=CLOSE_MANUAL_ISSUE_COMMENT.format(
+                    sha=self.sha, time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                ),
+            )
+
             for e in runtime_environments:
                 self.runtime_environment = e
                 close_no_management_issue = partial(
@@ -978,12 +804,18 @@ class UpdateManager(ManagerBase):
                     comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
                 )
                 with cwd(thoth_config.get_overlays_directory(e)):
-                    update_issue = self.get_issue_by_title(
-                        _UPDATE_MERGE_REQUEST_TITLE.format(env_name=e)
+                    update_prs = (
+                        self.get_prs_by_branch(
+                            _string2branch_name(_UPDATE_BRANCH_NAME.format(env_name=e)),
+                            status=PRStatus.all,
+                        )
+                        or []
                     )
-                    if (
-                        update_issue is not None and update_issue.status == 2
-                    ):  # status == 2 means "open" in OGR.
+                    to_rebase = []
+                    for pr in update_prs:
+                        if pr.status == PRStatus.open:
+                            to_rebase.append(pr)
+                    if update_prs and not to_rebase:
                         try:
                             self.delete_remote_branch(
                                 _string2branch_name(
@@ -995,20 +827,16 @@ class UpdateManager(ManagerBase):
                                 f"Failed to delete branch {_UPDATE_BRANCH_NAME.format(env_name=e)}, "
                                 "trying to continue"
                             )
-
-                    close_manual_update_issue = partial(
-                        self.close_issue_and_comment,
-                        _ISSUE_MANUAL_UPDATE,
-                        comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
-                    )
-
+                    elif to_rebase:
+                        for pr in to_rebase:
+                            rebase_pr_branch_and_comment(repo=self.repo, pr=pr)
+                        continue
                     if os.path.isfile("Pipfile"):
                         _LOGGER.info("Using Pipfile for dependency management")
                         close_no_management_issue()
                         result = self._do_update(
                             labels, pipenv_used=True, req_dev=False
                         )
-                        close_manual_update_issue()
                     elif os.path.isfile("requirements.in"):
                         self._create_pipenv_environment(input_file="requirements.in")
                         _LOGGER.info("Using requirements.in for dependency management")
@@ -1027,7 +855,6 @@ class UpdateManager(ManagerBase):
                             result = self._do_update(
                                 labels, pipenv_used=False, req_dev=True
                             )
-                        close_manual_update_issue()
                     else:
                         _LOGGER.warning("No dependency management found")
                         issue = self.get_issue_by_title(
@@ -1040,6 +867,7 @@ class UpdateManager(ManagerBase):
                                 labels=labels,
                             )
                         result = {}
-            results[e] = result
+                results[e] = result
+            close_manual_update_issue()
 
         return results
