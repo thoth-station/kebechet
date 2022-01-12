@@ -110,9 +110,9 @@ class ThothAdviseManager(ManagerBase):
         """Get SHA of the current head commit."""
         return self.repo.head.commit.hexsha
 
-    def _construct_branch_name(self) -> str:
+    def _construct_branch_name(self, analysis_id: str) -> str:
         """Construct branch name for the updated dependency."""
-        return f"{_BRANCH_NAME}-{self.sha[:10]}"
+        return f"{_BRANCH_NAME}-{analysis_id[:15]}"
 
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
@@ -379,7 +379,7 @@ class ThothAdviseManager(ManagerBase):
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
-                branch_name = self._construct_branch_name()
+                branch_name = self._construct_branch_name(analysis_id)
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
 
