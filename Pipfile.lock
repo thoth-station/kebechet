@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b45b61ea3151d74c3a82e4c1068a9ac172caf75c8dc26860d6f40d6c0c3fe3ad"
+            "sha256": "7fda753d410ecc99930033b18439236f5246ba66daf0285b06de7566835d1b3f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -151,7 +151,7 @@
                 "sha256:f04e857b59d9d1ccc39ce2da1021d196e47234873820cbeaad210724b1ee28ac",
                 "sha256:fadbfe37f74051d024037f223b8e001611eac868b5c5b06144ef4d8b799862f2"
             ],
-            "markers": "python_version >= '3.6' and python_version < '3.9'",
+            "markers": "python_version < '3.9'",
             "version": "==0.2.1"
         },
         "beautifulsoup4": {
@@ -764,7 +764,7 @@
                 "sha256:e41e8951749c4b5c9a2dc5fdbc1a4eec6ab2a140fdae9b460b0f557eed870f4d",
                 "sha256:f71d57cc8645f14816ae249407d309be250ad8de93ef61d9709b45a0ddf4050c"
             ],
-            "markers": "python_version < '3.10' and platform_machine != 'aarch64' and platform_machine != 'arm64'",
+            "markers": "python_version >= '3.8'",
             "version": "==1.22.0"
         },
         "oauthlib": {
@@ -835,13 +835,21 @@
             ],
             "version": "==4.8.0"
         },
+        "pip": {
+            "hashes": [
+                "sha256:deaf32dcd9ab821e359cd8330786bcd077604b5c5730c0b096eda46f95c24a2d",
+                "sha256:fd11ba3d0fdb4c07fbc5ecbba0b1b719809420f25038f8ee3cd913d3faa3033a"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==21.3.1"
+        },
         "pipenv": {
             "hashes": [
-                "sha256:4ab2f60742184d851ac44b9e1d423afe71dc2ea7a68bde07eb890c8b4ce5a420",
-                "sha256:8253fe6f9cfb3791a54da8a0571f73c918cb3457dd908684c1800a13a06ec4c1"
+                "sha256:3b80b4512934b9d8e8ce12c988394642ff96bb697680e5b092e59af503178327",
+                "sha256:f84d7119239b22ab2ac2b8fbc7d619d83cf41135206d72a17c4f151cda529fd0"
             ],
             "index": "pypi",
-            "version": "==2020.11.15"
+            "version": "==2022.1.8"
         },
         "platformdirs": {
             "hashes": [
@@ -1222,6 +1230,14 @@
             ],
             "index": "pypi",
             "version": "==1.5.2"
+        },
+        "setuptools": {
+            "hashes": [
+                "sha256:2404879cda71495fc4d5cbc445ed52fdaddf352b36e40be8dcc63147cb4edabe",
+                "sha256:68eb94073fc486091447fcb0501efd6560a0e5a1839ba249e5ff3c4c93f05f90"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==60.5.0"
         },
         "six": {
             "hashes": [
@@ -1708,6 +1724,14 @@
             ],
             "index": "pypi",
             "version": "==2.0.2"
+        },
+        "setuptools": {
+            "hashes": [
+                "sha256:2404879cda71495fc4d5cbc445ed52fdaddf352b36e40be8dcc63147cb4edabe",
+                "sha256:68eb94073fc486091447fcb0501efd6560a0e5a1839ba249e5ff3c4c93f05f90"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==60.5.0"
         },
         "toml": {
             "hashes": [
