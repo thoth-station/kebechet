@@ -76,6 +76,12 @@ and requirements format should be defined in the configuration file. More
 information about configuration options for ``.thoth.yaml`` can be found in the
 `thoth-station/thamos <https://github.com/thoth-station/thamos>`__ repository.
 
+Available Thoth advise commands
+----------------------------------
+
+To run this manager, open an issue with the title "Kebechet Advise". The creation of this issue will trigger the
+execution of this manager.
+
 Manager Author
 --------------
 
