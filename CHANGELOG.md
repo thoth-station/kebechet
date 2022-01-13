@@ -1,5 +1,16 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.7.0 (2022-01-13T16:23:54)
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* use analysis-id 4 branch name to avoid collisions
+* add documentation for advise issue
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* add link to manager doc above managers block in minimal yaml
+* update version manager to act on PR merge with labels
+* Suggest users to use Thamos CLI to create requirements file
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* check if update needs rebase
+
 ## Release 1.6.8 (2022-01-05T12:38:37)
 * Fix the links to each manager's README
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
