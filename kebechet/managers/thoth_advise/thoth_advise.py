@@ -274,7 +274,7 @@ class ThothAdviseManager(ManagerBase):
         self._issue_list = copy_of_issue_list
 
     def _advise_issue_is_fresh(self, issue: Issue):
-        return not issue.get_comments(author=self.project.service.user.get_username)
+        return not issue.get_comments(author=APP_NAME)
 
     def _close_all_but_oldest_issue(self) -> typing.Optional[Issue]:
         oldest = None
@@ -426,13 +426,13 @@ class ThothAdviseManager(ManagerBase):
                     to_open = len(
                         self._tracking_issue.get_comments(
                             filter_regex=f"^{STARTED_COMMENT_STARTS_WITH}",
-                            author=self.project.service.user.get_username(),
+                            author=APP_NAME,
                         )
                     )
                     finished = len(
                         self._tracking_issue.get_comments(
                             filter_regex=f"^{FINISHED_COMMENT_STARTS_WITH}",
-                            author=self.project.service.user.get_username(),
+                            author=APP_NAME,
                         )
                     )
                     if to_open - finished == 0:
