@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.7.1 (2022-01-17T15:31:23)
+* remove all references to get user
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+
 ## Release 1.7.0 (2022-01-13T16:23:54)
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 * use analysis-id 4 branch name to avoid collisions
