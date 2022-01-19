@@ -22,7 +22,9 @@ import json
 import typing
 import yaml
 import os
+
 from thamos import lib
+from thamos.exceptions import ConfigurationError as ThothConfigurationError
 
 import git  # noqa F401
 
@@ -59,16 +61,17 @@ _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 
 ADVISE_ISSUE_TITLE = "Kebechet Advise"
 
-STARTED_ADVISE_COMMENT = "Started advise with id {analysis_id} for {env_name} to get current status, click [here](\
+STARTED_ADVISE_COMMENT = "Started advise for {env}: analysis id = {analysis_id}, to get current status, click [here](\
     https://{host}/api/v1/advise/python/{analysis_id})"
 STARTED_COMMENT_STARTS_WITH = STARTED_ADVISE_COMMENT[
-    : STARTED_ADVISE_COMMENT.index("{analysis_id}")
+    : STARTED_ADVISE_COMMENT.index("{env}")
 ]
+STARTED_ADVISE_REGEX = r"^Started advise for ([\w\-]*): "
 
-FINISHED_ADVISE_COMMENT_PREFIX = "Finished advise for {env_name}\n\n"
-FINISHED_COMMENT_STARTS_WITH = FINISHED_ADVISE_COMMENT_PREFIX[
-    : FINISHED_ADVISE_COMMENT_PREFIX.index("{env_name}")
-]
+ADVISE_RESULT_PREFIX = "Result for {env_name}: "
+SUCCESSFUL_ADVISE_COMMENT = ADVISE_RESULT_PREFIX + "Finished advise.\n\n"
+SUCCESSFUL_ADVISE_REGEX = r"^Result for ([\w\-]*): Finished"
+ERROR_ADVISE_REGEX = r"^Result for ([\w\-]*): Error"
 
 _INTERNAL_TRIGGER_PR_BODY_LOOKUP = {
     InternalTriggerEnum.CVE.value: NEW_CVE_PR_BODY,
@@ -241,7 +244,7 @@ class ThothAdviseManager(ManagerBase):
 
         if self._tracking_issue:
             comment = (
-                FINISHED_ADVISE_COMMENT_PREFIX.format(env_name=self.runtime_environment)
+                SUCCESSFUL_ADVISE_COMMENT.format(env_name=self.runtime_environment)
                 + f"Adviser failed\n{textblock}"
             )
             self._tracking_issue.comment(comment)
@@ -297,6 +300,15 @@ class ThothAdviseManager(ManagerBase):
             self._issue_list.remove(issue)
 
         return oldest
+
+    @staticmethod
+    def _metadata_indicates_internal_trigger(metadata: dict) -> bool:
+        kebechet_metadata = metadata.get(
+            "kebechet_metadata"
+        )  # type: typing.Optional[dict]
+        return bool(
+            kebechet_metadata and kebechet_metadata.get("message_justification")
+        )
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
@@ -356,22 +368,25 @@ class ThothAdviseManager(ManagerBase):
                                 host=thoth_config["host"],
                             )
                         )
-                    except FileLoadError:
-                        issue_title = (
-                            f"No requirements file found for runtime environment {e}."
-                        )
-                        body = f"""Please create requirements file for environment {e}
+                    except (FileLoadError, ThothConfigurationError) as exc:
+                        if isinstance(exc, FileLoadError):
+                            self._tracking_issue.comment(
+                                f"""Result for {e}: Error advising, no requirements found.
 
-                        If this project does not use requirements.txt or Pipfile then remove thoth-advise manager from
-                        your .thoth.yaml configuration."""
-                        error_issue = self.get_issue_by_title(issue_title)
-                        if error_issue is None:
-                            error_issue = self.project.create_issue(
-                                title=issue_title, body=body, labels=labels
+                                If this project does not use requirements.txt or Pipfile then remove thoth-advise
+                                manager from your .thoth.yaml configuration."""
                             )
-                        self._tracking_issue.comment(
-                            f"Cannot advise for {e}, no requirements found, see: #{error_issue.id}"
-                        )
+                        elif isinstance(exc, ThothConfigurationError):
+                            self._tracking_issue.comment(
+                                f"""Result for {e}: Error advising, configuration error found in .thoth.yaml. The
+                                following exception was caught when submitting:
+
+                                ```
+                                {exc}
+                                ```"""
+                            )
+                            # open issue
+                            # comment on advise issue with issue id
                         return False
             return True
         else:
@@ -379,6 +394,8 @@ class ThothAdviseManager(ManagerBase):
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
+                if self._metadata_indicates_internal_trigger(res[0].get("metadata")):
+                    self._tracking_issue = None  # internal trigger advise results should not be tracked by issue
                 branch_name = self._construct_branch_name(analysis_id)
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
@@ -402,7 +419,7 @@ class ThothAdviseManager(ManagerBase):
                     )
                     if opened_merge and self._tracking_issue:
                         comment = (
-                            FINISHED_ADVISE_COMMENT_PREFIX.format(
+                            SUCCESSFUL_ADVISE_COMMENT.format(
                                 env_name=self.runtime_environment
                             )
                             + f"Opened merge request, see: #{opened_merge.id}"
@@ -410,7 +427,7 @@ class ThothAdviseManager(ManagerBase):
                         self._tracking_issue.comment(comment)
                     elif self._tracking_issue:
                         comment = (
-                            FINISHED_ADVISE_COMMENT_PREFIX.format(
+                            SUCCESSFUL_ADVISE_COMMENT.format(
                                 env_name=self.runtime_environment
                             )
                             + "Dependencies for this runtime environment are already up to date :)."
@@ -425,19 +442,29 @@ class ThothAdviseManager(ManagerBase):
                 if self._tracking_issue:
                     to_open = len(
                         self._tracking_issue.get_comments(
-                            filter_regex=f"^{STARTED_COMMENT_STARTS_WITH}",
+                            filter_regex=STARTED_ADVISE_REGEX,
                             author=APP_NAME,
                         )
                     )
                     finished = len(
                         self._tracking_issue.get_comments(
-                            filter_regex=f"^{FINISHED_COMMENT_STARTS_WITH}",
+                            filter_regex=SUCCESSFUL_ADVISE_REGEX,
+                            author=APP_NAME,
+                        )
+                    )
+                    errors = len(
+                        self._tracking_issue.get_comments(
+                            filter_regex=ERROR_ADVISE_REGEX,
                             author=APP_NAME,
                         )
                     )
                     if to_open - finished == 0:
-                        self._tracking_issue.comment(
-                            "Finished advising for all environments."
-                        )
-                        self._tracking_issue.close()
+                        if errors > 0:
+                            comment = f"""All advises complete, but leaving issue open because {errors} could not be
+                            successfully submitted and may require user action."""
+                        else:
+                            self._tracking_issue.comment(
+                                "Finished advising for all environments."
+                            )
+                            self._tracking_issue.close()
                 return to_ret
