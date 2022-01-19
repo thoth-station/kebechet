@@ -198,7 +198,7 @@ def run(
             manager_configuration["analysis_id"] = analysis_id
 
         try:
-            if manager_configuration.get("enabled", True):
+            if manager_configuration.pop("enabled", True):
                 instance = kebechet_manager(
                     slug=slug,
                     service=ogr_service,
