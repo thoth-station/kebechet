@@ -97,7 +97,10 @@ def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
                 depth = clone_kwargs.get("depth")
                 if depth:
                     repo.remote().fetch(depth=depth)
-                else:
+                elif (
+                    repo.git.execute(["git", "rev-parse", "--is-shallow-repository"])
+                    == "true"
+                ):
                     repo.git.fetch(unshallow=True)
                 repo.git.checkout(branch)
             else:
