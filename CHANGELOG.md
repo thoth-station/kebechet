@@ -1,35 +1,50 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.7.2 (2022-01-23T15:31:23)
+
+- Add branch for if thoth configuration blocks advise submission
+- check before trying to unshallow a repo
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- pop enabled config
+- check before trying to unshallow a repo
+- Enable TLS verification
+- Unpin fasttext version from Pipfile
+- Enable TLS verification in the sample default configuration
+
 ## Release 1.7.1 (2022-01-17T15:31:23)
-* remove all references to get user
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+
+- remove all references to get user
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 
 ## Release 1.7.0 (2022-01-13T16:23:54)
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* use analysis-id 4 branch name to avoid collisions
-* add documentation for advise issue
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* add link to manager doc above managers block in minimal yaml
-* update version manager to act on PR merge with labels
-* Suggest users to use Thamos CLI to create requirements file
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* check if update needs rebase
+
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- use analysis-id 4 branch name to avoid collisions
+- add documentation for advise issue
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- add link to manager doc above managers block in minimal yaml
+- update version manager to act on PR merge with labels
+- Suggest users to use Thamos CLI to create requirements file
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- check if update needs rebase
 
 ## Release 1.6.8 (2022-01-05T12:38:37)
-* Fix the links to each manager's README
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* create_pr for manager class with default value for forknamespace
-* use env variable for kebechets name
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+
+- Fix the links to each manager's README
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- create_pr for manager class with default value for forknamespace
+- use env variable for kebechets name
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 
 ## Release 1.6.7 (2021-11-26T18:41:48)
-* Fix format string reference to environment name
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
-* :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
-* remove kebechet- prefix from version branch (used for image tag)
+
+- Fix format string reference to environment name
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+- :arrow_up: Automatic update of dependencies by Kebechet for the rhel:8 environment
+- remove kebechet- prefix from version branch (used for image tag)
 
 ## Release 1.6.6 (2021-11-18T16:47:27)
 
@@ -207,9 +222,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency thoth-common from 0.13.6 to 0.13.7
 
 - :pushpin: Automatic update of dependency thamos from 0.10.1 to 0.10.2
+
 - :pushpin: Automatic update of dependency pytest-cov from 2.8.1 to 2.9.0
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.5 to 0.13.6
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.4 to 0.13.5
+
 - kebechet should be capitalized
 - :pushpin: Automatic update of dependency thoth-common from 0.13.3 to 0.13.4
 - Added repo
@@ -1567,9 +1586,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Fix if maintainers are not stated in OWNERS file
 
 - Typo fix
+
 - fixed coala
+
 - coala fix
+
 - Coala fix
+
 - Coala fix
 - Added error handling in case version control is used
 - fixed coala
@@ -1630,9 +1653,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Added instruction for manual trigger and closses issue
 
 - Added instruction for manual trigger and closses issue"
+
 - Updated template and workflow to use openshift image
+
 - removed extra files
+
 - Check standard package in package.json
+
 - kebechet only uses thoth sourcemanagement
 - removed pin
 - Updated managers to use ogr methods
@@ -1703,9 +1730,13 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.1 to 1.4.2 (#475)
 
 - :pushpin: Automatic update of dependency thoth-common from 0.14.1 to 0.14.2 (#474)
+
 - :pushpin: Automatic update of dependency gitpython from 3.1.3 to 3.1.7 (#471)
+
 - :pushpin: Automatic update of dependency thamos from 0.10.5 to 0.10.6 (#472)
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.13 to 0.14.1
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.12 to 0.13.13
 - :pushpin: Automatic update of dependency thoth-sourcemanagement from 0.2.9 to 0.3.0
 - :pushpin: Automatic update of dependency requests from 2.23.0 to 2.24.0
