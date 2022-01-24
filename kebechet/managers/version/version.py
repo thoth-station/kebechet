@@ -117,7 +117,7 @@ class VersionManager(ManagerBase):
             res = self._trigger_update_files(trigger)
             version_file, new_version, old_version = res
             repo.git.add(version_file)
-            has_prev_release = utils._has_prev_release_tag(repo, old_version)
+            prev_release = utils._prev_release_tag(repo, old_version)
             changelog = utils._compute_changelog(
                 repo=repo,
                 old_version=old_version,
@@ -125,7 +125,7 @@ class VersionManager(ManagerBase):
                 changelog_smart=changelog_smart,
                 changelog_classifier=changelog_classifier,
                 changelog_format=changelog_format,
-                prev_release_tag=has_prev_release,
+                prev_release_tag=prev_release,
             )
 
             if not changelog:
@@ -140,7 +140,7 @@ class VersionManager(ManagerBase):
             message = constants._VERSION_PULL_REQUEST_NAME.format(new_version)
             repo.index.commit(message)
             repo.remote().push(branch_name)
-            return branch_name, new_version, changelog, has_prev_release
+            return branch_name, new_version, changelog, bool(prev_release)
 
     def _create_pr_for_trigger_release(
         self,

@@ -71,14 +71,14 @@ def _adjust_version_file(file_path: str, update_function: Callable) -> Optional[
     return new_version, old_version
 
 
-def _has_prev_release_tag(repo: Repo, old_version: str) -> bool:
+def _prev_release_tag(repo: Repo, old_version: str) -> Optional[str]:
     tags = repo.git.tag().splitlines()
 
     for tag in tags:
         if old_version == tag or re.match(f"v?{old_version}", tag):
-            return True
+            return tag
     else:
-        return False
+        return None
 
 
 def _write_to_changelog(changelog, new_version):
@@ -120,7 +120,7 @@ def _compute_changelog(
     changelog_smart: bool,
     changelog_classifier: str,
     changelog_format: str,
-    prev_release_tag: bool,
+    prev_release_tag: Optional[str] = None,
     version_file: bool = False,
 ) -> List[str]:
     """Compute changelog for the given repo.
@@ -141,6 +141,8 @@ def _compute_changelog(
         # can be in case of the very first release.
         old_versions = repo.git.rev_list("HEAD", max_parents=0).split()
         old_version = old_versions[-1]
+    else:
+        old_version = prev_release_tag
 
     _LOGGER.info("Smart Log : %s", str(changelog_smart))
 
