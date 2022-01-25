@@ -1,5 +1,9 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.7.3 (2022-01-25T15:31:23)
+
+- use previous tag for computing changelog
+
 ## Release 1.7.2 (2022-01-23T15:31:23)
 
 - Add branch for if thoth configuration blocks advise submission
@@ -230,7 +234,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency thoth-common from 0.13.4 to 0.13.5
 
 - kebechet should be capitalized
+
 - :pushpin: Automatic update of dependency thoth-common from 0.13.3 to 0.13.4
+
 - Added repo
 - Added repo
 - Revert "Fix if automatic relocking PR exists"
@@ -1594,7 +1600,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Coala fix
 
 - Coala fix
+
 - Added error handling in case version control is used
+
 - fixed coala
 - fixed coala
 - fixed commits
@@ -1661,7 +1669,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 - Check standard package in package.json
 
 - kebechet only uses thoth sourcemanagement
+
 - removed pin
+
 - Updated managers to use ogr methods
 - removed event variable
 - removed event variable
@@ -1738,7 +1748,9 @@ Starting with this release we have a Zuul-CI pipeline that:
 - :pushpin: Automatic update of dependency thoth-common from 0.13.13 to 0.14.1
 
 - :pushpin: Automatic update of dependency thoth-common from 0.13.12 to 0.13.13
+
 - :pushpin: Automatic update of dependency thoth-sourcemanagement from 0.2.9 to 0.3.0
+
 - :pushpin: Automatic update of dependency requests from 2.23.0 to 2.24.0
 - :pushpin: Automatic update of dependency thoth-common from 0.13.11 to 0.13.12
 - :pushpin: Automatic update of dependency pytest-timeout from 1.4.0 to 1.4.1
