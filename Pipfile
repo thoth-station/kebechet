@@ -25,6 +25,9 @@ pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
 pylint = "*"
+behave = "*"
+pygithub = "*"
+toml = "*"
 
 [requires]
 python_version = "3.8"

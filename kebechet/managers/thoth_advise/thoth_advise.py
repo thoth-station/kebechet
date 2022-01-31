@@ -133,7 +133,7 @@ class ThothAdviseManager(ManagerBase):
 
         if self._metadata_indicates_internal_trigger():
             body = _INTERNAL_TRIGGER_PR_BODY_LOOKUP[
-                self.metadata["message_justification"]  # type: ignore
+                int(self.metadata["message_justification"])  # type: ignore
             ].format(
                 package=self.metadata.get("package_name"),  # type: ignore
                 version=self.metadata.get("package_version"),  # type: ignore
@@ -232,9 +232,11 @@ class ThothAdviseManager(ManagerBase):
         try:
             with open("OWNERS", "r") as owners_file:
                 owners = yaml.safe_load(owners_file)
-            return list(map(str, owners.get("approvers") or [])) + [APP_NAME]
+            permitted_users = list(map(str, owners.get("approvers") or [])) + [APP_NAME]
         except FileNotFoundError:
-            return list(self.project.who_can_merge_pr()) + [APP_NAME]
+            permitted_users = list(self.project.who_can_merge_pr()) + [APP_NAME]
+
+        return [uname.lower() for uname in permitted_users]
 
     def _close_advise_issues4users_lacking_perms(self):
         permitted_users = self._get_users_with_permission()
