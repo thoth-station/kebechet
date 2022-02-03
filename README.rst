@@ -3,6 +3,14 @@
 Kebechet
 ========
 
+.. image:: https://img.shields.io/github/v/tag/thoth-station/kebechet?style=plastic
+  :target: https://github.com/thoth-station/kebechet/tags
+  :alt: GitHub tag (latest by date)
+
+.. image:: https://quay.io/repository/thoth-station/kebechet-job/status
+  :target: https://quay.io/repository/thoth-station/kebechet-job?tab=tags
+  :alt: Quay - Build
+
 Kebechet is an extensible system of repository managers for GitHub, GitLab, and
 Pagure.
 
