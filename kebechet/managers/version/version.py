@@ -155,7 +155,9 @@ class VersionManager(ManagerBase):
             # If this PR already exists, this will fail.
             pr = self.project.create_pr(
                 title=message,
-                body=trigger.construct_pr_body(changelog, has_prev_release),
+                body=trigger.construct_pr_body(
+                    changelog=changelog, has_prev_release=has_prev_release
+                ),
                 target_branch=self.project.default_branch,
                 source_branch=branch_name,
             )
