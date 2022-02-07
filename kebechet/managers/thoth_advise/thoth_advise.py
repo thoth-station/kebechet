@@ -139,7 +139,7 @@ class ThothAdviseManager(ManagerBase):
             "message_justification"
         ):
             body = _INTERNAL_TRIGGER_PR_BODY_LOOKUP[
-                kebechet_metadata.get("message_justification")
+                kebechet_metadata.get("message_justification")  # type: ignore
             ].format(
                 package=kebechet_metadata.get("package_name"),
                 version=kebechet_metadata.get("package_version"),

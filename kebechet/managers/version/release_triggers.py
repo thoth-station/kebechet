@@ -95,7 +95,7 @@ class BaseTrigger:
                         )
         return adjusted
 
-    def construct_pr_body(self, changelog: List[str], tag_missing: bool):
+    def construct_pr_body(self, changelog: List[str], has_prev_release: bool):
         """Construct PR body for trigger."""
         raise NotImplementedError
 
@@ -238,19 +238,19 @@ class ReleasePRlabels(BaseTrigger):
         list_of_labels = [lbl.name for lbl in self.pull_request.labels]
         return self.label_config.index_from_label_list(list_of_labels) is not None
 
-    def construct_pr_body(self, changelog: List[str], tag_missing: bool):
+    def construct_pr_body(self, changelog: List[str], has_prev_release: bool):
         """Construct body of the opened pull request with version update.
 
         Args:
             changelog (List[str]): List of individual changes based off of commits
-            tag_missing (bool): Whether or not the was a previous tag for the repository
+            has_prev_release (bool): Whether or not the was a previous tag for the repository
 
         Returns:
             (str): The PR containing the new version string's body.
         """
         body = ""
         truncated_changelog = changelog[: constants._MAX_CHANELOG_SIZE]
-        if tag_missing:
+        if not has_prev_release:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
             "\n\nFrom: #"
@@ -421,14 +421,14 @@ class ReleaseIssue(BaseTrigger):
             f"Hey, @{self.issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.",
         )
 
-    def construct_pr_body(self, changelog: List[str], tag_missing: bool) -> str:
+    def construct_pr_body(self, changelog: List[str], has_prev_release: bool) -> str:
         """Construct body of the opened pull request with version update."""
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
         body = self._adjust_pr_body()
         truncated_changelog = changelog[: constants._MAX_CHANELOG_SIZE]
-        if tag_missing:
+        if not has_prev_release:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
             "\n\nCloses: #"
