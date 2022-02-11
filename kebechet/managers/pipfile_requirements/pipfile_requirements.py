@@ -82,6 +82,27 @@ class PipfileRequirementsManager(ManagerBase):
 
         return requirements
 
+    def _create_missing_pipenv_files_issue(self, file_name):
+        issue_title = (
+            f"Kebechet Pipfile Requirements Manager: no {file_name} found in repo"
+        )
+        body = f"""Kebechet pipfile_requirements manager is installed but no
+        `{file_name}` was found in this repository.
+
+        `{file_name}` is required by the pipfile_requirements manager in its
+        current configuration (as specified in `.thoth.yaml`).
+
+        Either remove this manager from `.thoth.yaml`, adjust its configuration,
+        or update the repository to meet the requirements.
+
+        Reference: see the documentation for
+        [pipfile_requirements](https://thoth-station.ninja/docs/developers/kebechet/managers/pipfile_requirements.html).
+        """
+        issue = self.get_issue_by_title(issue_title)
+        if issue:
+            return
+        self.project.create_issue(title=issue_title, body=body)
+
     def run(self, lockfile: bool = False) -> None:  # type: ignore
         """Keep your requirements.txt in sync with Pipfile/Pipfile.lock."""
         if self.parsed_payload:
@@ -94,7 +115,11 @@ class PipfileRequirementsManager(ManagerBase):
 
         file_name = "Pipfile.lock" if lockfile else "Pipfile"
 
-        file_contents = self.project.get_file_content(file_name)
+        try:
+            file_contents = self.project.get_file_content(file_name)
+        except FileNotFoundError:
+            self._create_missing_pipenv_files_issue(file_name)
+            return
 
         pipfile_content = (
             sorted(self.get_pipfile_lock_requirements(file_contents))
