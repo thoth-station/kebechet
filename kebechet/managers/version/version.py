@@ -260,6 +260,7 @@ class VersionManager(ManagerBase):
             )
 
         reported_issues = []
+        version_update_complete = False
         for issue in self.project.get_issue_list():
             issue_title = issue.title.strip()
 
@@ -273,9 +274,13 @@ class VersionManager(ManagerBase):
                 reported_issues.append(issue)
 
             trigger = ReleaseIssue(issue)
-            # This is an optimization not to clone repo each time.
             if not trigger.is_trigger():
                 continue
+            elif version_update_complete:
+                reported_issues.append(
+                    issue
+                )  # will close duplicate version release issues
+                continue  # skip so that we don't open two PRs for same branch
 
             if assignees:
                 try:
@@ -343,6 +348,9 @@ class VersionManager(ManagerBase):
                 branch_name=branch_name,
                 new_version=new_version,
                 has_prev_release=has_prev_release,
+            )
+            version_update_complete = (
+                True  # do not create multiple PRs if multiple release issues exist
             )
 
         for reported_issue in reported_issues:
