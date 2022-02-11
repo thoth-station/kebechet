@@ -33,9 +33,25 @@ _EVENTS_SUPPORTED = ["issues", "issue"]
 
 
 _PR_BODY = """## Automatic configuration initialization
-The Kebechet app was installed on this repository but no configuration was
-found.  This PR contains basic configuration of runtime environments and
-managers."""
+The Kebechet app was installed on this repository but no configuration was found.  This PR contains basic configuration
+of runtime environments and managers.
+
+Information about each manager including configuration:
+- [Info](https://thoth-station.ninja/docs/developers/kebechet/managers/info_manager.html): provides info about python
+  packages detected as well as dependency graph
+- [Label Bot](https://thoth-station.ninja/docs/developers/kebechet/managers/label_bot.html): auto labels issues using a
+  pretrained natural language processing model
+- [Pipfile Requirements](https://thoth-station.ninja/docs/developers/kebechet/managers/pipfile_requirements.html):
+  synchronizes `requirements.txt` with a repositories Pipfile dependencies, or entire locked dependency stack
+- [Thoth Advise](https://thoth-station.ninja/docs/developers/kebechet/managers/thoth_advise.html): manages Python
+  dependencies using Thoth's recommendation system
+- [Thoth Provenance](https://thoth-station.ninja/docs/developers/kebechet/managers/thoth_provenance.html): validates
+  Pipfile.lock against remote index
+- [Update](https://thoth-station.ninja/docs/developers/kebechet/managers/update.html): automatically update
+  `requirements.txt` or `Pipfile` dependencies in a repository
+- [Version](https://thoth-station.ninja/docs/developers/kebechet/managers/version.html): updates version strings upon
+  request in repository
+"""
 
 _BRANCH_NAME = "kebechet-initial-thoth-config"
 
