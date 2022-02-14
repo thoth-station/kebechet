@@ -150,7 +150,7 @@ def _compute_changelog(
         _LOGGER.info("Classifier : %s", changelog_classifier)
         _LOGGER.info("Format : %s", changelog_format)
         changelog = repo.git.log(
-            f"{old_version}..HEAD", no_merges=True, format="%s"
+            f"{old_version}..HEAD", no_merges=True, format="%h %s"
         ).splitlines()
         changelog = generate_log(
             changelog,
@@ -159,7 +159,7 @@ def _compute_changelog(
         )
     else:
         changelog = repo.git.log(
-            f"{old_version}..HEAD", no_merges=True, format="* %s"
+            f"{old_version}..HEAD", no_merges=True, format="* %h %s"
         ).splitlines()
 
     if version_file:
