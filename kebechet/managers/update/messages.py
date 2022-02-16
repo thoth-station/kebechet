@@ -80,7 +80,7 @@ For more information, see [Pipfile]({pip_url}) and [Pipfile.lock]({piplock_url})
 
 Once this issue is resolved, the issue will be automatically closed by bot.
 
-/label thoth/potential-flake
+/label thoth/potential-observation
 /kind bug
 /priority critical-urgent
 """
