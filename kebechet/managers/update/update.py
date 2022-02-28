@@ -190,7 +190,8 @@ class UpdateManager(ManagerBase):
             ) from exc
 
         default = list(
-            package_name.lower() for package_name in pipfile_content["packages"].keys()
+            package_name.lower()
+            for package_name in pipfile_content.get("packages", {}).keys()
         )
         develop = list(
             package_name.lower()
