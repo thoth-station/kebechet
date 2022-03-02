@@ -3,7 +3,6 @@
 approvers:
   - codificat
   - fridex
-  - goern
   - harshad16
   - kpostoffice
   - pacospace
@@ -14,4 +13,4 @@ reviewers:
   - kpostoffice
 
 labels:
-  - sig/cyborgs
+  - sig/user-experience
