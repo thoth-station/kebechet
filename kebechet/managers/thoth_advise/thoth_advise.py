@@ -96,6 +96,12 @@ def _runtime_env_name_from_advise_response(response: dict):
     return response["result"]["parameters"]["project"]["runtime_environment"]["name"]
 
 
+def _get_kebechet_metadata(adviser_metadata: dict) -> typing.Optional[dict]:
+    return adviser_metadata["arguments"]["thoth-adviser"]["metadata"].get(
+        "kebechet_metadata"
+    )
+
+
 class ThothAdviseManager(ManagerBase):
     """Manage updates of dependencies using Thoth."""
 
@@ -131,9 +137,7 @@ class ThothAdviseManager(ManagerBase):
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
 
-        kebechet_metadata = metadata.get(
-            "kebechet_metadata"
-        )  # type: typing.Optional[dict]
+        kebechet_metadata = _get_kebechet_metadata(adviser_metadata=metadata)
 
         if kebechet_metadata is not None and kebechet_metadata.get(
             "message_justification"
@@ -218,7 +222,9 @@ class ThothAdviseManager(ManagerBase):
             type_ = error["type"]
             _LOGGER.info(f"Error type: {type_}")
 
-            kebechet_metadata = adv_results[0]["metadata"].get("kebechet_metadata")
+            kebechet_metadata = _get_kebechet_metadata(
+                adviser_metadata=adv_results[0]["metadata"]
+            )
 
             if (
                 kebechet_metadata is not None
@@ -303,9 +309,7 @@ class ThothAdviseManager(ManagerBase):
 
     @staticmethod
     def _metadata_indicates_internal_trigger(metadata: dict) -> bool:
-        kebechet_metadata = metadata.get(
-            "kebechet_metadata"
-        )  # type: typing.Optional[dict]
+        kebechet_metadata = _get_kebechet_metadata(metadata)
         return bool(
             kebechet_metadata and kebechet_metadata.get("message_justification")
         )
