@@ -244,7 +244,7 @@ class ThothAdviseManager(ManagerBase):
 
         if self._tracking_issue:
             comment = (
-                SUCCESSFUL_ADVISE_COMMENT.format(env_name=self.runtime_environment)
+                SUCCESSFUL_ADVISE_COMMENT.format(env=self.runtime_environment)
                 + f"Adviser failed\n{textblock}"
             )
             self._tracking_issue.comment(comment)
@@ -420,7 +420,7 @@ class ThothAdviseManager(ManagerBase):
                     if opened_merge and self._tracking_issue:
                         comment = (
                             SUCCESSFUL_ADVISE_COMMENT.format(
-                                env_name=self.runtime_environment
+                                env=self.runtime_environment
                             )
                             + f"Opened merge request, see: #{opened_merge.id}"
                         )
@@ -428,7 +428,7 @@ class ThothAdviseManager(ManagerBase):
                     elif self._tracking_issue:
                         comment = (
                             SUCCESSFUL_ADVISE_COMMENT.format(
-                                env_name=self.runtime_environment
+                                env=self.runtime_environment
                             )
                             + "Dependencies for this runtime environment are already up to date :)."
                         )
