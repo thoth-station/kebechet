@@ -24,7 +24,7 @@ import toml
 import re
 import json
 import typing
-from typing import Optional
+from typing import Optional, List
 from itertools import chain
 from functools import partial
 from datetime import datetime
@@ -54,6 +54,7 @@ from .utils import rebase_pr_branch_and_comment
 from kebechet.utils import construct_raw_file_url
 from thoth.common.helpers import cwd
 from thamos.config import config as thoth_config
+from thamos.exceptions import NoRuntimeEnvironmentError
 
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile("(==|===|<=|>=|~=|!=|<|>|\\[)")
@@ -453,7 +454,11 @@ class UpdateManager(ManagerBase):
         information of packages that were present in the old environment so we can selectively change versions in the
         already existing requirements.txt or add packages that were introduced as a transitive dependency.
         """
-        overlays_dir = thoth_config.get_overlays_directory(self.runtime_environment)
+        try:
+            overlays_dir = thoth_config.get_overlays_directory(self.runtime_environment)
+        except NoRuntimeEnvironmentError:  # handle the "default" case where no runtime_envs are defined
+            overlays_dir = "."
+
         if pipenv_used:
             pull_request = self._open_merge_request_update(
                 body,
@@ -775,6 +780,7 @@ class UpdateManager(ManagerBase):
 
             overlays_dir = thoth_config.content.get("overlays_dir")
 
+            runtime_environments: List[Optional[str]]
             if self.runtime_environment:
                 if self.runtime_environment not in runtime_environment_names:
                     # This is not a warning as it is expected when users remove and change runtime_environments
@@ -784,8 +790,10 @@ class UpdateManager(ManagerBase):
             else:
                 if overlays_dir:
                     runtime_environments = runtime_environment_names
-                else:
+                elif runtime_environment_names:
                     runtime_environments = [runtime_environment_names[0]]
+                else:
+                    runtime_environments = [None]
 
             results: dict = {}
 
@@ -798,16 +806,21 @@ class UpdateManager(ManagerBase):
             )
 
             for e in runtime_environments:
-                self.runtime_environment = e
+                self.runtime_environment = e or "default"
                 close_no_management_issue = partial(
                     self.close_issue_and_comment,
-                    _ISSUE_NO_DEPENDENCY_NAME.format(env_name=e),
+                    _ISSUE_NO_DEPENDENCY_NAME.format(env_name=self.runtime_environment),
                     comment=ISSUE_CLOSE_COMMENT.format(sha=self.sha),
                 )
-                with cwd(thoth_config.get_overlays_directory(e)):
+                env_dir = thoth_config.get_overlays_directory(e) if e else "."
+                with cwd(env_dir):
                     update_prs = (
                         self.get_prs_by_branch(
-                            _string2branch_name(_UPDATE_BRANCH_NAME.format(env_name=e)),
+                            _string2branch_name(
+                                _UPDATE_BRANCH_NAME.format(
+                                    env_name=self.runtime_environment
+                                )
+                            ),
                             status=PRStatus.all,
                         )
                         or []
@@ -820,13 +833,15 @@ class UpdateManager(ManagerBase):
                         try:
                             self.delete_remote_branch(
                                 _string2branch_name(
-                                    _UPDATE_BRANCH_NAME.format(env_name=e)
+                                    _UPDATE_BRANCH_NAME.format(
+                                        env_name=self.runtime_environment
+                                    )
                                 )
                             )
                         except Exception:
                             _LOGGER.exception(
-                                f"Failed to delete branch {_UPDATE_BRANCH_NAME.format(env_name=e)}, "
-                                "trying to continue"
+                                f"Failed to delete branch "
+                                f"{_UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)}, trying to continue"
                             )
                     elif to_rebase:
                         for pr in to_rebase:
@@ -859,16 +874,22 @@ class UpdateManager(ManagerBase):
                     else:
                         _LOGGER.warning("No dependency management found")
                         issue = self.get_issue_by_title(
-                            _ISSUE_NO_DEPENDENCY_NAME.format(env_name=e)
+                            _ISSUE_NO_DEPENDENCY_NAME.format(
+                                env_name=self.runtime_environment
+                            )
                         )
                         if issue is None:
                             self.project.create_issue(
-                                title=_ISSUE_NO_DEPENDENCY_NAME.format(env_name=e),
-                                body=ISSUE_NO_DEPENDENCY_MANAGEMENT.format(env_name=e),
+                                title=_ISSUE_NO_DEPENDENCY_NAME.format(
+                                    env_name=self.runtime_environment
+                                ),
+                                body=ISSUE_NO_DEPENDENCY_MANAGEMENT.format(
+                                    env_name=self.runtime_environment
+                                ),
                                 labels=labels,
                             )
                         result = {}
-                results[e] = result
+                results[self.runtime_environment] = result
             close_manual_update_issue()
 
         return results
