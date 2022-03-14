@@ -49,7 +49,7 @@ class ManagerBase:
         runtime_environment: Optional[str] = None,
     ):
         """Initialize manager instance for talking to services."""
-        self.service_url: str = service.instance_url
+        self.service_url: str = service.instance_url  # type: ignore
         self.slug = slug
         self.service_type = service_type
         # Parsed payload structure can be accessed in payload_parser.py

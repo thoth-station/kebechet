@@ -302,9 +302,9 @@ class ReleasePRlabels(BaseTrigger):
         """
         error_msg = constants._NO_VERSION_FOUND_ISSUE_NAME
         _LOGGER.warning(error_msg)
-        i = get_issue_by_title(self.pull_request.project, error_msg)
+        i = get_issue_by_title(self.pull_request.source_project, error_msg)
         if i is None:
-            self.pull_request.project.create_issue(
+            self.pull_request.source_project.create_issue(
                 title=error_msg,
                 body=f"Automated version release cannot be performed.\nRelated: #{self.pull_request.id}",
                 labels=labels,
@@ -330,9 +330,9 @@ class ReleasePRlabels(BaseTrigger):
             + ", ".join(adjusted_files)
             + "`"
         )
-        i = get_issue_by_title(self.pull_request.project, error_msg)
+        i = get_issue_by_title(self.pull_request.source_project, error_msg)
         if i is None:
-            self.pull_request.project.create_issue(
+            self.pull_request.source_project.create_issue(
                 title=error_msg,
                 body=f"{_issue_body}\nRelated: #{self.pull_request.id}",
                 labels=labels,

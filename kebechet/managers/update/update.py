@@ -395,7 +395,8 @@ class UpdateManager(ManagerBase):
                 _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
             ),
         )
-        merge_request.add_label(*labels)
+        if labels:
+            merge_request.add_label(*labels)
         return merge_request
 
     def _git_push(
