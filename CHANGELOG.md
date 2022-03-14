@@ -1,5 +1,36 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.8.0 (2022-03-14T14:43:57)
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* close duplicate release issues when manager is run (#1000)
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* Add links to manager docs in config initialization
+* freshness check to avoid duplicating PR
+* wrong location for keb metadata was used
+* env_name->env
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* Update OWNERS
+* handle case where no packages section exists in Pipfile
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* open issue if no pipenv files are found
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* Update the label to use on issue creation
+* Update GitHub issue templates for bugs and features
+* Update pre-commit plugins
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* Add commit hashes to the changelog entries
+* handle case where no runtime_envs are defined
+* use consistent name for 'has_prev_release'
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :medal_sports: set badges for easy access to content
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#984)
+
 ## Release 1.7.3 (2022-01-25T15:31:23)
 
 - use previous tag for computing changelog
