@@ -356,6 +356,9 @@ class ReleaseIssue(BaseTrigger):
         """Create new release issue trigger."""
         self.issue = issue
 
+    def _is_fresh(self):
+        return len(self.issue.get_comments()) == 0
+
     def is_trigger(self) -> bool:
         """Return whether or not this object is a valid trigger for a new version.
 
@@ -363,8 +366,10 @@ class ReleaseIssue(BaseTrigger):
             bool
         """
         t = self.issue.title.lower()
-        return t in self._TITLE2UPDATE_INDEX or (
-            t.endswith(constants._DIRECT_VERSION_TITLE) and len(t.split(" ")) == 2
+        return (
+            t in self._TITLE2UPDATE_INDEX
+            or (t.endswith(constants._DIRECT_VERSION_TITLE) and len(t.split(" ")) == 2)
+            and self._is_fresh()
         )
 
     def get_new_version(self, old_version):
