@@ -472,6 +472,10 @@ class UpdateManager(ManagerBase):
         output_file = "requirements-dev.txt" if req_dev else "requirements.txt"
         output_file = f"{overlays_dir}/{output_file}"
         pull_request = self._open_merge_request_update(body, labels, [output_file])
+
+        if update_issue := self.get_issue_by_title(_ISSUE_MANUAL_UPDATE):
+            update_issue.comment(f"Opened PR updating dependencies. #{pull_request.id}")
+
         return pull_request.id  # type: ignore
 
     @classmethod
