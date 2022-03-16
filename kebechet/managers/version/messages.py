@@ -38,3 +38,21 @@ The `release_label_config` in your `version` manager configuration in
 list strings which match the labels which you want to create the corresponding
 releases for.
 """
+
+ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND = """
+Automated version release could not be completed.
+
+Kebechet version manager expects a file with one of the following names: `["setup.py", "__init__.py", "__about__.py",
+"version.py", "app.py", "wsgi.py"]` to contain the line:
+
+```
+...
+__version__ = X.Y.Z
+...
+```
+
+where `X.Y.Z` is the current semantic version. To fix this issue, add this line to one of these files. If none of these
+files exist create one somewhere in your repository.
+
+**Related**: #{github_id}
+"""
