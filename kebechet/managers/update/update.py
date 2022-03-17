@@ -92,6 +92,7 @@ _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 # updated on subsequent calls.
 
 _INVALID_BRANCH_CHARACTERS = [":", "?", "[", "\\", "^", "~", " ", "\t"]
+MAX_PIPENV_CMD_LEN = 60000  # max gh issue/comment is 65,536 this leaves ~5000 characters for the rest of the issue
 
 
 def _string2branch_name(string: str):
@@ -577,7 +578,7 @@ class UpdateManager(ManagerBase):
                     slug=self.slug,
                     environment_details=self.get_environment_details(),
                     dependency_graph=self.get_dependency_graph(graceful=True),
-                    **exc.__dict__,
+                    **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
                 )
             )
 
@@ -636,7 +637,7 @@ class UpdateManager(ManagerBase):
                         url=file_url,
                         file=file_name,
                         environment_details=self.get_environment_details(),
-                        **exc.__dict__,  # noqa F821
+                        **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
                     ),
                     labels=labels,
                 )
@@ -679,7 +680,7 @@ class UpdateManager(ManagerBase):
                     piplock_url=piplock_url,
                     environment_details=self.get_environment_details(),
                     dependency_graph=self.get_dependency_graph(graceful=True),
-                    **exc.__dict__,  # noqa F821
+                    **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
                 ),
                 labels=labels,
             )

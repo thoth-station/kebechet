@@ -39,6 +39,30 @@ class PipenvError(KebechetException):
         self.raw_command = command
         super().__init__(*args)
 
+    def char_limit_dict(self, char_limit: int):
+        """Return command, stdout, and stderr in a dictionary with a maximum num. of characters allocated."""
+        to_ret = {}
+        attrs = [
+            (len(self.command), "command", self.command),
+            (len(self.stdout), "stdout", self.stdout),
+            (len(self.stderr), "stderr", self.stderr),
+        ]
+        attrs.sort()  # sorted according to string length, ensures largest attrs get highest char limit
+        individual_char_limit = int(char_limit / len(attrs))
+        for i in range(len(attrs)):
+            curr = attrs[i]
+            if curr[0] < individual_char_limit:
+                to_ret[curr[1]] = curr[2]
+
+                # distribute remaining limit, the max is to avoid divide by 0 on the final iteration
+                individual_char_limit += int(
+                    (individual_char_limit - curr[0]) / max(1, len(attrs) - i - 1)
+                )
+            else:
+                to_ret[curr[1]] = curr[2][: individual_char_limit - 3] + "..."
+
+        return to_ret
+
 
 class InternalError(KebechetException):
     """Raised for internal errors, should not occur for end-user."""
