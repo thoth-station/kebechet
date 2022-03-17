@@ -23,7 +23,7 @@ import sys
 import traceback
 import logging
 import tempfile
-from ogr.services.base import BaseGitService, BaseGitProject
+from ogr.services.base import BaseGitService, GitProject
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from urllib.parse import urljoin
@@ -163,7 +163,7 @@ def create_ogr_service(
     """Create a new OGR service for interacting with remote GitForges."""
     service_type = service_type.upper()
     if service_type == "GITHUB":
-        ogr_service = GithubService(
+        ogr_service: BaseGitService = GithubService(
             token=token,
             github_app_id=os.getenv("GITHUB_APP_ID"),
             github_app_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
@@ -171,6 +171,8 @@ def create_ogr_service(
     elif service_type == "GITLAB":
         ogr_service = GitlabService(token=token, instance_url=service_url)
     elif service_type == "PAGURE":
+        if service_url is None:
+            raise ValueError("Service URL must be defined for Pagure integration.")
         ogr_service = PagureService(
             token=token,
             instance_url=service_url,
@@ -180,7 +182,7 @@ def create_ogr_service(
     return ogr_service
 
 
-def get_issue_by_title(ogr_project: BaseGitProject, title: str):
+def get_issue_by_title(ogr_project: GitProject, title: str):
     """If an issue exists in the passed project then return the issue object."""
     for issue in ogr_project.get_issue_list():
         if issue.title == title:

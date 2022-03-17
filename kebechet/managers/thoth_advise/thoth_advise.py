@@ -261,7 +261,7 @@ class ThothAdviseManager(ManagerBase):
                 owners = yaml.safe_load(owners_file)
             return list(map(str, owners.get("approvers") or [])) + [APP_NAME]
         except FileNotFoundError:
-            return self.project.who_can_merge_pr().append(APP_NAME)
+            return list(self.project.who_can_merge_pr()) + [APP_NAME]
 
     def _close_advise_issues4users_lacking_perms(self):
         permitted_users = self._get_users_with_permission()
@@ -287,7 +287,7 @@ class ThothAdviseManager(ManagerBase):
 
     def _close_all_but_oldest_issue(self) -> typing.Optional[Issue]:
         oldest = None
-        to_close: Issue = []
+        to_close: typing.List[Issue] = []
         for issue in self._issue_list:
             if issue.title == ADVISE_ISSUE_TITLE:
                 if oldest is None:
