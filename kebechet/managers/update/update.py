@@ -751,14 +751,14 @@ class UpdateManager(ManagerBase):
                     result["merge request id"] = versions  # return the merge request id
             except Exception as exc:
                 _LOGGER.exception(
-                    f"Failed to create update for current master {self.sha}: {str(exc)}"
+                    f"Failed to create update for current {self.project.default_branch} {self.sha}: {str(exc)}"
                 )
         else:
             self.close_issue_and_comment(
                 title=_UPDATE_MERGE_REQUEST_TITLE.format(
                     env_name=self.runtime_environment
                 ),
-                comment=f"No longer relevant based on the state of the current branch {self.sha}",
+                comment=f"Dependencies for default branch, {self.project.default_branch}, already up to date.",
             )
 
         return result
