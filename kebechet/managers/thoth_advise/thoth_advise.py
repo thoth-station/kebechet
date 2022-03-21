@@ -68,7 +68,7 @@ STARTED_COMMENT_STARTS_WITH = STARTED_ADVISE_COMMENT[
 ]
 STARTED_ADVISE_REGEX = r"^Started advise for ([\w\-]*): "
 
-ADVISE_RESULT_PREFIX = "Result for {env_name}: "
+ADVISE_RESULT_PREFIX = "Result for {env}: "
 SUCCESSFUL_ADVISE_COMMENT = ADVISE_RESULT_PREFIX + "Finished advise.\n\n"
 SUCCESSFUL_ADVISE_REGEX = r"^Result for ([\w\-]*): Finished"
 ERROR_ADVISE_REGEX = r"^Result for ([\w\-]*): Error"
@@ -368,7 +368,7 @@ class ThothAdviseManager(ManagerBase):
                         self._tracking_issue.comment(
                             STARTED_ADVISE_COMMENT.format(
                                 analysis_id=analysis_id,
-                                env_name=e,
+                                env=e,
                                 host=thoth_config["host"],
                             )
                         )
