@@ -27,7 +27,10 @@ from kebechet.utils import get_issue_by_title
 
 from . import constants
 from .exceptions import VersionError
-from .messages import RELEASE_TAG_MISSING_WARNING
+from .messages import (
+    RELEASE_TAG_MISSING_WARNING,
+    ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -306,7 +309,9 @@ class ReleasePRlabels(BaseTrigger):
         if i is None:
             self.pull_request.source_project.create_issue(
                 title=error_msg,
-                body=f"Automated version release cannot be performed.\nRelated: #{self.pull_request.id}",
+                body=ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND.format(
+                    github_id=self.pull_request.id
+                ),
                 labels=labels,
             )
 
@@ -462,7 +467,9 @@ class ReleaseIssue(BaseTrigger):
         if i is None:
             self.issue.project.create_issue(
                 title=error_msg,
-                body=f"Automated version release cannot be performed.\nRelated: #{self.issue.id}",
+                body=ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND.format(
+                    github_id=self.issue.id
+                ),
                 labels=labels,
             )
 
