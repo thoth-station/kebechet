@@ -89,17 +89,11 @@ _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP = {
 }
 
 
-APP_NAME = os.getenv("GITHUB_APP_NAME", "khebhut")
+APP_NAME = f'{os.getenv("GITHUB_APP_NAME", "khebhut").lower()}[bot]'
 
 
 def _runtime_env_name_from_advise_response(response: dict):
     return response["result"]["parameters"]["project"]["runtime_environment"]["name"]
-
-
-def _get_kebechet_metadata(adviser_metadata: dict) -> typing.Optional[dict]:
-    return adviser_metadata["arguments"]["thoth-adviser"]["metadata"].get(
-        "kebechet_metadata"
-    )
 
 
 class ThothAdviseManager(ManagerBase):
@@ -137,20 +131,17 @@ class ThothAdviseManager(ManagerBase):
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
 
-        kebechet_metadata = _get_kebechet_metadata(adviser_metadata=metadata)
-
-        if kebechet_metadata is not None and kebechet_metadata.get(
-            "message_justification"
-        ):
+        if self._metadata_indicates_internal_trigger():
             body = _INTERNAL_TRIGGER_PR_BODY_LOOKUP[
-                kebechet_metadata.get("message_justification")  # type: ignore
+                self.metadata["message_justification"]  # type: ignore
             ].format(
-                package=kebechet_metadata.get("package_name"),
-                version=kebechet_metadata.get("package_version"),
-                index=kebechet_metadata.get("package_index"),
+                package=self.metadata.get("package_name"),  # type: ignore
+                version=self.metadata.get("package_version"),  # type: ignore
+                index=self.metadata.get("package_index"),  # type: ignore
+                document_id=metadata["document_id"],
             )
         else:
-            body = DEFAULT_PR_BODY
+            body = DEFAULT_PR_BODY.format(document_id=metadata["document_id"])
 
         with open(".thoth.yaml", "r") as f:
             thoth_config = yaml.safe_load(f)
@@ -178,6 +169,7 @@ class ThothAdviseManager(ManagerBase):
         for mr in self._cached_merge_requests:
             if mr.source_branch == branch_name:
                 _LOGGER.info("Merge request already exists, updating...")
+                mr.body = body
                 return mr
 
         _LOGGER.info("Opening merge request")
@@ -191,13 +183,15 @@ class ThothAdviseManager(ManagerBase):
 
         return pr
 
-    def _write_advise(self, adv_results: list):
+    def _write_advise(self, adv_results: dict):
         with open(".thoth.yaml", "r") as f:
             thoth_config = yaml.safe_load(f)
         overlays_dir = thoth_config.get("overlays_dir")
-        requirements_lock = adv_results[0]["report"][0][1]["requirements_locked"]
-        requirements = adv_results[0]["parameters"]["project"]["requirements"]
-        requirements_format = adv_results[0]["parameters"]["requirements_format"]
+        requirements_lock = adv_results["result"]["report"]["products"][0]["project"][
+            "requirements_locked"
+        ]
+        requirements = adv_results["result"]["parameters"]["project"]["requirements"]
+        requirements_format = adv_results["result"]["parameters"]["requirements_format"]
         if overlays_dir:
             with cwd(f"{overlays_dir}/{self.runtime_environment}"):
                 lib.write_files(
@@ -212,41 +206,20 @@ class ThothAdviseManager(ManagerBase):
                 requirements_format=requirements_format,
             )
 
-    def _act_on_advise_error(self, adv_results: list):
+    def _act_on_advise_error(self, adv_results: dict):
         """Create an issue if advise fails."""
         _LOGGER.debug(json.dumps(adv_results))
         textblock = ""
-        errors = adv_results[0]["report"][0][0]
-        for error in errors:
-            justification = error["justification"]
-            type_ = error["type"]
-            _LOGGER.info(f"Error type: {type_}")
+        document_id = adv_results["metadata"]["document_id"]
 
-            kebechet_metadata = _get_kebechet_metadata(
-                adviser_metadata=adv_results[0]["metadata"]
-            )
-
-            if (
-                kebechet_metadata is not None
-                and kebechet_metadata.get("message_justification") is not None
-            ):
-                internal_trigger_info = _INTERNAL_TRIGGER_ISSUE_BODY_LOOKUP[
-                    kebechet_metadata["message_justification"]
-                ].format(
-                    package=kebechet_metadata.get("package_name"),
-                    version=kebechet_metadata.get("package_version"),
-                    index=kebechet_metadata.get("package_index"),
-                )
-            else:
-                internal_trigger_info = ""
-
-            textblock = (
-                textblock
-                + f"## Error type: {type_}\n"
-                + f"**runtime_environment**: {self.runtime_environment}\n"
-                + f"**Justification**: {justification}\n"
-                + internal_trigger_info
-            )
+        textblock = (
+            textblock
+            + "## Error:"
+            + adv_results["result"]["error_msg"]
+            + f"**runtime_environment**: {self.runtime_environment}\n"
+            + "## Justification**:\n"
+            + f"for more information please see https://thoth-station.ninja/search/advise/{document_id}/summary"
+        )
 
         if self._tracking_issue:
             comment = (
@@ -271,7 +244,7 @@ class ThothAdviseManager(ManagerBase):
         for issue in self._issue_list:
             if (
                 issue.title == ADVISE_ISSUE_TITLE
-                and issue.author not in permitted_users
+                and issue.author.lower() not in permitted_users
             ):
                 issue.comment(
                     ADVISE_ACTION_NOT_PERMITTED.format(
@@ -307,12 +280,8 @@ class ThothAdviseManager(ManagerBase):
 
         return oldest
 
-    @staticmethod
-    def _metadata_indicates_internal_trigger(metadata: dict) -> bool:
-        kebechet_metadata = _get_kebechet_metadata(metadata)
-        return bool(
-            kebechet_metadata and kebechet_metadata.get("message_justification")
-        )
+    def _metadata_indicates_internal_trigger(self) -> bool:
+        return bool(self.metadata and self.metadata.get("message_justification"))
 
     def run(self, labels: list, analysis_id=None):
         """Run Thoth Advising Bot."""
@@ -398,7 +367,7 @@ class ThothAdviseManager(ManagerBase):
                 self.repo = repo
                 _LOGGER.info("Using analysis results from %s", analysis_id)
                 res = lib.get_analysis_results(analysis_id)
-                if self._metadata_indicates_internal_trigger(res[0].get("metadata")):
+                if self._metadata_indicates_internal_trigger():
                     self._tracking_issue = None  # internal trigger advise results should not be tracked by issue
                 branch_name = self._construct_branch_name(analysis_id)
                 branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
@@ -417,7 +386,7 @@ class ThothAdviseManager(ManagerBase):
                 to_ret = False
                 if res[1] is False:
                     _LOGGER.info("Advise succeeded")
-                    self._write_advise(res)
+                    self._write_advise(res[0])
                     opened_merge = self._open_merge_request(
                         branch_name, labels, ["Pipfile.lock"], res[0].get("metadata")
                     )
