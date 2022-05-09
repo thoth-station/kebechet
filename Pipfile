@@ -25,6 +25,7 @@ pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
 pylint = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"

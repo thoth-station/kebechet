@@ -11,3 +11,18 @@ presubmits:
             - "pre-commit"
             - "run"
             - "--all-files"
+  - name: thoth-mypy-py38
+    decorate: true
+    skip_report: false
+    always_run: true
+    context: aicoe-ci/prow/mypy
+    spec:
+      containers:
+        - image: quay.io/thoth-station/thoth-pytest-py38:v0.14.3
+          command:
+            - "run-mypy"
+          args:
+            - "."
+            - "--ignore-missing-imports"
+            - "--config-file"
+            - "mypy.ini"
