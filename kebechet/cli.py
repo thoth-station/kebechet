@@ -83,7 +83,7 @@ def cli_run(
     namespace: str,
     project: str,
     service_url: Optional[str] = None,
-    runtime_environment=Optional[str],
+    runtime_environment: Optional[str] = None,
 ):
     """Run Kebechet using provided YAML configuration file."""
     run(
@@ -101,18 +101,24 @@ def cli_run(
 @click.option(
     "-i", "--analysis_id", metavar="id", envvar="KEBECHET_ANALYSIS_ID", required=True
 )
+@click.option(
+    "-m", "--thoth-adviser-metadata", envvar="THOTH_ADVISER_METADATA", required=True
+)
 @click.option("-e", "--runtime-environment", envvar="KEBECHET_RUNTIME_ENVIRONMENT")
 def cli_run_results(
     origin: str,
     service: str,
     analysis_id: str,
+    thoth_adviser_metadata: str,
     runtime_environment: Optional[str] = None,
 ):
     """Run Kebechet after results are received (meant to be triggered automatically)."""
+    kebechet_metadata = json.loads(thoth_adviser_metadata)["kebechet_metadata"]
     run_analysis(
         analysis_id=analysis_id,
         origin=origin,
         service=service,
+        kebechet_metadata=kebechet_metadata,
         runtime_environment=runtime_environment,
     )
 
