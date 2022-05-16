@@ -96,7 +96,7 @@ _EVENTS_SUPPORTED = ["push", "issues", "issue", "merge_request"]
 # updated on subsequent calls.
 
 _INVALID_BRANCH_CHARACTERS = [":", "?", "[", "\\", "^", "~", " ", "\t"]
-MAX_PIPENV_CMD_LEN = 60000  # max gh issue/comment is 65,536 this leaves ~5000 characters for the rest of the issue
+MAX_PIPENV_CMD_LEN = 50000  # max gh issue/comment is 65,536 this leaves ~5000 characters for the rest of the issue
 
 
 def _string2branch_name(string: str):
