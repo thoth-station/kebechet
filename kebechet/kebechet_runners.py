@@ -112,6 +112,7 @@ def run_analysis(
     analysis_id: str,
     origin: str,
     service: str,
+    kebechet_metadata: dict,
     runtime_environment: Optional[str] = None,
 ) -> None:
     """Run result managers (meant to be triggered automatically)."""
@@ -123,6 +124,7 @@ def run_analysis(
         namespace=namespace,
         project=project,
         enabled_managers=["thoth-provenance", "thoth-advise"],
+        metadata=kebechet_metadata,
         analysis_id=analysis_id,
         runtime_environment=runtime_environment,
     )

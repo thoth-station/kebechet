@@ -38,6 +38,7 @@ repos:
       - id: mypy
         exclude: '^(docs|tasks|tests)|setup\.py'
         args: [--ignore-missing-imports]
+        additional_dependencies: [types-PyYAML, types-toml, types-requests]
 
   - repo: https://github.com/psf/black
     rev: 22.3.0
