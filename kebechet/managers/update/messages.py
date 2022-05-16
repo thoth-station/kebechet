@@ -237,3 +237,11 @@ The direct dependencies updated in the pull request are -
 This Pull Request is based on a [Project Thoth GitHub App](https://github.com/marketplace/khebhut),
 and [Kebechet](https://github.com/thoth-station/kebechet) v{kebechet_version}
 """
+
+UNINIT_OVERLAY_DIR_BODY = """Kebechet was unable to run update manager for the {env} runtime environment. The overlay
+directory associated with it has not been initialized. See below for more info:
+
+```
+{exception}
+```
+"""

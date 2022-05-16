@@ -48,13 +48,17 @@ from .messages import (
     ISSUE_NO_DEPENDENCY_MANAGEMENT,
     ISSUE_PIPENV_UPDATE_ALL,
     ISSUE_UNSUPPORTED_PACKAGE,
+    UNINIT_OVERLAY_DIR_BODY,
     UPDATE_MESSAGE_BODY,
 )
 from .utils import rebase_pr_branch_and_comment
 from kebechet.utils import construct_raw_file_url
 from thoth.common.helpers import cwd
 from thamos.config import config as thoth_config
-from thamos.exceptions import NoRuntimeEnvironmentError
+from thamos.exceptions import (
+    NoRuntimeEnvironmentError,
+    ConfigurationError as ThamosConfigurationError,
+)
 
 _LOGGER = logging.getLogger(__name__)
 _RE_VERSION_DELIMITER = re.compile("(==|===|<=|>=|~=|!=|<|>|\\[)")
@@ -460,6 +464,21 @@ class UpdateManager(ManagerBase):
             overlays_dir = thoth_config.get_overlays_directory(self.runtime_environment)
         except NoRuntimeEnvironmentError:  # handle the "default" case where no runtime_envs are defined
             overlays_dir = "."
+        except ThamosConfigurationError as e:
+            if "not initialized" not in str(
+                e
+            ):  # check and make sure exception is do to unitialized dir
+                raise e
+            title = f"Uninitialized Overlay Dir ({self.runtime_environment})"
+            if not self.get_issue_by_title(title):
+                self.project.create_issue(
+                    title=title,
+                    body=UNINIT_OVERLAY_DIR_BODY.format(
+                        env=self.runtime_environment, exception=str(e)
+                    ),
+                    labels=labels,
+                )
+                raise DependencyManagementError("Uninitialized overlay directory.")
 
         if pipenv_used:
             pull_request = self._open_merge_request_update(
