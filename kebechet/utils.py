@@ -107,12 +107,15 @@ def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
                 repo = _clone_repo_and_set_vals(repo_url, ".", **clone_kwargs)
                 repo.git.checkout(branch)
             yield repo
+            repo.git.stash()  # cleanup unused changes
             repo.git.clean("-xdf")
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
             repo = _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs)
             repo.git.checkout(branch)
             yield repo
+            repo.git.stash()  # cleanup unused changes
+            repo.git.clean("-xdf")
 
 
 def construct_raw_file_url(
