@@ -1,5 +1,24 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.9.0 (2022-05-19T17:21:54)
+* ba55d4b Add behave tests to Kebechet for 'integration' tests
+* 29e8a08 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* bc985bd fix: adjust pipenv cmd limit downward (leave space for dep graph)
+* 2148a7f fix: open issue in the case of uninitialized overlay dir
+* 18bdf88 fix: cleanup any unused changes to avoid merge conflicts
+* 7c6d9de various bugfixes for keb-advise-manager
+* d648580 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1040)
+* b2fabb2 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 52e1438 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1034)
+* 55665f6 env for format
+* 057a13a clearer github comment for up to date dependencies
+* bfaac03 add more info to no v found issue
+* c060090 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 1a9f59d :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 5afd12f fix mypy precommit errs
+* fafbe4c add comment to update issue with PR id
+* cef66cf place limit on chars from pipenv command. leave ~5000 for the rest of the issue
+
 ## Release 1.8.0 (2022-03-14T14:43:57)
 * :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 * close duplicate release issues when manager is run (#1000)
