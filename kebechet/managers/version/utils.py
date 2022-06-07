@@ -17,7 +17,6 @@
 
 """A variety of functions to be used in version manager with no home in particular."""
 
-
 from datetime import datetime
 from typing import Callable, Optional, Dict, List, Any
 import os
@@ -213,3 +212,22 @@ def _is_merge_event(payload: Dict[str, Any]):
 
 def _pr_id_from_webhook(payload: Dict[str, Any]):
     return payload["raw_payload"]["payload"]["number"]
+
+
+def _is_release_version_pr(payload: Dict[str, Any]):
+    if (
+        payload["raw_payload"]["payload"]["pull_request"]["user"]["login"]
+        == "khebhut[bot]"
+    ):
+        return (
+            "Release of version"
+            in payload["raw_payload"]["payload"]["pull_request"]["title"]
+        )
+
+
+def _get_version(payload: Dict[str, Any]):
+    return payload["raw_payload"]["payload"]["pull_request"]["head"]["ref"]
+
+
+def _get_merge_commit_sha(payload: Dict[str, Any]):
+    return payload["raw_payload"]["payload"]["pull_request"]["merge_commit_sha"]
