@@ -204,6 +204,31 @@ class VersionManager(ManagerBase):
         trigger: BaseTrigger
 
         if (
+            self.parsed_payload
+            and utils._is_merge_event(self.parsed_payload)
+            and utils._is_release_version_pr(self.parsed_payload)
+        ):
+            tag_version = utils._get_version(self.parsed_payload)
+            with cloned_repo(self) as repo:
+                _LOGGER.info(f"Creating Tag of version {tag_version}")
+                _LOGGER.info(
+                    repo.git.execute(
+                        [
+                            "git",
+                            "tag",
+                            f"{tag_version}",
+                            f"{utils._get_merge_commit_sha(self.parsed_payload)}",
+                        ]
+                    )
+                )
+                _LOGGER.info(
+                    repo.git.execute(
+                        ["git", "push", "origin", f"refs/tags/{tag_version}"]
+                    )
+                )
+            return
+
+        if (
             pr_releases
             and self.parsed_payload
             and utils._is_merge_event(self.parsed_payload)
