@@ -222,7 +222,9 @@ class VersionManager(ManagerBase):
                     )
                 )
                 _LOGGER.info(
-                    repo.git.execute(["git", "push", "origin", f"{tag_version}"])
+                    repo.git.execute(
+                        ["git", "push", "origin", f"refs/tags/{tag_version}"]
+                    )
                 )
             return
 
