@@ -14,6 +14,19 @@ Kebechet
 Kebechet is an extensible system of repository managers for GitHub, GitLab, and
 Pagure.
 
+
+To configure Kebechet on the repo, visit https://github.com/marketplace/khebhut
+
+To install Kebechet cli, run the following commands::
+
+   > pipenv install
+   > pipenv shell
+
+Set ENV variables for authentication information::
+
+   > KEBECHET_SERVICE_NAME=GITHUB
+   > GITHUB_KEBECHET_TOKEN=<your oauth token>
+
 To use it on your repository, all you have to do is set up the authentication
 information and then run the following command::
 
