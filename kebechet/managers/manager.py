@@ -165,6 +165,11 @@ pipenv version: {pipenv_version}
             fork_username=self.project.namespace if self.project.is_fork else None,
         )
 
+    def pr_comment(self, id: int, body: str):
+        """Comment on the PR."""
+        pr = self.project.get_pr(id)
+        pr.comment(body=body)
+
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
         raise NotImplementedError

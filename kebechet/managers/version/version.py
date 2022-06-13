@@ -226,8 +226,27 @@ class VersionManager(ManagerBase):
                         ["git", "push", "origin", f"refs/tags/{tag_version}"]
                     )
                 )
-            return
+                try:
+                    # Branch name is same as tag version
+                    _LOGGER.info(f"Deleting branch {tag_version}")
+                    repo.git.execute(
+                        [
+                            "git",
+                            "push",
+                            "origin",
+                            "-d",
+                            f"refs/heads/{tag_version}",
+                        ]
+                    )
 
+                except Exception:
+                    _LOGGER.exception(f"Failed to delete branch {tag_version}")
+                    self.pr_comment(
+                        utils._pr_id_from_webhook(self.parsed_payload),
+                        body=f"Failed to delete branch {tag_version} , due to permissions issue",
+                    )
+
+            return
         if (
             pr_releases
             and self.parsed_payload
