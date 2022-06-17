@@ -63,7 +63,7 @@ class ManagerBase:
 
         self.service = service
         self.project = service.get_project(namespace=self.owner, repo=self.repo_name)
-        self._repo = None
+        self._repo: git.Repo = None
         self.metadata = metadata
         self.runtime_environment = runtime_environment
 
