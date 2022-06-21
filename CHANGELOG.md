@@ -1,5 +1,17 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.0 (2022-06-21T18:05:10)
+* 7e7d2c6 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 4e141c0 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1066)
+* 3fdd416 Issue: Delete the branch if the pr is merged and tag is created
+* f8905e7 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 493eabe :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 65f2936 Address https://github.com/thoth-station/kebechet/pull/1058#pullrequestreview-1001902393
+* a3edba2 Update run() method to check the merge PR ,to create TAG and publish
+* 3bfa558 Add new util functions
+* a6b0e8d :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1057)
+* eecb7db Fixing repo typing bug so tests can pass.
+
 ## Release 1.9.0 (2022-05-19T17:21:54)
 * ba55d4b Add behave tests to Kebechet for 'integration' tests
 * 29e8a08 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
