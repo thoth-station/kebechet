@@ -74,6 +74,23 @@ Configuration
       - string
       - "CLUSTER_SIMILAR"
       - see Glyphs `README`_ for a list of supported formatters
+    * - pr_releases
+      - boolean
+      - true
+      - automatically create releases from appropriately labeled PRs
+    * - release_label_config
+      - Object[str, List[str]]
+      - | release_label_config:
+
+            |  calendar: [calendar-release]
+            |  major: [major-release]
+            |  minor: [minor-release]
+            |  patch: [patch-release]
+            |  pre: [pre-release]
+            |  build: [build-release]
+            |  finalize: [finalize-version]
+      - list of labels in a PR that will trigger a specific type of release. Setting configuration for only a subset
+        of the release types will leave the rest of the defaults unchanged.
 
 Example
 -------
@@ -99,6 +116,14 @@ An example configuration:
             - sesheta
           # Add release information to CHANGELOG.md file automatically.
           changelog_file: true
+          release_label_config:
+            # calendar: [calendar-release] remains unchanged
+            major: [major-v]
+            minor: [minor-v]
+            patch: [patch-v]
+            # pre: [pre-release] remains unchanged
+            # build: [build-release] remains unchanged
+            finalize: []
 
 An example of this version manager in action can be found `here
 <https://github.com/thoth-station/kebechet/issues/98>`_.
@@ -122,3 +147,6 @@ Manager Author
 --------------
 
 Fridolin Pokorny <fridolin@redhat.com>
+
+
+..
