@@ -19,20 +19,19 @@
 
 import git
 from ogr.abstract import PullRequest
+from kebechet import utils
 
 
-def _pull_remote_branch_to_local(repo: git.Repo, branch_name: str):
+def _create_local_branch_from_origin(repo: git.Repo, branch_name: str):
     original_branch = repo.active_branch.name
+    repo.git.fetch("origin", branch_name)
     repo.git.checkout(branch_name)
-    repo.git.pull()
     repo.git.checkout(original_branch)
 
 
 def num_commits_behind(repo: git.Repo, target_branch: str, source_branch: str) -> int:
     """Count how many commits source branch is behind target branch."""
-    _pull_remote_branch_to_local(
-        repo=repo, branch_name=source_branch
-    )  # otherwise the ref cannot be found
+    _create_local_branch_from_origin(repo, source_branch)
     commit_dif_count = repo.git.rev_list(
         f"{target_branch}...{source_branch}", left_right=True, count=True
     ).split("\t")
@@ -50,6 +49,7 @@ def rebase_pr_branch_and_comment(
         return None  # pr is directly on top of target_branch
     cur_branch = repo.active_branch.name
     try:
+        utils.fetch_and_checkout_branch(repo, pr.source_branch)
         repo.git.checkout(pr.source_branch)
         repo.git.rebase(pr.target_branch)
         repo.git.push("origin", pr.source_branch, force=True)

@@ -69,6 +69,12 @@ def _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs) -> git.Repo:
     return repo
 
 
+def fetch_and_checkout_branch(repo: git.Repo, branch_name: str):
+    """Fetch branch from origin and check it out locally."""
+    repo.git.fetch("origin", branch_name)
+    repo.git.checkout(branch_name)
+
+
 @contextmanager
 def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
@@ -102,17 +108,17 @@ def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
                     == "true"
                 ):
                     repo.git.fetch(unshallow=True)
-                repo.git.checkout(branch)
+                fetch_and_checkout_branch(repo, branch)
             else:
                 repo = _clone_repo_and_set_vals(repo_url, ".", **clone_kwargs)
-                repo.git.checkout(branch)
+                fetch_and_checkout_branch(repo, branch)
             yield repo
             repo.git.stash()  # cleanup unused changes
             repo.git.clean("-xdf")
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
             repo = _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs)
-            repo.git.checkout(branch)
+            fetch_and_checkout_branch(repo, branch)
             yield repo
             repo.git.stash()  # cleanup unused changes
             repo.git.clean("-xdf")
