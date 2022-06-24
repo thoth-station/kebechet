@@ -24,6 +24,7 @@ import importlib.resources as pkg_resources
 from kebechet.managers.manager import ManagerBase
 from kebechet.utils import cloned_repo
 from . import resources
+from ogr.abstract import PRStatus
 
 _INFO_ISSUE_NAME = "Kebechet info"
 
@@ -64,7 +65,7 @@ class ConfigInitializer(ManagerBase):
         thoth_config = pkg_resources.read_text(resources, "simple.thoth.yaml")
 
         with cloned_repo(self, depth=1, branch=self.project.default_branch) as repo:
-            prs = self.get_prs_by_branch(_BRANCH_NAME)
+            prs = self.get_prs_by_branch(_BRANCH_NAME, status=PRStatus.all)
             if len(prs) > 0:
                 _LOGGER.debug("PR initializing .thoth.yaml already exists skipping...")
                 return None
