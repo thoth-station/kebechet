@@ -504,10 +504,10 @@ class UpdateManager(ManagerBase):
         """Create a pipenv environment - Pipfile and Pipfile.lock from requirements.in or requirements-dev.in file."""
         if os.path.isfile(input_file) and input_file == "requirements.in":
             _LOGGER.info(f"Installing dependencies from {input_file}")
-            cls.run_pipenv(f"pipenv install -r {input_file}")
+            cls.run_pipenv(f"pipenv lock -r {input_file}")
         elif os.path.isfile(input_file) and input_file == "requirements-dev.in":
             _LOGGER.info(f"Installing dependencies from {input_file}")
-            cls.run_pipenv(f"pipenv install -r {input_file} --dev")
+            cls.run_pipenv(f"pipenv lock -r {input_file} --dev")
         else:
             raise DependencyManagementError(
                 "No dependency management found in the repo - no Pipfile nor requirements.in nor requirements-dev.in"
