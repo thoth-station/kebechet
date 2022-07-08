@@ -230,8 +230,7 @@ class ThothAdviseManager(ManagerBase):
 
     def _get_users_with_permission(self) -> typing.List[str]:
         try:
-            with open("OWNERS", "r") as owners_file:
-                owners = yaml.safe_load(owners_file)
+            owners = yaml.safe_load(self.project.get_file_content("OWNERS"))
             permitted_users = list(map(str, owners.get("approvers") or [])) + [APP_NAME]
         except FileNotFoundError:
             permitted_users = list(self.project.who_can_merge_pr()) + [APP_NAME]
