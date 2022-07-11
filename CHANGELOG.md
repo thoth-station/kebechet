@@ -1,5 +1,15 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.1 (2022-07-11T20:27:17)
+* 0bb79f6 Issue: Kebechet was picking approvers from it's own OWNERS file
+* 521b82f :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 656f71e Fix: Refer key 'parameters' directly
+* 3e391b4 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 18e28dc Issue: https://github.com/thoth-station/kebechet/issues/1050
+* db9596f :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 137e855 fetch branch using git.fetch before trying to use it
+* 5042936 add documentation for PR labels for version manager
+
 ## Release 1.10.0 (2022-06-21T18:05:10)
 * 7e7d2c6 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 * 4e141c0 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1066)
