@@ -56,3 +56,22 @@ files exist create one somewhere in your repository.
 
 **Related**: #{github_id}
 """
+
+UNABLE_TO_UPDATE_VERSION_ERROR = """
+Kebechet version manager had a problem when trying to update the version and can
+not continue with the process.
+
+Please see the details below for hints on where to find the cause of the
+problem. Once the root cause of the problem has been corrected you can request a
+new version update.
+
+Details:
+
+- File path: `{file_path}`
+- Line number: `{line_num}`
+- Old version: `{old_version}`
+- Issue: `{reason}`
+
+Environment details:
+{environment_details}
+"""

@@ -24,12 +24,14 @@ import json
 
 from ogr.abstract import Issue, PullRequest
 from kebechet.utils import get_issue_by_title
+from kebechet.managers import ManagerBase
 
 from . import constants
 from .exceptions import VersionError
 from .messages import (
     RELEASE_TAG_MISSING_WARNING,
     ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND,
+    UNABLE_TO_UPDATE_VERSION_ERROR,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,7 +60,19 @@ class BaseTrigger:
                 old_version = parts[1][1:-1]  # Remove ' and " in string representation.
                 _LOGGER.info("Old version found in sources: %s", old_version)
 
-                new_version = self.get_new_version(old_version)
+                try:
+                    new_version = self.get_new_version(old_version)
+                except VersionError as e:
+                    raise VersionError(
+                        UNABLE_TO_UPDATE_VERSION_ERROR.format(
+                            file_path=file_path,
+                            line_num=idx + 1,
+                            old_version=old_version,
+                            reason=str(e),
+                            environment_details=ManagerBase.get_environment_details(),
+                        )
+                    ) from e
+
                 _LOGGER.info("Computed new version: %s", new_version)
 
                 content[idx] = f'__version__ = "{new_version}"'
@@ -291,7 +305,7 @@ class ReleasePRlabels(BaseTrigger):
             return update_function(old_version)
         except ValueError as e:  # Semver raises ValueError when version cannot be parsed.
             raise VersionError(
-                f"Wrong version specifier found in sources: `{old_version}`"
+                f"The version found in sources is not a valid SemVer string: `{old_version}`"
             ) from e
 
     def open_no_files_adjusted_issue(self, labels: List[str]):
@@ -408,7 +422,7 @@ class ReleaseIssue(BaseTrigger):
             return update_function(old_version)
         except ValueError as e:  # Semver raises ValueError when version cannot be parsed.
             raise VersionError(
-                f"Wrong version specifier found in sources: `{old_version}`"
+                f"The version found in sources is not a valid SemVer string: `{old_version}`"
             ) from e
 
     def _adjust_pr_body(self) -> str:
