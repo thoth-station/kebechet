@@ -27,6 +27,16 @@ RUN \
     mkdir -p /home/user/.ssh ${PIPENV_CACHE_DIR} &&\
     chmod a+wrx -R /etc/passwd /home/user
 
+# install python3.10
+# ref: https://tecadmin.net/how-to-install-python-3-10-on-centos-rhel-8-fedora/
+RUN dnf install -y --setopt=tsflags=nodocs wget yum-utils make gcc openssl-devel bzip2-devel libffi-devel zlib-devel && \
+    wget https://www.python.org/ftp/python/3.10.5/Python-3.10.5.tgz && \
+    tar xzf Python-3.10.5.tgz && \
+    cd Python-3.10.5 && \
+    ./configure --with-system-ffi --with-computed-gotos --enable-loadable-sqlite-extension && \
+    make -j ${nproc} && \
+    make altinstall
+
 # For local installation from sources.
 # ADD ./ /tmp/kebechet
 # RUN  pip3 install virtualenv && mkdir -p /usr/local/lib/python3.6/site-packages/ && cd /tmp/kebechet/ && python3 setup.py install
