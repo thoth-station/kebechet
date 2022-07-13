@@ -782,7 +782,7 @@ class UpdateManager(ManagerBase):
 
         return result
 
-    def run(self, labels: list) -> Optional[dict]:
+    def run(self, labels: list = []) -> Optional[dict]:
         """Create a pull request for each and every direct dependency in the given org/repo (slug)."""
         if self.parsed_payload:
             if self.parsed_payload.get("event") not in _EVENTS_SUPPORTED:
