@@ -324,10 +324,10 @@
         },
         "distlib": {
             "hashes": [
-                "sha256:6564fe0a8f51e734df6333d08b8b94d4ea8ee6b99b5ed50613f731fd4089f34b",
-                "sha256:e4b58818180336dc9c529bfb9a0b58728ffc09ad92027a3f30b7cd91e3458579"
+                "sha256:a7f75737c70be3b25e2bee06288cec4e4c221de18455b2dd037fe2a795cab2fe",
+                "sha256:b710088c59f06338ca514800ad795a132da19fda270e3ce4affc74abf955a26c"
             ],
-            "version": "==0.3.4"
+            "version": "==0.3.5"
         },
         "distro": {
             "hashes": [
@@ -617,10 +617,10 @@
         },
         "micropipenv": {
             "hashes": [
-                "sha256:d576b1e5830ffe5ad9a67450ed975175a586bd8e91ea0c38acaef744ceae8630",
-                "sha256:f441b7876f95be77611dc948bf0c54b0c1e369fc98665b764ef61ae1bb064b1c"
+                "sha256:6d463d99a51eb5ea66b402643bbb8688a0b40bf232b463f3bdb3977150bfd787",
+                "sha256:c3bd6dbad761565170acd4ae0d1fee3f7caed6a36d4fe99f684e7637397599f8"
             ],
-            "version": "==1.3.0"
+            "version": "==1.3.1"
         },
         "mock": {
             "hashes": [
@@ -1179,11 +1179,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:560ce41420373b6949830831e8e11d96b311694ae58c8b145954bcb365bb035f",
-                "sha256:e410026af0af8c373f8ac40b550c15c11b58e60ddc3f65fcc395ad263daefaf1"
+                "sha256:6f460da98b730d671510af18f119f96d01e3ba027ac0e985871abb3aede1c514",
+                "sha256:95fd321f583dfcfaf279a0b2cdc83d8d28c8b7cca4d2959fc4539bb4fecb56a0"
             ],
             "index": "pypi",
-            "version": "==1.7.1"
+            "version": "==1.7.2"
         },
         "six": {
             "hashes": [
