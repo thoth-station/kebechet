@@ -24,7 +24,7 @@ import json
 
 from ogr.abstract import Issue, PullRequest
 from kebechet.utils import get_issue_by_title
-from kebechet.managers import ManagerBase
+from kebechet.managers.manager import ManagerBase
 
 from . import constants
 from .exceptions import VersionError
