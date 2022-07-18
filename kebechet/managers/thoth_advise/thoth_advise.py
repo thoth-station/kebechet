@@ -130,7 +130,6 @@ class ThothAdviseManager(ManagerBase):
     ) -> typing.Optional[PullRequest]:
         """Open a pull/merge request for dependency update."""
         commit_msg = "Auto generated update"
-
         if self._metadata_indicates_internal_trigger():
             body = _INTERNAL_TRIGGER_PR_BODY_LOOKUP[
                 int(self.metadata["message_justification"])  # type: ignore
@@ -154,7 +153,6 @@ class ThothAdviseManager(ManagerBase):
         )
 
         body = f"# Automatic Update of {full_name} runtime-environment\n" + body
-
         # Delete branch if it didn't change Pipfile.lock
         diff = self.repo.git.diff(self.project.default_branch, files)
         if diff == "":
@@ -187,11 +185,11 @@ class ThothAdviseManager(ManagerBase):
         with open(".thoth.yaml", "r") as f:
             thoth_config = yaml.safe_load(f)
         overlays_dir = thoth_config.get("overlays_dir")
-        requirements_lock = adv_results["result"]["report"]["products"][0]["project"][
+        requirements_lock = adv_results["report"]["products"][0]["project"][
             "requirements_locked"
         ]
-        requirements = adv_results["result"]["parameters"]["project"]["requirements"]
-        requirements_format = adv_results["result"]["parameters"]["requirements_format"]
+        requirements = adv_results["parameters"]["project"]["requirements"]
+        requirements_format = adv_results["parameters"]["requirements_format"]
         if overlays_dir:
             with cwd(f"{overlays_dir}/{self.runtime_environment}"):
                 lib.write_files(
@@ -325,7 +323,6 @@ class ThothAdviseManager(ManagerBase):
                     runtime_environments = [
                         thoth_config["runtime_environments"][0]["name"]
                     ]
-
                 for e in runtime_environments:
                     try:
                         analysis_id = lib.advise_here(
@@ -380,7 +377,9 @@ class ThothAdviseManager(ManagerBase):
                     )
                     return False
                 _LOGGER.debug(json.dumps(res))
-
+                with open(".thoth.yaml", "r") as f:
+                    thoth_config = yaml.safe_load(f)
+                overlays_dir = thoth_config.get("overlays_dir")
                 self.runtime_environment = _runtime_env_name_from_advise_response(
                     res[0]
                 )
@@ -388,8 +387,16 @@ class ThothAdviseManager(ManagerBase):
                 if res[1] is False:
                     _LOGGER.info("Advise succeeded")
                     self._write_advise(res[0])
+                    res[0].update({"document_id": analysis_id})
+                    file_path = (
+                        os.path.join(
+                            overlays_dir, str(self.runtime_environment), "Pipfile.lock"
+                        )
+                        if overlays_dir
+                        else "Pipfile.lock"
+                    )
                     opened_merge = self._open_merge_request(
-                        branch_name, labels, ["Pipfile.lock"], res[0].get("metadata")
+                        branch_name, labels, [file_path], res[0]
                     )
                     if opened_merge and self._tracking_issue:
                         comment = (
