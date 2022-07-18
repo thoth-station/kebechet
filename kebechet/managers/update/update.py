@@ -185,6 +185,13 @@ class UpdateManager(ManagerBase):
         return version[len("==") :]
 
     @staticmethod
+    def _remove_extra_deps(dep) -> str:
+        """Turn Pipfile dependency from foo[bar] to just foo."""
+        pkg_name_re = r"[a-zA-Z0-9][\w\.\-]*[a-zA-Z0-9]"
+        name_w_extras_re = rf"^({pkg_name_re})(\[{pkg_name_re}(, {pkg_name_re})*\])?$"
+        return re.match(name_w_extras_re, dep).group(1)  # type: ignore
+
+    @staticmethod
     def _get_direct_dependencies() -> tuple:
         """Get all direct dependencies stated in the Pipfile file."""
         try:
@@ -196,11 +203,11 @@ class UpdateManager(ManagerBase):
             ) from exc
 
         default = list(
-            package_name.lower()
+            UpdateManager._remove_extra_deps(package_name.lower())
             for package_name in pipfile_content.get("packages", {}).keys()
         )
         develop = list(
-            package_name.lower()
+            UpdateManager._remove_extra_deps(package_name.lower())
             for package_name in pipfile_content.get("dev-packages", {}).keys()
         )
 
