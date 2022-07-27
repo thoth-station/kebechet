@@ -317,8 +317,6 @@ class ThothAdviseManager(ManagerBase):
                     runtime_environments = [
                         e["name"] for e in thoth_config["runtime_environments"]
                     ]
-                    for e in thoth_config["runtime_environments"]:
-                        runtime_environments.append(e["name"])
                 else:
                     runtime_environments = [
                         thoth_config["runtime_environments"][0]["name"]
