@@ -19,6 +19,7 @@ GitPython = ">=3.1.0"
 PyYAML = "*"
 typing-extensions = "*"
 ogr = "*"
+cmake= "*"
 
 [dev-packages]
 pytest = "*"
