@@ -1,5 +1,18 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.2 (2022-08-01T07:01:46)
+* bf81dd2 Fix: Kebechet advise manager starting multiple advice requests Update run() method to prevent adding duplicate runtime_environments from .thoth.yaml
+* bbdbd34 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* b405c22 Fix for  referencing incorrect dict keys and Piplock file path
+* 5c5238a :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* c88a1a0 fix: change the import method of managerbase in release_version
+* be9ceae :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* b4ccdc0 Process direct dependencies to remove any extra deps
+* 6781b02 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* c13e8c6 bugfix: make labels for update manager default to empty list
+* f3420d7 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* c8e715d A more informative version manager message around wrong versions
+
 ## Release 1.10.1 (2022-07-11T20:27:17)
 * 0bb79f6 Issue: Kebechet was picking approvers from it's own OWNERS file
 * 521b82f :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
