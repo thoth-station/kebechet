@@ -16,7 +16,7 @@ WORKDIR /home/user
 
 RUN \
     dnf install -y --setopt=tsflags=nodocs redhat-rpm-config which git \
-      gcc gcc-c++ \
+      gcc gcc-c++ cmake \
       python3-pip python3-devel \
       python38 python38-devel \
       python39 python39-devel &&\
