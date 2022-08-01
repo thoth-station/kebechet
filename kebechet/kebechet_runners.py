@@ -52,7 +52,10 @@ def _parse_url_4_args(url: str) -> Tuple[str, str, str, str]:
     returns:
     tuple: (slug, namespace, project, service_url)
     """
-    scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)
+    scheme: str
+    host: str
+    slug: str
+    scheme, _, host, _, slug, _, _ = urllib3.util.parse_url(url)  # type: ignore
     slug = slug[1:]
     namespace = slug.split("/")[0]
     project = slug.split("/")[1]
