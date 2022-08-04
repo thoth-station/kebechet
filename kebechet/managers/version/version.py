@@ -70,8 +70,7 @@ class VersionManager(ManagerBase):
         Maintainers can be either stated in the configuration or in the OWNERS file in the repo itself.
         """
         try:
-            with open("OWNERS", "r") as owners_file:
-                owners = yaml.safe_load(owners_file)
+            owners = yaml.safe_load(self.project.get_file_content("OWNERS"))
             maintainers = list(map(str, owners.get("approvers") or []))
         except (FileNotFoundError, KeyError, ValueError, yaml.YAMLError):
             _LOGGER.exception("Failed to load maintainers file")
