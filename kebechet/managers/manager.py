@@ -118,7 +118,9 @@ pipenv version: {pipenv_version}
     def get_dependency_graph(cls, graceful: bool = False):
         """Get dependency graph of the project."""
         try:
-            cls.run_pipenv("pipenv install --dev --skip-lock")
+            cls.run_pipenv(
+                "pipenv sync --dev"
+            )  # use sync so that deps are from Pipfile.lock
             return cls.run_pipenv("pipenv graph")
         except PipenvError as exc:
             if not graceful:
