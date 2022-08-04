@@ -94,7 +94,12 @@ class BaseTrigger:
     ) -> List[Tuple[str, str, str]]:
         """Walk through the directory structure and try to adjust version identifier in sources."""
         adjusted = []
-        for root, _, files in os.walk("./"):
+        for root, dirs, files in os.walk("./"):
+            dirs[:] = [
+                d for d in dirs if not d[0] == "."
+            ]  # remove hidden dirs (done in place to remove from walk)
+            files = [f for f in files if not f[0] == "."]  # remove hidden files
+
             for file_name in files:
                 if file_name in (
                     "setup.py",
