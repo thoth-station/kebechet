@@ -41,6 +41,8 @@ from requests.exceptions import SSLError
 
 _LOGGER = logging.getLogger("kebechet")
 
+CREATE_SUPPORT_ISSUE = bool(os.getenv("KEBECHET_CREATE_SUPPORT_ISSUE", False))
+
 
 def _parse_url_4_args(url: str) -> Tuple[str, str, str, str]:
     """
@@ -239,12 +241,13 @@ def run(
             elif isinstance(exc, ManagerFailedException):
                 continue
 
-            _create_issue_from_exception(
-                keb_version=keb_version,
-                manager_name=manager_name,
-                ogr_service=ogr_service,
-                slug=slug,
-                exc=exc,
-            )
+            if CREATE_SUPPORT_ISSUE:
+                _create_issue_from_exception(
+                    keb_version=keb_version,
+                    manager_name=manager_name,
+                    ogr_service=ogr_service,
+                    slug=slug,
+                    exc=exc,
+                )
 
     _LOGGER.info("Finished management for %r", slug)
