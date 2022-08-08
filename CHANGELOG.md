@@ -1,5 +1,16 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.3 (2022-08-08T18:43:45)
+* 03b509a :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 20fab3b download owners file from repo
+* ba8a06d remove hidden files during os walk
+* 3661bd9 call sync when generating dependency graph
+* fd5c20a Add configuration for support issue creation
+* 0f907e2 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1105)
+* 0c6ac2f Update Dockerfile with cmake dependency
+* cdab57c add type annotations for urllib3.util.Url unpacking
+* 924d3d0 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1103)
+
 ## Release 1.10.2 (2022-08-01T07:01:46)
 * bf81dd2 Fix: Kebechet advise manager starting multiple advice requests Update run() method to prevent adding duplicate runtime_environments from .thoth.yaml
 * bbdbd34 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
