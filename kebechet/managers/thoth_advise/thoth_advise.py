@@ -115,7 +115,7 @@ class ThothAdviseManager(ManagerBase):
 
     def _construct_branch_name(self, analysis_id: str) -> str:
         """Construct branch name for the updated dependency."""
-        return f"{_BRANCH_NAME}-{analysis_id[:15]}"
+        return f"{_BRANCH_NAME}-{analysis_id[:26]}"
 
     def _git_push(
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
@@ -145,7 +145,6 @@ class ThothAdviseManager(ManagerBase):
         with open(".thoth.yaml", "r") as f:
             thoth_config = yaml.safe_load(f)
         overlays_dir = thoth_config.get("overlays_dir")
-
         full_name = (
             f"{overlays_dir}/{self.runtime_environment}"
             if overlays_dir
@@ -433,8 +432,7 @@ class ThothAdviseManager(ManagerBase):
                     )
                     errors = len(
                         self._tracking_issue.get_comments(
-                            filter_regex=ERROR_ADVISE_REGEX,
-                            author=APP_NAME,
+                            filter_regex=ERROR_ADVISE_REGEX, author=APP_NAME
                         )
                     )
                     if to_open - finished == 0:
