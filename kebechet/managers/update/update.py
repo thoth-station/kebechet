@@ -42,7 +42,6 @@ from kebechet.utils import cloned_repo
 
 from .messages import (
     ISSUE_CLOSE_COMMENT,
-    CLOSE_MANUAL_ISSUE_COMMENT,
     ISSUE_COMMENT_UPDATE_ALL,
     ISSUE_INITIAL_LOCK,
     ISSUE_NO_DEPENDENCY_MANAGEMENT,
@@ -50,6 +49,7 @@ from .messages import (
     ISSUE_UNSUPPORTED_PACKAGE,
     UNINIT_OVERLAY_DIR_BODY,
     UPDATE_MESSAGE_BODY,
+    CLOSE_MANUAL_ISSUE_COMMENT_PR,
 )
 from .utils import rebase_pr_branch_and_comment
 from kebechet.utils import construct_raw_file_url
@@ -114,6 +114,7 @@ class UpdateManager(ManagerBase):
         self._repo = None
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
+        self._pr_url = None
         super().__init__(*args, **kwargs)
 
     @property
@@ -409,6 +410,7 @@ class UpdateManager(ManagerBase):
         )
         if labels:
             merge_request.add_label(*labels)
+        self._pr_url = merge_request.url
         return merge_request
 
     def _git_push(
@@ -828,15 +830,6 @@ class UpdateManager(ManagerBase):
                     runtime_environments = [None]
 
             results: dict = {}
-
-            close_manual_update_issue = partial(
-                self.close_issue_and_comment,
-                _ISSUE_MANUAL_UPDATE,
-                comment=CLOSE_MANUAL_ISSUE_COMMENT.format(
-                    sha=self.sha, time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                ),
-            )
-
             for e in runtime_environments:
                 self.runtime_environment = e or "default"
                 close_no_management_issue = partial(
@@ -922,6 +915,14 @@ class UpdateManager(ManagerBase):
                             )
                         result = {}
                 results[self.runtime_environment] = result
+            close_manual_update_issue = partial(
+                self.close_issue_and_comment,
+                _ISSUE_MANUAL_UPDATE,
+                comment=CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
+                    pr=self._pr_url,
+                    time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                ),
+            )
             close_manual_update_issue()
 
         return results
