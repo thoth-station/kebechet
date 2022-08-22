@@ -105,6 +105,11 @@ Update manager ran @{time} for {sha}. Management complete.
 """
 
 
+CLOSE_MANUAL_ISSUE_COMMENT_PR = """
+Update manager ran @{time} , Pull Request: {pr}. Management complete.
+"""
+
+
 # Issue created when the environment cannot be replicated.
 ISSUE_REPLICATE_ENV = """
 Unable to replicate environment provided in [Pipfile.lock]({piplock_url}).
