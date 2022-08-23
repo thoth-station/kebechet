@@ -114,7 +114,7 @@ class UpdateManager(ManagerBase):
         self._repo = None
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
-        self._pr_url = None
+        self._pr_list = []
         super().__init__(*args, **kwargs)
 
     @property
@@ -410,7 +410,7 @@ class UpdateManager(ManagerBase):
         )
         if labels:
             merge_request.add_label(*labels)
-        self._pr_url = merge_request.url
+        self._pr_list.append(merge_request.url)
         return merge_request
 
     def _git_push(
@@ -915,14 +915,26 @@ class UpdateManager(ManagerBase):
                             )
                         result = {}
                 results[self.runtime_environment] = result
-            close_manual_update_issue = partial(
-                self.close_issue_and_comment,
-                _ISSUE_MANUAL_UPDATE,
-                comment=CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
-                    pr=self._pr_url,
-                    time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-                ),
-            )
-            close_manual_update_issue()
+
+            if overlays_dir:
+                issue = self.get_issue_by_title(_ISSUE_MANUAL_UPDATE)
+                if issue:
+                    for pr in self._pr_list:
+                        issue.comment(
+                            CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
+                                pr=pr,
+                                time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                            ),
+                        )
+                    issue.close()
+
+            else:
+                self.close_issue_and_comment(
+                    _ISSUE_MANUAL_UPDATE,
+                    comment=CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
+                        pr=self._pr_list[0],
+                        time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                    ),
+                )
 
         return results
