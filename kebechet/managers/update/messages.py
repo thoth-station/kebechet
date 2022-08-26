@@ -240,7 +240,7 @@ The direct dependencies updated in the pull request are -
 {package_name_rows}
 
 This Pull Request is based on a [Project Thoth GitHub App](https://github.com/marketplace/khebhut),
-and [Kebechet](https://github.com/thoth-station/kebechet) v{kebechet_version}
+and [Kebechet](https://github.com/thoth-station/kebechet)
 """
 
 UNINIT_OVERLAY_DIR_BODY = """Kebechet was unable to run update manager for the {env} runtime environment. The overlay

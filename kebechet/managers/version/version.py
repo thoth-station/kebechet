@@ -152,7 +152,7 @@ class VersionManager(ManagerBase):
         message = constants._VERSION_PULL_REQUEST_NAME.format(new_version)
         try:
             # If this PR already exists, this will fail.
-            pr = self.project.create_pr(
+            pr = self.create_pr(
                 title=message,
                 body=trigger.construct_pr_body(
                     changelog=changelog, has_prev_release=has_prev_release

@@ -17,7 +17,6 @@
 
 """Dependency update management logic."""
 
-import kebechet
 import os
 import logging
 import toml
@@ -400,7 +399,7 @@ class UpdateManager(ManagerBase):
         )
 
         _LOGGER.info("Creating a new pull request to update dependencies.")
-        merge_request = self.project.create_pr(
+        merge_request = self.create_pr(
             title=_UPDATE_MERGE_REQUEST_TITLE.format(env_name=self.runtime_environment),
             body=body,
             target_branch=self.project.default_branch,
@@ -615,7 +614,6 @@ class UpdateManager(ManagerBase):
             )
 
     def _generate_update_body(self, outdated: dict) -> str:
-        kebechet_version = kebechet.__version__
         package_name_rows = ""
         for package in outdated.keys():
             details = outdated[package]
@@ -627,9 +625,7 @@ class UpdateManager(ManagerBase):
             package_name_rows += (
                 f"|**{package}**|{old_version}|{new_version}|{is_dev}|\n"
             )
-        body = UPDATE_MESSAGE_BODY.format(
-            package_name_rows=package_name_rows, kebechet_version=kebechet_version
-        )
+        body = UPDATE_MESSAGE_BODY.format(package_name_rows=package_name_rows)
         return body
 
     def _create_or_update_initial_lock(self, labels, pipenv_used, req_dev):
