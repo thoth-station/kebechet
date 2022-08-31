@@ -55,8 +55,33 @@ def cwd(path: str):
         os.chdir(previous_dir)
 
 
-def _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs) -> git.Repo:
-    _LOGGER.info(f"Cloning repository {repo_url} to {repo_path}")
+def _clone_repo_and_set_vals(
+    manager: ManagerBase, repo_path: str, **clone_kwargs
+) -> git.Repo:
+    service_url = manager.service_url
+    slug = manager.slug
+    if service_url.startswith("https://"):
+        service_url = service_url[len("https://") :]
+    elif service_url.startswith("http://"):
+        service_url = service_url[len("http://") :]
+    else:
+        # This is mostly internal error - we require service URL to have protocol explicitly set
+        raise NotImplementedError
+
+    namespace, repository = slug.split("/")
+    access_token = None
+    if manager.installation:
+        access_token = manager.service.authentication.get_token(namespace, repository)
+        repo_url = f"https://{APP_NAME}:{access_token}@{service_url}/{slug}"
+    else:
+        repo_url = f"git@{service_url}:{slug}.git"
+    masked_repo_url = (
+        repo_url.replace(access_token, "MASKED")
+        if access_token is not None
+        else repo_url
+    )
+
+    _LOGGER.info(f"Cloning repository {masked_repo_url} to {repo_path}")
     repo = git.Repo.clone_from(repo_url, repo_path, **clone_kwargs)
     repo.config_writer().set_value(
         "user", "name", os.getenv("KEBECHET_GIT_NAME", "Kebechet")
@@ -78,23 +103,7 @@ def fetch_and_checkout_branch(repo: git.Repo, branch_name: str):
 @contextmanager
 def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
     """Clone the given Git repository and cd into it."""
-    service_url = manager.service_url
-    slug = manager.slug
     branch = branch or manager.project.default_branch
-    if service_url.startswith("https://"):
-        service_url = service_url[len("https://") :]
-    elif service_url.startswith("http://"):
-        service_url = service_url[len("http://") :]
-    else:
-        # This is mostly internal error - we require service URL to have protocol explicitly set
-        raise NotImplementedError
-
-    namespace, repository = slug.split("/")
-    if manager.installation:
-        access_token = manager.service.authentication.get_token(namespace, repository)
-        repo_url = f"https://{APP_NAME}:{access_token}@{service_url}/{slug}"
-    else:
-        repo_url = f"git@{service_url}:{slug}.git"
 
     if _CLONE_DIRECTORY is not None:
         with cwd(_CLONE_DIRECTORY):
@@ -110,14 +119,14 @@ def cloned_repo(manager: "ManagerBase", branch: str = None, **clone_kwargs):
                     repo.git.fetch(unshallow=True)
                 fetch_and_checkout_branch(repo, branch)
             else:
-                repo = _clone_repo_and_set_vals(repo_url, ".", **clone_kwargs)
+                repo = _clone_repo_and_set_vals(manager, ".", **clone_kwargs)
                 fetch_and_checkout_branch(repo, branch)
             yield repo
             repo.git.stash()  # cleanup unused changes
             repo.git.clean("-xdf")
     else:
         with TemporaryDirectory() as repo_path, cwd(repo_path):
-            repo = _clone_repo_and_set_vals(repo_url, repo_path, **clone_kwargs)
+            repo = _clone_repo_and_set_vals(manager, repo_path, **clone_kwargs)
             fetch_and_checkout_branch(repo, branch)
             yield repo
             repo.git.stash()  # cleanup unused changes
