@@ -161,7 +161,9 @@ pipenv version: {pipenv_version}
         """Create a PR but defaults to opening PR within a fork rather than on parent fork."""
         return self.project.create_pr(
             title=title,
-            body=body,
+            body=body + f"\n<details>"
+            f"<summary>Environment details</summary>"
+            f"\n{self.get_environment_details()}\n</details>",
             target_branch=target_branch,
             source_branch=source_branch,
             fork_username=self.project.namespace if self.project.is_fork else None,
