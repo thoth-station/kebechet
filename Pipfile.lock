@@ -1209,11 +1209,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:af0987fc074ada4a166bdc7e9d99d1da7811c6107e4b3416c7052ea1adb77dfc",
-                "sha256:d391204a2a59c54b764cd351c44c67eed17b43d51f4dbe3eba48b83b70c93db9"
+                "sha256:7378c08d81da78a4860da7b4900ac51fef38be841d01bc5b7cb249ac51e070c6",
+                "sha256:ef4b4d57631662ff81e15c22bf007f7ce07c47321648c8e601fbd22950ed1a79"
             ],
             "index": "pypi",
-            "version": "==1.9.7"
+            "version": "==1.9.8"
         },
         "six": {
             "hashes": [
@@ -1501,11 +1501,11 @@
     "develop": {
         "astroid": {
             "hashes": [
-                "sha256:396c88d0a58d7f8daadf730b2ce90838bf338c6752558db719ec6f99c18ec20e",
-                "sha256:d612609242996c4365aeb0345e61edba34363eaaba55f1c0addf6a98f073bef6"
+                "sha256:9b408d5d540387a74ca5405a5197aa24fbf9178b4019b16b3e532fbdf0e467cc",
+                "sha256:cd468be9d9d03d086d4d7e6643a59bfc025762d2c895e1e22cf21feced7bb148"
             ],
             "markers": "python_full_version >= '3.7.2'",
-            "version": "==2.12.5"
+            "version": "==2.12.7"
         },
         "attrs": {
             "hashes": [
@@ -1703,7 +1703,7 @@
                 "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7",
                 "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"
             ],
-            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
             "version": "==5.10.1"
         },
         "lazy-object-proxy": {
@@ -1919,7 +1919,7 @@
                 "sha256:25d4e2e446c453be6360c67ddfb88838cfc42026322770ba13d1fbd403a93a5c",
                 "sha256:3235a9010fae54323e727c3ac06fb720752fe6635b3426e379daec60fbd44a83"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4'",
+            "markers": "python_version >= '3.6' and python_version < '4.0'",
             "version": "==0.11.4"
         },
         "typing-extensions": {
