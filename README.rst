@@ -33,6 +33,8 @@ Contribute
 - Source Code: `<github.com/thoth-station/kebechet>`_
 
 Support
+
+Test
 -------
 
 If you are having issues, please let us know by opening an issue
