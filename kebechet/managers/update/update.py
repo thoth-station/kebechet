@@ -585,8 +585,7 @@ class UpdateManager(ManagerBase):
     def _pipenv_update_all(cls):
         """Update all dependencies to their latest version."""
         _LOGGER.info("Updating all dependencies to their latest version")
-        cls.run_pipenv("pipenv update --dev")
-        cls.run_pipenv("pipenv lock")
+        cls.run_pipenv("pipenv lock --dev")
         return None
 
     def _add_refresh_comment(self, exc: PipenvError, issue: Issue):
