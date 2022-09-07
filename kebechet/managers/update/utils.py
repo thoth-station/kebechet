@@ -18,7 +18,7 @@
 """Util functions for update manager."""
 
 import git
-from ogr.abstract import PullRequest
+from ogr.abstract import PullRequest, PRStatus
 from kebechet import utils
 
 
@@ -42,6 +42,8 @@ def rebase_pr_branch_and_comment(
     repo: git.Repo, pr: PullRequest, close_on_failure: bool = True
 ):
     """Rebase PR on top of target branch."""
+    if pr.status != PRStatus.open:  # PR is still open before attempting rebase.
+        return
     num_behind = num_commits_behind(
         repo=repo, target_branch=pr.target_branch, source_branch=pr.source_branch
     )
