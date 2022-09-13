@@ -1,5 +1,8 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.5 (2022-09-13T15:27:51)
+* eca1171 Type cast the type to pass typechecking (#1138)
+
 ## Release 1.10.4 (2022-09-13T12:27:51)
 * e4f0671 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1134)
 * a9c3bc5 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
