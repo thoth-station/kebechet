@@ -56,7 +56,7 @@ def cwd(path: str):
 
 
 def _clone_repo_and_set_vals(
-    manager: ManagerBase, repo_path: str, **clone_kwargs
+    manager: "ManagerBase", repo_path: str, **clone_kwargs
 ) -> git.Repo:
     service_url = manager.service_url
     slug = manager.slug
