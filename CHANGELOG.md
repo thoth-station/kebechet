@@ -1,5 +1,19 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.10.4 (2022-09-13T12:27:51)
+* e4f0671 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment (#1134)
+* a9c3bc5 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* ea8dec8 check to make sure pr exists before attempting rebase on remote branch
+* 40f30fe Use lock when updating the dependencies to avoid resource limitations
+* 4e5fa9d :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* c3b0e8f :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 6d6a243 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 30e76d2 - Add environment details in PR body with <details> tag (#1120)
+* 8f5927d Mask git clone https token from logs (#1124)
+* a42f419 Point the closing comment with Pull request link (#1119)
+* 3d0eb13 Fix _construct_branch_name() method to avoid conflict while creating branches for different analysis ids
+* 07e302b :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+
 ## Release 1.10.3 (2022-08-08T18:43:45)
 * 03b509a :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 * 20fab3b download owners file from repo
