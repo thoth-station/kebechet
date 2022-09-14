@@ -45,7 +45,6 @@ from .messages import (
     ISSUE_INITIAL_LOCK,
     ISSUE_NO_DEPENDENCY_MANAGEMENT,
     ISSUE_PIPENV_UPDATE_ALL,
-    ISSUE_UNSUPPORTED_PACKAGE,
     UNINIT_OVERLAY_DIR_BODY,
     UPDATE_MESSAGE_BODY,
     CLOSE_MANUAL_ISSUE_COMMENT_PR,
@@ -73,10 +72,6 @@ _ISSUE_REPLICATE_ENV_NAME = (
 )
 _ISSUE_NO_DEPENDENCY_NAME = (
     "No dependency management found for the {env_name} environment"
-)
-_ISSUE_UNSUPPORTED_PACKAGE = (
-    "Application cannot be managed by Kebechet due to it containing an unsupported package "
-    "location in {env_name} environment."
 )
 _ISSUE_MANUAL_UPDATE = "Kebechet update"
 
@@ -176,7 +171,7 @@ class UpdateManager(ManagerBase):
             return ""
         elif version is None and package_info.get("path"):
             _LOGGER.debug("Skipping... package installation references a local path.")
-
+            return ""
         if not version:
             raise InternalError(
                 f"Failed to retrieve version information for dependency {dependency}, (dev: {is_dev})"
@@ -234,96 +229,6 @@ class UpdateManager(ManagerBase):
             direct_dependencies.add(package_name.lower())
 
         return direct_dependencies
-
-    def _get_all_packages_versions(self) -> dict:
-        """Parse Pipfile.lock file and retrieve all packages in the corresponding locked versions."""
-        try:
-            with open("Pipfile.lock") as pipfile_lock:
-                pipfile_lock_content = json.load(pipfile_lock)
-        except Exception as exc:
-            # TODO: open a PR to fix this
-            raise DependencyManagementError(
-                f"Failed to load Pipfile.lock file: {str(exc)}"
-            ) from exc
-
-        result = {}
-
-        for package_name, package_info in pipfile_lock_content["default"].items():
-            if "git" in package_info:
-                self._create_unsupported_package_issue(package_name, "git")
-                raise DependencyManagementError(
-                    "Failed to find version in package that uses git source."
-                )
-            elif "path" in package_info:
-                self._create_unsupported_package_issue(package_name, "local")
-                raise DependencyManagementError(
-                    "Failed to find version in package that uses local source."
-                )
-            result[package_name.lower()] = {
-                "dev": False,
-                "version": package_info["version"][len("==") :],
-            }
-
-        for package_name, package_info in pipfile_lock_content["develop"].items():
-            if "git" in package_info:
-                self._create_unsupported_package_issue(package_name, "git")
-                raise DependencyManagementError(
-                    "Failed to find version in package that uses git source."
-                )
-            elif "path" in package_info:
-                self._create_unsupported_package_issue(package_name, "local")
-                raise DependencyManagementError(
-                    "Failed to find version for package that uses local installation."
-                )
-            result[package_name.lower()] = {
-                "dev": False,
-                "version": package_info["version"][len("==") :],
-            }
-        # Close git as a source issues.
-
-        issue = self.get_issue_by_title(
-            _ISSUE_UNSUPPORTED_PACKAGE.format(env_name=self.runtime_environment)
-        )
-        if issue:
-            issue.comment(
-                f"Issue closed as no packages use git as a source anymore. Related SHA - {self.sha}"
-            )
-            issue.close()
-        return result
-
-    def _create_unsupported_package_issue(self, package_name, pkg_location):
-        """Create an issue as Kebechet doesn't support packages with git as source."""
-        _LOGGER.info("Key Error encountered, due package source being git.")
-        relative_dir = self._get_cwd_relative2gitroot()
-        pip_url = construct_raw_file_url(
-            self.service_url,
-            self.slug,
-            os.path.join(relative_dir, "Pipfile"),
-            self.service_type,
-        )
-        piplock_url = construct_raw_file_url(
-            self.service_url,
-            self.slug,
-            os.path.join(relative_dir, "Pipfile.lock"),
-            self.service_type,
-        )
-        issue = self.get_issue_by_title(
-            _ISSUE_UNSUPPORTED_PACKAGE.format(env_name=self.runtime_environment)
-        )
-        if issue is None:
-            self.project.create_issue(
-                title=_ISSUE_UNSUPPORTED_PACKAGE.format(
-                    env_name=self.runtime_environment
-                ),
-                body=ISSUE_UNSUPPORTED_PACKAGE.format(
-                    sha=self.sha,
-                    package=package_name,
-                    pkg_location=pkg_location,
-                    pip_url=pip_url,
-                    piplock_url=piplock_url,
-                    environment_details=self.get_environment_details(),
-                ),
-            )
 
     @classmethod
     def _get_direct_dependencies_version(cls, strict=True) -> dict:
@@ -726,7 +631,6 @@ class UpdateManager(ManagerBase):
         )
 
         if pipenv_used:
-            old_environment = self._get_all_packages_versions()
             old_direct_dependencies_version = self._get_direct_dependencies_version(
                 strict=False
             )
