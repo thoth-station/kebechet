@@ -386,8 +386,12 @@ class UpdateManager(ManagerBase):
             if not self.get_issue_by_title(title):
                 self.project.create_issue(
                     title=title,
-                    body=UNINIT_OVERLAY_DIR_BODY.format(
-                        env=self.runtime_environment, exception=str(e)
+                    body=self.create_github_body(
+                        template=UNINIT_OVERLAY_DIR_BODY,
+                        required_info={
+                            "env": self.runtime_environment or "default",
+                            "exception": str(e),
+                        },
                     ),
                     labels=labels,
                 )
@@ -508,12 +512,17 @@ class UpdateManager(ManagerBase):
                 break
         else:
             issue.comment(
-                ISSUE_COMMENT_UPDATE_ALL.format(
-                    sha=self.sha,
-                    slug=self.slug,
-                    environment_details=self.get_environment_details(),
-                    dependency_graph=self.get_dependency_graph(graceful=True),
-                    **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
+                self.create_github_body(
+                    template=ISSUE_COMMENT_UPDATE_ALL,
+                    required_info={
+                        "sha": self.sha,
+                        "slug": self.slug,
+                        "environment_details": str(self.get_environment_details()),
+                    },
+                    optional_info={
+                        "dependency_graph": self.get_dependency_graph(graceful=True),
+                        **exc.__dict__,
+                    },
                 )
             )
 
@@ -529,7 +538,10 @@ class UpdateManager(ManagerBase):
             package_name_rows += (
                 f"|**{package}**|{old_version}|{new_version}|{is_dev}|\n"
             )
-        body = UPDATE_MESSAGE_BODY.format(package_name_rows=package_name_rows)
+        body = self.create_github_body(
+            template=UPDATE_MESSAGE_BODY,
+            required_info={"package_name_rows": package_name_rows},
+        )
         return body
 
     def _create_or_update_initial_lock(self, labels, pipenv_used, req_dev):
@@ -564,12 +576,15 @@ class UpdateManager(ManagerBase):
                     title=_ISSUE_INITIAL_LOCK_NAME.format(
                         env_name=self.runtime_environment
                     ),
-                    body=ISSUE_INITIAL_LOCK.format(
-                        sha=self.sha,
-                        url=file_url,
-                        file=file_name,
-                        environment_details=self.get_environment_details(),
-                        **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
+                    body=self.create_github_body(
+                        template=ISSUE_INITIAL_LOCK,
+                        required_info={
+                            "sha": self.sha,
+                            "file_url": file_url,
+                            "file_name": file_name,
+                            "environment_details": str(self.get_environment_details()),
+                        },
+                        optional_info={**exc.__dict__},
                     ),
                     labels=labels,
                 )
@@ -606,13 +621,18 @@ class UpdateManager(ManagerBase):
                 title=_ISSUE_FAILED_TO_UPDATE_DEPENDENCIES.format(
                     env_name=self.runtime_environment
                 ),
-                body=ISSUE_PIPENV_UPDATE_ALL.format(
-                    sha=self.sha,
-                    pip_url=pip_url,
-                    piplock_url=piplock_url,
-                    environment_details=self.get_environment_details(),
-                    dependency_graph=self.get_dependency_graph(graceful=True),
-                    **exc.char_limit_dict(MAX_PIPENV_CMD_LEN),
+                body=self.create_github_body(
+                    ISSUE_PIPENV_UPDATE_ALL,
+                    required_info={
+                        "sha": self.sha,
+                        "pip_url": pip_url,
+                        "piplock_url": piplock_url,
+                        "environment_details": str(self.get_environment_details()),
+                    },
+                    optional_info={
+                        "dependency_graph": self.get_dependency_graph(graceful=True),
+                        **exc.__dict__,
+                    },
                 ),
                 labels=labels,
             )
@@ -807,8 +827,11 @@ class UpdateManager(ManagerBase):
                                 title=_ISSUE_NO_DEPENDENCY_NAME.format(
                                     env_name=self.runtime_environment
                                 ),
-                                body=ISSUE_NO_DEPENDENCY_MANAGEMENT.format(
-                                    env_name=self.runtime_environment
+                                body=self.create_github_body(
+                                    template=ISSUE_NO_DEPENDENCY_MANAGEMENT,
+                                    required_info={
+                                        "env_name": self.runtime_environment
+                                    },
                                 ),
                                 labels=labels,
                             )

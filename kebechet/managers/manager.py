@@ -22,7 +22,8 @@ import platform
 import typing
 import git
 import os
-from typing import List, Optional
+from typing import Dict, List, Optional
+from functools import partial
 
 import delegator
 import kebechet
@@ -177,3 +178,31 @@ pipenv version: {pipenv_version}
     def run(self, labels: list) -> typing.Optional[dict]:
         """Run the given manager implementation."""
         raise NotImplementedError
+
+    @staticmethod
+    def create_github_body(
+        template: str,
+        required_info: Dict[str, str] = {},
+        optional_info: Dict[str, str] = {},
+    ) -> str:
+        """Create a github issue body from a template respecting github character limit."""
+        partial_format = partial(template.format, **required_info)
+
+        req_info_len = sum(len(s) for s in required_info.values())
+
+        # final len(body) < 65536 because len(body) includes {{format}} strings which are replaced
+        optional_data_lim = (
+            65536 - len(template) - req_info_len
+        )  # 65536 is the github character limit
+
+        opt_info_list = [(k, v) for k, v in optional_info.items()]
+        opt_info_list = sorted(
+            opt_info_list, key=lambda x: len(x[1])
+        )  # sort so smallest items are truncated first
+
+        for i in range(len(opt_info_list)):
+            item_limit = int(optional_data_lim / (len(optional_info) - i))
+            optional_info[opt_info_list[i][0]] = opt_info_list[i][1][:item_limit]
+            optional_data_lim -= len(opt_info_list[i][1][:item_limit])
+
+        return partial_format(**optional_info)
