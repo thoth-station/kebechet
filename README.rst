@@ -1,6 +1,6 @@
 .. begin
 
-Kebechet
+Kebeche
 
 ========
 
