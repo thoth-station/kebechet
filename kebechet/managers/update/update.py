@@ -828,12 +828,18 @@ class UpdateManager(ManagerBase):
                     issue.close()
 
             else:
-                self.close_issue_and_comment(
-                    _ISSUE_MANUAL_UPDATE,
-                    comment=CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
-                        pr=self._pr_list[0],
-                        time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-                    ),
-                )
+                if self._pr_list:
+                    self.close_issue_and_comment(
+                        _ISSUE_MANUAL_UPDATE,
+                        comment=CLOSE_MANUAL_ISSUE_COMMENT_PR.format(
+                            pr=self._pr_list[0],
+                            time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                        ),
+                    )
+                else:
+                    self.close_issue_and_comment(
+                        _ISSUE_MANUAL_UPDATE,
+                        comment="The dependencies are already up to date. No update is needed at this time.",
+                    )
 
         return results
