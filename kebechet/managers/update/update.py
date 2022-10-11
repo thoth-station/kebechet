@@ -25,7 +25,7 @@ import toml
 import re
 import json
 import typing
-from typing import Optional, List
+from typing import Optional
 from itertools import chain
 from functools import partial
 from datetime import datetime
@@ -111,6 +111,7 @@ class UpdateManager(ManagerBase):
         # We do API calls once for merge requests and we cache them for later use.
         self._cached_merge_requests = None
         self._pr_list = []
+        self.runtime_environment = "default"
         super().__init__(*args, **kwargs)
 
     @property
@@ -738,26 +739,14 @@ class UpdateManager(ManagerBase):
             runtime_environment_names = [
                 e["name"] for e in thoth_config.list_runtime_environments()
             ]
-
             overlays_dir = thoth_config.content.get("overlays_dir")
 
-            runtime_environments: List[Optional[str]]
-            if self.runtime_environment:
-                if self.runtime_environment not in runtime_environment_names:
+            results: dict = {}
+            for e in self.runtime_environments or []:
+                if e not in runtime_environment_names:
                     # This is not a warning as it is expected when users remove and change runtime_environments
                     _LOGGER.info("Requested runtime does not exist in target repo.")
-                    return None
-                runtime_environments = [self.runtime_environment]
-            else:
-                if overlays_dir:
-                    runtime_environments = runtime_environment_names
-                elif runtime_environment_names:
-                    runtime_environments = [runtime_environment_names[0]]
-                else:
-                    runtime_environments = [None]
-
-            results: dict = {}
-            for e in runtime_environments:
+                    continue
                 self.runtime_environment = e or "default"
                 close_no_management_issue = partial(
                     self.close_issue_and_comment,
@@ -793,7 +782,8 @@ class UpdateManager(ManagerBase):
                         except Exception:
                             _LOGGER.exception(
                                 f"Failed to delete branch "
-                                f"{_UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)}, trying to continue"
+                                f"{_UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)}, "
+                                f"trying to continue"
                             )
                     elif to_rebase:
                         for pr in to_rebase:

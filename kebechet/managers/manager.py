@@ -47,7 +47,7 @@ class ManagerBase:
         service_type: str,
         parsed_payload: Optional[dict] = None,
         metadata: Optional[dict] = None,
-        runtime_environment: Optional[str] = None,
+        runtime_environments: List[str] = None,
     ):
         """Initialize manager instance for talking to services."""
         self.service_url: str = service.instance_url  # type: ignore
@@ -66,7 +66,7 @@ class ManagerBase:
         self.project = service.get_project(namespace=self.owner, repo=self.repo_name)
         self._repo: git.Repo = None
         self.metadata = metadata
-        self.runtime_environment = runtime_environment
+        self.runtime_environments = runtime_environments
 
     @property
     def repo(self):

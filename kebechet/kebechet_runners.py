@@ -172,11 +172,29 @@ def run(
         return
 
     managers = config.managers
-
+    runtime_environments: List[str]
+    if runtime_environment:
+        runtime_environments = [runtime_environment]
+    elif config.config.get("overlays_dir"):
+        runtime_environments = [
+            e["name"] for e in config.config.get("runtime_environments")
+        ]
+    else:
+        runtime_environments = [config.config["runtime_environments"][0]["name"]]
     for manager in managers:
         # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
         # YAML references, we do not break.
         manager = dict(manager)
+        disallow_run_times = manager.get("env_disallow_list", [])
+        allowed_run_times = manager.get("env_allow_list", [])
+        if disallow_run_times:
+            runtime_environments = list(
+                set(runtime_environments) - set(disallow_run_times)
+            )
+        if allowed_run_times:
+            runtime_environments = list(
+                set(runtime_environments).intersection(set(allowed_run_times))
+            )
         try:
             manager_name = manager.pop("name")
         except Exception:
@@ -212,7 +230,7 @@ def run(
                     service_type=service_type,
                     parsed_payload=parsed_payload,
                     metadata=metadata,
-                    runtime_environment=runtime_environment,
+                    runtime_environments=runtime_environments,
                 )
                 instance.run(**manager_configuration)
         except Exception as exc:  # noqa F841
