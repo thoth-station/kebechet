@@ -46,8 +46,8 @@ class PipfileRequirementsManager(ManagerBase):
                 isinstance(entry, dict) and "version" not in entry
             ):
                 # e.g. using git, ...
-                issue_title = f"No pinned version for {package_name}"
-                body = f"Package {package_name} does not use pinned version in Pipfile: {entry}"
+                issue_title = f"No pinned version for package {package_name}"
+                body = f"Package `{package_name}` does not use pinned version in Pipfile:\n```json\n{entry}\n```"
                 if self.get_issue_by_title(issue_title) is None:
                     self.project.create_issue(
                         title=issue_title,
@@ -68,8 +68,8 @@ class PipfileRequirementsManager(ManagerBase):
         for package_name, package_version in content.items():
             if not isinstance(package_version, str):
                 # e.g. using git, ...
-                issue_title = f"Unsupported version entry for {package_name}"
-                body = f"Unsupported version entry for {package_name} in Pipfile.lock: {package_version}"
+                issue_title = f"Unsupported version entry for package {package_name}"
+                body = f"Unsupported version entry for package `{package_name}` in Pipfile.lock: {package_version}"
                 if self.get_issue_by_title(issue_title) is None:
                     self.project.create_issue(
                         title=issue_title,
