@@ -43,7 +43,7 @@ _INVALID_LABEL_CONFIG_ISSUE_NAME = (
 # Github and Gitlab events on which the manager acts upon.
 _EVENTS_SUPPORTED = ["issues", "issue"]
 # Maximum number of log messages in a single release. Set due to ultrahook limits.
-_MAX_CHANELOG_SIZE = 300
+_MAX_CHANGELOG_SIZE = 300
 
 
 def _get_new_version(

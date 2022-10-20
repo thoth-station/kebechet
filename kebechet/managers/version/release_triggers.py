@@ -271,7 +271,7 @@ class ReleasePRlabels(BaseTrigger):
             (str): The PR containing the new version string's body.
         """
         body = ""
-        truncated_changelog = changelog[: constants._MAX_CHANELOG_SIZE]
+        truncated_changelog = changelog[: constants._MAX_CHANGELOG_SIZE]
         if not has_prev_release:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
@@ -282,7 +282,7 @@ class ReleasePRlabels(BaseTrigger):
             + "\n".join(truncated_changelog)
             + "\n```"
         )
-        if len(changelog) > constants._MAX_CHANELOG_SIZE:
+        if len(changelog) > constants._MAX_CHANGELOG_SIZE:
             body += "\n" + constants._BODY_TRUNCATED
         return body
 
@@ -456,7 +456,7 @@ class ReleaseIssue(BaseTrigger):
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
         body = self._adjust_pr_body()
-        truncated_changelog = changelog[: constants._MAX_CHANELOG_SIZE]
+        truncated_changelog = changelog[: constants._MAX_CHANGELOG_SIZE]
         if not has_prev_release:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
         body += (
@@ -467,7 +467,7 @@ class ReleaseIssue(BaseTrigger):
             + "\n".join(truncated_changelog)
             + "\n```"
         )
-        if len(changelog) > constants._MAX_CHANELOG_SIZE:
+        if len(changelog) > constants._MAX_CHANGELOG_SIZE:
             body += "\n" + constants._BODY_TRUNCATED
         return body
 
