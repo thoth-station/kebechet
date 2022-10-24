@@ -17,6 +17,8 @@
 
 """Dependency update management logic."""
 
+# TODO now: when update manager rebases, it is updating multiple PRs
+
 import os
 import logging
 import toml
@@ -321,10 +323,16 @@ class UpdateManager(ManagerBase):
         self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
     ) -> None:
         """Perform git push after adding files and giving a commit message."""
+        cur_branch = self.repo.active_branch
         self.repo.git.checkout("HEAD", b=branch_name)
-        self.repo.index.add(files)
-        self.repo.index.commit(commit_msg)
-        self.repo.remote().push(branch_name, force=force_push)
+        try:
+            self.repo.index.add(files)
+            self.repo.index.commit(commit_msg)
+            self.repo.remote().push(branch_name, force=force_push)
+        finally:  # always revert to original
+            self.repo.git.checkout(
+                cur_branch
+            )  # maybe turn into context manager in the future `with_branch(branch_name)`
 
     def _get_all_outdated(self, old_direct_dependencies: dict) -> dict:
         """Get all outdated packages based on Pipfile.lock."""
