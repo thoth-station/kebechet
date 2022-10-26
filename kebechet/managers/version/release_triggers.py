@@ -16,12 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Release triggers which result in new version released on GitHub."""
-
 from typing import List, Optional, Any, Dict, Tuple
 import logging
 import os
 import json
 
+import toml
 from ogr.abstract import Issue, PullRequest
 from kebechet.utils import get_issue_by_title
 from kebechet.managers.manager import ManagerBase
@@ -40,13 +40,38 @@ _LOGGER = logging.getLogger(__name__)
 class BaseTrigger:
     """Base class for triggers of new version releases."""
 
+    def adjust_version_toml_file(self, file_path: str) -> Optional[tuple]:
+        """Adjust version in the toml file, return signalizes whether the return value indicates change in file."""
+        with open(file_path, "r") as f:
+            toml_content = toml.loads(f.read())
+        project = toml_content.get("project", None)
+        old_version = project.get("version")
+        if old_version:
+            try:
+                new_version = self.get_new_version(old_version)
+            except VersionError as e:
+                raise VersionError(
+                    UNABLE_TO_UPDATE_VERSION_ERROR.format(
+                        file_path=file_path,
+                        line_num=1,
+                        old_version=old_version,
+                        reason=str(e),
+                        environment_details=ManagerBase.get_environment_details(),
+                    )
+                ) from e
+            _LOGGER.info("Computed new version: %s", new_version)
+            toml_content["project"]["version"] = new_version
+            with open(file_path, "w") as output_file:
+                output_file.write(toml.dumps(toml_content))
+            return new_version, old_version
+        return None
+
     def adjust_version_file(self, file_path: str) -> Optional[tuple]:
         """Adjust version in the given file, return signalizes whether the return value indicates change in file."""
-        with open(file_path, "r") as input_file:
-            content = input_file.read().splitlines()
-
         changed = False
         old_version = None
+        with open(file_path, "r") as input_file:
+            content = input_file.read().splitlines()
         for idx, line in enumerate(content):
             if line.startswith("__version__ = "):
                 parts = line.split(" = ", maxsplit=1)
@@ -72,12 +97,9 @@ class BaseTrigger:
                             environment_details=ManagerBase.get_environment_details(),
                         )
                     ) from e
-
                 _LOGGER.info("Computed new version: %s", new_version)
-
                 content[idx] = f'__version__ = "{new_version}"'
                 changed = True
-
         if not changed:
             return None
 
@@ -98,22 +120,29 @@ class BaseTrigger:
             dirs[:] = [
                 d for d in dirs if not d[0] == "."
             ]  # remove hidden dirs (done in place to remove from walk)
+            if "tests" in dirs:
+                dirs.remove("tests")
             files = [f for f in files if not f[0] == "."]  # remove hidden files
-
+            files_dict = {
+                "setup.py": self.adjust_version_file,
+                "__init__.py": self.adjust_version_file,
+                "__about__.py": self.adjust_version_file,
+                "version.py": self.adjust_version_file,
+                "app.py": self.adjust_version_file,
+                "wsgi.py": self.adjust_version_file,
+                "pyproject.toml": self.adjust_version_toml_file,
+            }
             for file_name in files:
-                if file_name in (
-                    "setup.py",
-                    "__init__.py",
-                    "__about__.py",
-                    "version.py",
-                    "app.py",
-                    "wsgi.py",
-                ):
-                    file_path = os.path.join(root, file_name)
-                    adjusted_version = self.adjust_version_file(file_path)
+                if file_name in files_dict:
+                    func_to_call = files_dict[file_name]
+                    adjusted_version = func_to_call(os.path.join(root, file_name))
                     if adjusted_version:
                         adjusted.append(
-                            (file_path, adjusted_version[0], adjusted_version[1])
+                            (
+                                os.path.join(root, file_name),
+                                adjusted_version[0],
+                                adjusted_version[1],
+                            )
                         )
         return adjusted
 

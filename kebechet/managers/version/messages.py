@@ -43,11 +43,13 @@ ISSUE_BODY_NO_VERSION_IDENTIFIER_FOUND = """
 Automated version release could not be completed.
 
 Kebechet version manager expects a file with one of the following names: `["setup.py", "__init__.py", "__about__.py",
-"version.py", "app.py", "wsgi.py"]` to contain the line:
+"version.py", "app.py", "wsgi.py", "pyproject.toml"]` to contain the line:
 
 ```
 ...
-__version__ = X.Y.Z
+version = X.Y.Z  (in pyproject.toml project section)
+or
+__version__ = X.Y.Z (in the rest of the options)
 ...
 ```
 
