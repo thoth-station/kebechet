@@ -85,3 +85,62 @@ Kebechet works as a part of Thoth Ecosystem, please raise an issue or add the
 new manager to the `KebechetGithubAppInstallations
 <https://github.com/thoth-station/storages/blob/15ed39ef6c8d7bf58037046f3bab2465c5c4bb22/thoth/storages/graph/models.py#L1434>`_
 table.
+
+
+Configure different managers per Overlays
+-----------------------------------------
+
+- Add allow and disallow to each manager's configuration options, where the user can specify which manager is (dis)allowed for each overlay.
+
+Example: .thoth.yaml
+
+.. code-block:: yaml
+
+        host: khemenu.thoth-station.ninja
+        tls_verify: true
+        requirements_format: pipenv
+        overlays_dir: overlays
+
+        runtime_environments:
+          - name: ps-nlp
+            operating_system:
+              name: ubi
+            version: "8"
+            python_version: "3.8"
+            recommendation_type: latest
+
+          - name: ps-nlp-pytorch
+            operating_system:
+              name: ubi
+            version: "8"
+            python_version: "3.8"
+            recommendation_type: latest
+
+          - name: ps-nlp-tensorflow
+            operating_system:
+              name: ubi
+            version: "8"
+            python_version: "3.8"
+            recommendation_type: latest
+
+          - name: ps-nlp-tensorflow-gpu
+            operating_system:
+              name: ubi
+            version: "8"
+            python_version: "3.8"
+            recommendation_type: latest
+        managers:
+          - name: thoth-advise
+            # Do not run this manager in the ps-nlp-tensorflow-gpu overlay
+            env_disallow_list:
+              - ps-nlp-tensorflow-gpu
+            configuration:
+              labels: [bot]
+          - name: update
+            # Run this manager in the ps-nlp-tensorflow-gpu overlay (only)
+            env_allow_list:
+              - ps-nlp-tensorflow-gpu
+            configuration:
+              labels: [bot]
+          - name: info
+          # No allow/disallow present: this manager applies to all runtimes

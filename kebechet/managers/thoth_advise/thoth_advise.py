@@ -294,7 +294,6 @@ class ThothAdviseManager(ManagerBase):
         self._issue_list = self.project.get_issue_list()
         self._close_advise_issues4users_lacking_perms()
         self._tracking_issue = self._close_all_but_oldest_issue()
-        runtime_environments: typing.List[typing.Tuple[str, Issue]]
 
         if analysis_id is None:
             if self._tracking_issue is None:
@@ -311,16 +310,7 @@ class ThothAdviseManager(ManagerBase):
 
                 with open(".thoth.yaml", "r") as f:
                     thoth_config = yaml.safe_load(f)
-
-                if thoth_config.get("overlays_dir"):
-                    runtime_environments = [
-                        e["name"] for e in thoth_config["runtime_environments"]
-                    ]
-                else:
-                    runtime_environments = [
-                        thoth_config["runtime_environments"][0]["name"]
-                    ]
-                for e in runtime_environments:
+                for e in self.runtime_environments or []:
                     try:
                         analysis_id = lib.advise_here(
                             nowait=True,
