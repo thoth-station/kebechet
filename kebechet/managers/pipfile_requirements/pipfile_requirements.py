@@ -141,16 +141,16 @@ class PipfileRequirementsManager(ManagerBase):
             return
 
         with cloned_repo(self, depth=1) as repo:
+            self.repo = repo
             with open("requirements.txt", "w") as requirements_file:
                 requirements_file.write("\n".join(pipfile_content))
                 requirements_file.write("\n")
 
             branch_name = "kebechet-pipfile-requirements-sync"
-            repo.git.checkout(b=branch_name)
-            repo.index.add(["requirements.txt"])
-            repo.index.commit(
-                "Update requirements.txt respecting requirements in {}".format(
+            self._git_commit_push(
+                commit_msg="Update requirements.txt respecting requirements in {}".format(
                     "Pipfile" if not lockfile else "Pipfile.lock"
-                )
+                ),
+                branch_name=branch_name,
+                files=["requirements.txt"],
             )
-            repo.remote().push(branch_name)

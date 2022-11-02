@@ -297,7 +297,7 @@ class UpdateManager(ManagerBase):
         """Open a pull/merge request for dependency update."""
         # If we have already an update for this package we simple issue git
         # push force always to keep branch up2date with the recent master and avoid merge conflicts.
-        self._git_push(
+        self._git_commit_push(
             _UPDATE_COMMIT_MSG.format(env_name=self.runtime_environment),
             _string2branch_name(
                 _UPDATE_BRANCH_NAME.format(env_name=self.runtime_environment)
@@ -319,21 +319,6 @@ class UpdateManager(ManagerBase):
             merge_request.add_label(*labels)
         self._pr_list.append(merge_request.url)
         return merge_request
-
-    def _git_push(
-        self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
-    ) -> None:
-        """Perform git push after adding files and giving a commit message."""
-        cur_branch = self.repo.active_branch
-        self.repo.git.checkout("HEAD", b=branch_name)
-        try:
-            self.repo.index.add(files)
-            self.repo.index.commit(commit_msg)
-            self.repo.remote().push(branch_name, force=force_push)
-        finally:  # always revert to original
-            self.repo.git.checkout(
-                cur_branch
-            )  # maybe turn into context manager in the future `with_branch(branch_name)`
 
     def _get_all_outdated(self, old_direct_dependencies: dict) -> dict:
         """Get all outdated packages based on Pipfile.lock."""
@@ -469,7 +454,7 @@ class UpdateManager(ManagerBase):
         commit_msg = "Initial dependency lock"
         if len(pull_requests) == 0:
             lock_func()
-            self._git_push(commit_msg, branch_name, files)
+            self._git_commit_push(commit_msg, branch_name, files)
             pr = self.create_pr(
                 title=commit_msg,
                 body="",

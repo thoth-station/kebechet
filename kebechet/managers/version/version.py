@@ -113,9 +113,10 @@ class VersionManager(ManagerBase):
         changelog_file: bool,
     ) -> Tuple[str, str, List[str], bool]:
         with cloned_repo(self) as repo:
+            to_commit = []
             res = self._trigger_update_files(trigger)
             version_file, new_version, old_version = res
-            repo.git.add(version_file)
+            to_commit.append(version_file)
             prev_release = utils._prev_release_tag(repo, old_version)
             changelog = utils._compute_changelog(
                 repo=repo,
@@ -132,13 +133,15 @@ class VersionManager(ManagerBase):
 
             if changelog_file:
                 utils._write_to_changelog(changelog, new_version)
-                repo.git.add("CHANGELOG.md")
+                to_commit.append("CHANGELOG.md")
 
+            self.repo = repo  # so that repo is set in _git_commit_push function
             branch_name = "v" + new_version
-            repo.git.checkout("HEAD", b=branch_name)
-            message = constants._VERSION_PULL_REQUEST_NAME.format(new_version)
-            repo.index.commit(message)
-            repo.remote().push(branch_name)
+            self._git_commit_push(
+                constants._VERSION_PULL_REQUEST_NAME.format(new_version),
+                branch_name,
+                to_commit,
+            )
             return branch_name, new_version, changelog, bool(prev_release)
 
     def _create_pr_for_trigger_release(
