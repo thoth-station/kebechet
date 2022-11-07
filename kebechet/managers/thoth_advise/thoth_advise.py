@@ -349,7 +349,6 @@ class ThothAdviseManager(ManagerBase):
                 if self._metadata_indicates_internal_trigger():
                     self._tracking_issue = None  # internal trigger advise results should not be tracked by issue
                 branch_name = self._construct_branch_name(analysis_id)
-                branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
 
                 if res is None:
