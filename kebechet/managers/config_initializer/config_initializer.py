@@ -65,6 +65,7 @@ class ConfigInitializer(ManagerBase):
         thoth_config = pkg_resources.read_text(resources, "simple.thoth.yaml")
 
         with cloned_repo(self, depth=1, branch=self.project.default_branch) as repo:
+            self.repo = repo
             prs = self.get_prs_by_branch(_BRANCH_NAME, status=PRStatus.all)
             if len(prs) > 0:
                 _LOGGER.debug("PR initializing .thoth.yaml already exists skipping...")
@@ -72,9 +73,11 @@ class ConfigInitializer(ManagerBase):
             repo.git.checkout("HEAD", b=_BRANCH_NAME)
             with open(".thoth.yaml", "w+") as f:
                 f.write(thoth_config)
-            repo.index.add([".thoth.yaml"])
-            repo.index.commit("Initialize .thoth.yaml with basic configuration")
-            repo.remote().push(_BRANCH_NAME)
+            self._git_commit_push(
+                "Initialize .thoth.yaml with basic configuration",
+                _BRANCH_NAME,
+                [".thoth.yaml"],
+            )
             self.create_pr(
                 title="Thoth Configuration Initialization",
                 body=_PR_BODY,

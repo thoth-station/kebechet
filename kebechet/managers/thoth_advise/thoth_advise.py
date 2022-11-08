@@ -117,14 +117,6 @@ class ThothAdviseManager(ManagerBase):
         """Construct branch name for the updated dependency."""
         return f"{_BRANCH_NAME}-{analysis_id[:26]}"
 
-    def _git_push(
-        self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
-    ) -> None:
-        """Perform git push after adding files and giving a commit message."""
-        self.repo.index.add(files)
-        self.repo.index.commit(commit_msg)
-        self.repo.remote().push(branch_name, force=force_push)
-
     def _open_merge_request(
         self, branch_name: str, labels: list, files: list, metadata: dict
     ) -> typing.Optional[PullRequest]:
@@ -160,7 +152,9 @@ class ThothAdviseManager(ManagerBase):
 
         # push force always to keep branch up2date with the recent branch HEAD and avoid merge conflicts.
         _LOGGER.info("Pushing changes")
-        self._git_push(":pushpin: " + commit_msg, branch_name, files, force_push=True)
+        self._git_commit_push(
+            ":pushpin: " + commit_msg, branch_name, files, force_push=True
+        )
 
         # Check if the merge request already exists
         for mr in self._cached_merge_requests:
@@ -355,7 +349,6 @@ class ThothAdviseManager(ManagerBase):
                 if self._metadata_indicates_internal_trigger():
                     self._tracking_issue = None  # internal trigger advise results should not be tracked by issue
                 branch_name = self._construct_branch_name(analysis_id)
-                branch = self.repo.git.checkout("-B", branch_name)  # noqa F841
                 self._cached_merge_requests = self.project.get_pr_list()
 
                 if res is None:

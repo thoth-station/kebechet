@@ -170,6 +170,21 @@ pipenv version: {pipenv_version}
             fork_username=self.project.namespace if self.project.is_fork else None,
         )
 
+    def _git_commit_push(
+        self, commit_msg: str, branch_name: str, files: list, force_push: bool = False
+    ) -> None:
+        """Perform git push after adding files and giving a commit message."""
+        cur_branch = self.repo.active_branch
+        self.repo.git.checkout("HEAD", b=branch_name)
+        try:
+            self.repo.index.add(files)
+            self.repo.git.commit(f"--message='{commit_msg}'", "--signoff")
+            self.repo.remote().push(branch_name, force=force_push)
+        finally:  # always revert to original
+            self.repo.git.checkout(
+                cur_branch
+            )  # maybe turn into context manager in the future `with_branch(branch_name)`
+
     def pr_comment(self, id: int, body: str):
         """Comment on the PR."""
         pr = self.project.get_pr(id)
