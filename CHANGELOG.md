@@ -1,5 +1,24 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.11.0 (2022-11-14T11:30:44)
+* 8c49688 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 661b908 remove branch creation
+* 1c69fea add signing to kebechet commits
+* 16c8374 New feature update : Add 'allow' and 'disallow' setting to each manager
+* e087552 Add 'env_allow_list' and 'env_disallow_list' setting to each manager
+* 6e76af7 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* cb7e541 add line to checkout default branch after pushing changes
+* 3b8352c :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* a76af37 Create function which respects gh body limits
+* 735fffb :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 385bbd0 add check for no PRs opened
+* 03bf872 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 3e697b5 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* e9adaad :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* 7211c21 Remove checks for git and local path from pipfile
+* bc612c8 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
+* b81b18f Format package names in GitHub issues
+
 ## Release 1.10.5 (2022-09-13T15:27:51)
 * eca1171 Type cast the type to pass typechecking (#1138)
 
