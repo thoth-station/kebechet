@@ -179,8 +179,11 @@ def run(
         runtime_environments = [
             e["name"] for e in config.config.get("runtime_environments")
         ]
-    else:
+    elif config.config.get("runtime_environments"):
         runtime_environments = [config.config["runtime_environments"][0]["name"]]
+    else:
+        runtime_environments = []
+
     for manager in managers:
         # We do pops on dict, which changes it. Let's create a soft duplicate so if a user uses
         # YAML references, we do not break.
