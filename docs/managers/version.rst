@@ -26,10 +26,14 @@ Prerequisites
 -------------
 
 #. You need one of the following files: ``setup.py``, ``version.py``,
-   ``__about.py``, ``__init__.py``, ``app.py`` or ``wsgi.py`` to contain the
+   ``__about.py``, ``__init__.py``, ``app.py`` , ``wsgi.py`` or   ``pyproject.toml``  to contain the
    following line::
+    version = "<current-version-string>" (in pyproject.toml project section)
 
-      __version__="<current-version-string>"
+    or
+
+    __version__ = "<current-version-string>" (in the rest of the options)
+
 
 Configuration
 -------------
