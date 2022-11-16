@@ -459,32 +459,24 @@ class ReleaseIssue(BaseTrigger):
                 f"The version found in sources is not a valid SemVer string: `{old_version}`"
             ) from e
 
-    def _adjust_pr_body(self) -> str:
-        if not self.issue.description:
-            return ""
+    def _get_pr_greeting(self) -> str:
+        greeting = f"Hey, @{self.issue.author}!\n\n"
 
-        result = "\n".join(self.issue.description.splitlines())
-        result = result.replace(
-            "Hey, Kebechet!\n\nCreate a new patch release, please.",
-            f"Hey, @{self.issue.author}!\n\nOpening this PR to fix the last release.",
-        )
-
-        result = result.replace(
-            "Hey, Kebechet!\n\nCreate a new minor release, please.",
-            f"Hey, @{self.issue.author}!\n\nOpening this PR to create a release in a backwards compatible manner.",
-        )
-
-        return result.replace(
-            "Hey, Kebechet!\n\nCreate a new major release, please.",
-            f"Hey, @{self.issue.author}!\n\nYour possible backwards incompatible changes will be released by this PR.",
-        )
+        if self.issue.title.lower == self._TITLE2UPDATE_INDEX[3]:  # patch
+            return f"{greeting}Opening this PR to fix the last release.\n"
+        elif self.issue.title.lower == self._TITLE2UPDATE_INDEX[2]:  # minor
+            return f"{greeting}Opening this PR to create a release in a backwards compatible manner.\n"
+        elif self.issue.title.lower == self._TITLE2UPDATE_INDEX[1]:  # major
+            return f"{greeting}Your possible backwards incompatible changes will be released by this PR.\n"
+        else:  # default
+            return f"{greeting}Creating requested release.\n"
 
     def construct_pr_body(self, changelog: List[str], has_prev_release: bool) -> str:
         """Construct body of the opened pull request with version update."""
         # Copy body from the original issue, this is helpful in case of
         # instrumenting CI (e.g. Depends-On in case of Zuul) so automatic
         # merges are perfomed as desired.
-        body = self._adjust_pr_body()
+        body = self._get_pr_greeting()
         truncated_changelog = changelog[: constants._MAX_CHANGELOG_SIZE]
         if not has_prev_release:
             body = body + "\n" + RELEASE_TAG_MISSING_WARNING
