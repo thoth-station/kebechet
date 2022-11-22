@@ -177,9 +177,9 @@ pipenv version: {pipenv_version}
         cur_branch = self.repo.active_branch
         self.repo.git.checkout("HEAD", b=branch_name)
         try:
-            self.repo.index.add(files)
+            self.repo.git.add(files)
             self.repo.git.commit(f"--message='{commit_msg}'", "--signoff")
-            self.repo.remote().push(branch_name, force=force_push)
+            self.repo.remote().push(branch_name, force=force_push).raise_if_error()
         finally:  # always revert to original
             self.repo.git.checkout(
                 cur_branch
