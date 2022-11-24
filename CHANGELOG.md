@@ -1,5 +1,13 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.11.1 (2022-11-24T14:37:44)
+* 9cf075b0 Use git add command instead of index.add from gitpython (#1176)
+* 53af1d3a ':arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment'
+* 4c2564fa Update repo
+* baaf8ea6 Add pyproject.toml to maintain version from Kebechet's version manager
+* a20a7d82 add default in case there are no runtime environments
+* 3538b199 make PR description independent of issue description
+
 ## Release 1.11.0 (2022-11-14T11:30:44)
 * 8c49688 :arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment
 * 661b908 remove branch creation
