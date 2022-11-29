@@ -44,7 +44,7 @@ class BaseTrigger:
         """Adjust version in the toml file, return signalizes whether the return value indicates change in file."""
         with open(file_path, "r") as f:
             toml_content = toml.loads(f.read())
-        project = toml_content.get("project", None)
+        project = toml_content.get("project", {})
         old_version = project.get("version")
         if old_version:
             try:
