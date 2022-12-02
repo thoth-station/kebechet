@@ -1,5 +1,10 @@
 # Changelog for the Kebechet - a Thoth bot
 
+## Release 1.11.2 (2022-12-02T19:53:13)
+* 365fc74 requirements manager changed to use pipenv libraries
+* 52105ca ':arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment'
+* 5681483 Fix the dict issue in version manager update for pyproject
+
 ## Release 1.11.1 (2022-11-24T14:37:44)
 * 9cf075b0 Use git add command instead of index.add from gitpython (#1176)
 * 53af1d3a ':arrow_up: Automatic update of dependencies by Kebechet for the rhel-8 environment'
